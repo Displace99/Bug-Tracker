@@ -1,0 +1,31 @@
+
+* when creating release
+1) export to new folder btnetVRM, 
+2) diff Web.config with previous Web.config. Diff btnet312 and btnet311.
+
+****************************************
+* cleaning up old bugs in demo - (Dec 2019, there is no demo)
+
+select datepart(dy,bg_reported_date), count(1) from bugs
+group by datepart(dy,bg_reported_date)
+order by 2 desc
+
+select count(1) from bugs
+delete from bugs where bg_id < 1000 -- CHANGE THIS
+delete from bug_user_flags where fl_bug not in (select bg_id from bugs)
+delete from bug_user_seen where sn_bug not in (select bg_id from bugs)
+delete from bug_posts where bp_bug not in (select bg_id from bugs)
+delete from bug_subscriptions where bs_bug not in (select bg_id from bugs)
+delete from bug_relationships where re_bug1 not in (select bg_id from bugs)
+delete from bug_relationships where re_bug2 not in (select bg_id from bugs)
+delete from bug_tasks where tsk_bug not in (select bg_id from bugs)
+
+delete from bugs where bg_reported_user between 40 and 200
+
+delete from users where 
+us_id > 20 
+and us_id not in (select bg_reported_user from bugs)
+and us_id not in (select bg_last_updated_user from bugs) 
+and us_id not in (select bp_user from bug_posts)
+****************************************
+
