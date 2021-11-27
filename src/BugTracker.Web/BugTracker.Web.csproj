@@ -43,7 +43,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Highlighter.Net, Version=2.0.0.1, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>references\Highlighter.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.0.30714, Culture=neutral, PublicKeyToken=b32731d11ce58905">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>references\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net, Version=2.4.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>references\Lucene.Net.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="SharpMimeTools, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>references\SharpMimeTools.dll</HintPath>
+    </Reference>
+    <Reference Include="System.DirectoryServices.Protocols" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -585,6 +602,10 @@
     <Content Include="projects.aspx" />
     <Content Include="queries.aspx" />
     <Content Include="query.aspx" />
+    <Content Include="references\Highlighter.Net.dll" />
+    <Content Include="references\log4net.dll" />
+    <Content Include="references\Lucene.Net.dll" />
+    <Content Include="references\SharpMimeTools.dll" />
     <Content Include="register.aspx" />
     <Content Include="relationships.aspx" />
     <Content Include="reports.aspx" />
@@ -632,25 +653,25 @@
     <Content Include="write_posts.aspx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Code\authenticate.cs" />
-    <Content Include="App_Code\bug.cs" />
-    <Content Include="App_Code\bug_list.cs" />
-    <Content Include="App_Code\dbutil.cs" />
-    <Content Include="App_Code\email.cs" />
-    <Content Include="App_Code\my_lucene.cs" />
-    <Content Include="App_Code\my_mime.cs" />
-    <Content Include="App_Code\pop3.cs" />
-    <Content Include="App_Code\POP3Client.cs" />
-    <Content Include="App_Code\print_bug.cs" />
-    <Content Include="App_Code\security.cs" />
-    <Content Include="App_Code\sortable_html_table.cs" />
-    <Content Include="App_Code\tags.cs" />
-    <Content Include="App_Code\TranslationService.cs" />
-    <Content Include="App_Code\user.cs" />
-    <Content Include="App_Code\util.cs" />
-    <Content Include="App_Code\version_control.cs" />
-    <Content Include="App_Code\whatsnew.cs" />
-    <Content Include="App_Code\workflow.cs" />
+    <Compile Include="btnet\authenticate.cs" />
+    <Compile Include="btnet\bug.cs" />
+    <Compile Include="btnet\bug_list.cs" />
+    <Compile Include="btnet\dbutil.cs" />
+    <Compile Include="btnet\email.cs" />
+    <Compile Include="btnet\my_lucene.cs" />
+    <Compile Include="btnet\my_mime.cs" />
+    <Compile Include="btnet\pop3.cs" />
+    <Compile Include="btnet\POP3Client.cs" />
+    <Compile Include="btnet\print_bug.cs" />
+    <Compile Include="btnet\security.cs" />
+    <Compile Include="btnet\sortable_html_table.cs" />
+    <Compile Include="btnet\tags.cs" />
+    <Compile Include="btnet\TranslationService.cs" />
+    <Compile Include="btnet\user.cs" />
+    <Compile Include="btnet\util.cs" />
+    <Compile Include="btnet\version_control.cs" />
+    <Compile Include="btnet\whatsnew.cs" />
+    <Compile Include="btnet\workflow.cs" />
     <Compile Include="obj\Debug\.NETFramework,Version=v4.5.AssemblyAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
