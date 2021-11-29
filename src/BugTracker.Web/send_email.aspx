@@ -1,4 +1,4 @@
-<%@ Page language="C#" validateRequest="false" %>
+<%@ Page language="C#" CodeBehind="send_email.aspx.cs" Inherits="BugTracker.Web.send_email" validateRequest="false" AutoEventWireup="True" %>
 <%@ Import Namespace="System.IO" %>
 <!--
 Copyright 2002-2011 Corey Trager

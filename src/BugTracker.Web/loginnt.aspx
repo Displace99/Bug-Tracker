@@ -1,4 +1,4 @@
-<%@ Page Language="C#" %>
+<%@ Page language="C#" CodeBehind="loginnt.aspx.cs" Inherits="BugTracker.Web.loginnt" AutoEventWireup="True" %>
 
 <!--
 Copyright 2002-2011 Corey Trager

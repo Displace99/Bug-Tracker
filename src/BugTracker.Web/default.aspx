@@ -1,4 +1,4 @@
-<%@ Page language="C#" validateRequest="false"%>
+<%@ Page language="C#" CodeBehind="default.aspx.cs" Inherits="BugTracker.Web.default" validateRequest="false" AutoEventWireup="True" %>
 <%@ Import Namespace="System.Data.SqlClient" %>
 <!--
 Copyright 2002-2011 Corey Trager

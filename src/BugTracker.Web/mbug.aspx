@@ -1,4 +1,4 @@
-<%@ Page language="C#" validateRequest="false"%>
+<%@ Page language="C#" CodeBehind="mbug.aspx.cs" Inherits="BugTracker.Web.mbug" validateRequest="false" AutoEventWireup="True" %>
 
 <!--
 Copyright 2002-2013 Corey Trager

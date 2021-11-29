@@ -1,4 +1,4 @@
-<%@ Page language="C#"%>
+<%@ Page language="C#" CodeBehind="server_variables.aspx.cs" Inherits="BugTracker.Web.server_variables" AutoEventWireup="True" %>
 <!--
 Copyright 2002-2014 Corey Trager
 Distributed under the terms of the GNU General Public License

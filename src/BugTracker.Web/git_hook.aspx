@@ -1,4 +1,4 @@
-<%@ Page language="C#" validateRequest="false"%>
+<%@ Page language="C#" CodeBehind="git_hook.aspx.cs" Inherits="BugTracker.Web.git_hook" validateRequest="false" AutoEventWireup="True" %>
 <%@ Import Namespace="System.IO" %>
 <%@ Import Namespace="System.Text.RegularExpressions" %>
 
