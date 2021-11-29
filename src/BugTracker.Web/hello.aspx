@@ -1,4 +1,4 @@
-<%@ Page language="C#"%>
+<%@ Page language="C#" CodeBehind="hello.aspx.cs" Inherits="BugTracker.Web.hello" AutoEventWireup="True" %>
 
 <script runat="server">
 

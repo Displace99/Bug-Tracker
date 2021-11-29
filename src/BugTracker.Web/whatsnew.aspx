@@ -1,4 +1,4 @@
-<%@ Page language="C#"%>
+<%@ Page language="C#" CodeBehind="whatsnew.aspx.cs" Inherits="BugTracker.Web.whatsnew" AutoEventWireup="True" %>
 
 <!-- #include file = "inc.aspx" -->
 

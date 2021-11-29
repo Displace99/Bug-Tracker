@@ -1,4 +1,4 @@
-<%@ Page language="C#"%>
+<%@ Page language="C#" CodeBehind="tags.aspx.cs" Inherits="BugTracker.Web.tags" AutoEventWireup="True" %>
 <!-- #include file = "inc.aspx" -->
 
 <script language="C#" runat="server">

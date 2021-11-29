@@ -1,4 +1,4 @@
-<%@ Page language="C#" ValidateRequest="false" %>
+<%@ Page language="C#" CodeBehind="search.aspx.cs" Inherits="BugTracker.Web.search" ValidateRequest="false" AutoEventWireup="True" %>
 <!--
 Copyright 2002-2011 Corey Trager
 Distributed under the terms of the GNU General Public License

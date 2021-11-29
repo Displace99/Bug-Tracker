@@ -1,4 +1,4 @@
-<%@ Page language="C#"%>
+<%@ Page language="C#" CodeBehind="git_view.aspx.cs" Inherits="BugTracker.Web.git_view" AutoEventWireup="True" %>
 <!-- #include file = "inc.aspx" -->
 <script language="C#" runat="server">
 
