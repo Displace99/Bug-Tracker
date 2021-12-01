@@ -8,7 +8,7 @@ namespace BugTracker.Web
     public partial class add_attachment : Page
     {
 		public int bugid;
-		Security security;
+		public Security security;
 
 		public void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -62,22 +62,22 @@ namespace BugTracker.Web
 		///////////////////////////////////////////////////////////////////////
 		void write_msg(string msg, bool rewrite_posts)
 		{
-			string script = "script"; // C# compiler doesn't like s c r i p t
-			Response.Write("<html><" + script + ">");
-			Response.Write("function foo() {");
-			Response.Write("parent.set_msg('");
-			Response.Write(msg);
-			Response.Write("'); ");
+            string script = "script"; // C# compiler doesn't like s c r i p t
+            Response.Write("<html><" + script + ">");
+            Response.Write("function foo() {");
+            Response.Write("parent.set_msg('");
+            Response.Write(msg);
+            Response.Write("'); ");
 
-			if (rewrite_posts)
-			{
-				Response.Write("parent.opener.rewrite_posts(" + Convert.ToString(bugid) + ")");
-			}
-			Response.Write("}</" + script + ">");
-			Response.Write("<body onload='foo()'>");
-			Response.Write("</body></html>");
-			Response.End();
-		}
+            if (rewrite_posts)
+            {
+                Response.Write("parent.opener.rewrite_posts(" + Convert.ToString(bugid) + ")");
+            }
+            Response.Write("}</" + script + ">");
+            Response.Write("<body onload='foo()'>");
+            Response.Write("</body></html>");
+            Response.End();
+        }
 
 		///////////////////////////////////////////////////////////////////////
 		void on_update()
@@ -112,8 +112,6 @@ namespace BugTracker.Web
 				return;
 			}
 
-			bool good = false;
-
 			try
 			{
 				Bug.insert_post_attachment(
@@ -128,31 +126,15 @@ namespace BugTracker.Web
 					internal_only.Checked,
 					true);
 
-				good = true;
+				Response.Redirect("edit_bug.aspx?id=" + Convert.ToString(bugid));
 
 			}
 			catch (Exception ex)
 			{
+				//TODO: We shouldn't write this exception out as it's a security risk.
+				//Should log it and provide a generic error message.
 				write_msg("caught exception:" + ex.Message, false);
 				return;
-			}
-
-
-			if (good)
-			{
-				write_msg(
-					filename
-					+ " was successfully upload ("
-					+ attached_file.PostedFile.ContentType
-					+ "), "
-					+ Convert.ToString(content_length)
-					+ " bytes"
-					, true);
-			}
-			else
-			{
-				// This should never happen....
-				write_msg("Unexpected error with file upload.", false);
 			}
 
 		}
