@@ -30,15 +30,16 @@ function waiting()
 </head>
 
 <body>
+<% security.write_menu(Response, btnet.Util.get_setting("PluralBugLabel","bugs")); %>
 
-<iframe name="hiddenframe" style="display:none" >x</iframe>
 
 <div class=align>
 
-Add attachment to <% Response.Write(Convert.ToString(bugid)); %>
+	Add attachment to <%= bugid %> <br />
+	<a href="edit_bug.aspx?id=<%=bugid %>">back to <%= btnet.Util.get_setting("SingularBugLabel","bug") %></a>
 <p>
 	<table border=0><tr><td>
-		<form target="hiddenframe" class=frm runat="server" enctype="multipart/form-data" onsubmit="return waiting()">
+		<form class=frm runat="server" enctype="multipart/form-data" onsubmit="return waiting()">
 			<table border=0>
 
 			<tr>
