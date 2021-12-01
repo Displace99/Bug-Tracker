@@ -364,9 +364,9 @@ void prepare_a_bunch_of_links_for_update()
 
     if (permission_level != Security.PERMISSION_READONLY)
     {
-        string attachment_link = "<img src=attach.gif align=top>&nbsp;<a href=\"javascript:open_popup_window('add_attachment.aspx','add attachment ',"
+        string attachment_link = "<img src=attach.gif align=top>&nbsp;<a href=add_attachment.aspx?id="
             + Convert.ToString(id)
-            + ",600,300)\" title='Attach an image, document, or other file to this item'>add attachment</a>";
+            + " title='Attach an image, document, or other file to this item'>add attachment</a>";
         attachment.InnerHtml = attachment_link;
     }
     else
