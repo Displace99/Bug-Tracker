@@ -485,7 +485,7 @@ void prepare_a_bunch_of_links_for_update()
             {
                 task_cnt = (int)dr_bug["task_cnt"];
             }
-            string tasks_link = "<a target=_blank href=tasks_frame.aspx?bugid="
+            string tasks_link = "<a href=tasks.aspx?bugid="
                 + Convert.ToString(id)
             + " title='View sub-tasks/time-tracking entries related to this item'><img src=clock.png border=0 align=top>&nbsp;tasks/time(<span id=task_cnt>" + task_cnt + "</span>)</a>";
             tasks.InnerHtml = tasks_link;

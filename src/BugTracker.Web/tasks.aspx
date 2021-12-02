@@ -149,7 +149,7 @@ function body_on_load()
 
 </head>
 <body onload="body_on_load()">
-
+	<% security.write_menu(Response, btnet.Util.get_setting("PluralBugLabel","bugs")); %>
 
 <div class=align>
 
@@ -159,6 +159,8 @@ Tasks for
 	+ " " 
 	+ Convert.ToString(bugid)); 
 %>
+	<br />
+	<a href="edit_bug.aspx?id=<%=bugid %>">back to <%= btnet.Util.get_setting("SingularBugLabel","bug") %></a>
 <p>
 
 <% if (permission_level == Security.PERMISSION_ALL && (security.user.is_admin || security.user.can_edit_tasks)) { %>
