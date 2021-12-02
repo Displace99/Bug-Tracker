@@ -46,6 +46,7 @@ void Page_Load(Object sender, EventArgs e)
 <script type="text/javascript" language="JavaScript" src="sortable.js"></script>
 </head>
 <body>
+	<% security.write_menu(Response, btnet.Util.get_setting("PluralBugLabel","bugs")); %>
 <div class=align>
 
 All Tasks

@@ -166,7 +166,7 @@ Tasks for
 <% if (permission_level == Security.PERMISSION_ALL && (security.user.is_admin || security.user.can_edit_tasks)) { %>
 <a href=edit_task.aspx?id=0&bugid=<% Response.Write(Convert.ToString(bugid)); %>>add new task</a>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<a target=_blank href=tasks_all.aspx>view all tasks</a>
+<a href=tasks_all.aspx>view all tasks</a>
 &nbsp;&nbsp;&nbsp;&nbsp;
 <a target=_blank href=tasks_all_excel.aspx>export all tasks to excel</a>
 <p>
