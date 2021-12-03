@@ -628,7 +628,6 @@
     <Content Include="tasks.aspx" />
     <Content Include="tasks_all.aspx" />
     <Content Include="tasks_all_excel.aspx" />
-    <Content Include="tasks_frame.aspx" />
     <Content Include="telephone.png" />
     <Content Include="telephone_edit.png" />
     <Content Include="translate.aspx" />
@@ -1397,13 +1396,6 @@
     <Compile Include="tasks_all_excel.aspx.designer.cs">
       <DependentUpon>tasks_all_excel.aspx</DependentUpon>
     </Compile>
-    <Compile Include="tasks_frame.aspx.cs">
-      <DependentUpon>tasks_frame.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="tasks_frame.aspx.designer.cs">
-      <DependentUpon>tasks_frame.aspx</DependentUpon>
-    </Compile>
     <Compile Include="translate.aspx.cs">
       <DependentUpon>translate.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1533,7 +1525,11 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="App_Data\logs\" />
+    <Folder Include="App_Data\lucene_index\" />
+    <Folder Include="App_Data\uploads\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
