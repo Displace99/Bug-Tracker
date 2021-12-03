@@ -364,9 +364,9 @@ void prepare_a_bunch_of_links_for_update()
 
     if (permission_level != Security.PERMISSION_READONLY)
     {
-        string attachment_link = "<img src=attach.gif align=top>&nbsp;<a href=\"javascript:open_popup_window('add_attachment.aspx','add attachment ',"
+        string attachment_link = "<img src=attach.gif align=top>&nbsp;<a href=add_attachment.aspx?id="
             + Convert.ToString(id)
-            + ",600,300)\" title='Attach an image, document, or other file to this item'>add attachment</a>";
+            + " title='Attach an image, document, or other file to this item'>add attachment</a>";
         attachment.InnerHtml = attachment_link;
     }
     else
@@ -485,7 +485,7 @@ void prepare_a_bunch_of_links_for_update()
             {
                 task_cnt = (int)dr_bug["task_cnt"];
             }
-            string tasks_link = "<a target=_blank href=tasks_frame.aspx?bugid="
+            string tasks_link = "<a href=tasks.aspx?bugid="
                 + Convert.ToString(id)
             + " title='View sub-tasks/time-tracking entries related to this item'><img src=clock.png border=0 align=top>&nbsp;tasks/time(<span id=task_cnt>" + task_cnt + "</span>)</a>";
             tasks.InnerHtml = tasks_link;

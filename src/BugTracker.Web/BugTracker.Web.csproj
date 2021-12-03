@@ -589,9 +589,6 @@
     <Content Include="merge_bug.aspx" />
     <Content Include="mlogin.aspx" />
     <Content Include="notifications.aspx" />
-    <Content Include="obj\Debug\BugTracker.Web.csproj.FileListAbsolute.txt" />
-    <Content Include="obj\Debug\BugTracker.Web.dll" />
-    <Content Include="obj\Debug\BugTracker.Web.pdb" />
     <Content Include="orgs.aspx" />
     <Content Include="paste_plain.png" />
     <Content Include="printer.png" />
@@ -631,7 +628,6 @@
     <Content Include="tasks.aspx" />
     <Content Include="tasks_all.aspx" />
     <Content Include="tasks_all_excel.aspx" />
-    <Content Include="tasks_frame.aspx" />
     <Content Include="telephone.png" />
     <Content Include="telephone_edit.png" />
     <Content Include="translate.aspx" />
@@ -1400,13 +1396,6 @@
     <Compile Include="tasks_all_excel.aspx.designer.cs">
       <DependentUpon>tasks_all_excel.aspx</DependentUpon>
     </Compile>
-    <Compile Include="tasks_frame.aspx.cs">
-      <DependentUpon>tasks_frame.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="tasks_frame.aspx.designer.cs">
-      <DependentUpon>tasks_frame.aspx</DependentUpon>
-    </Compile>
     <Compile Include="translate.aspx.cs">
       <DependentUpon>translate.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1509,7 +1498,6 @@
     <Compile Include="btnet\version_control.cs" />
     <Compile Include="btnet\whatsnew.cs" />
     <Compile Include="btnet\workflow.cs" />
-    <Compile Include="obj\Debug\.NETFramework,Version=v4.5.AssemblyAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="write_posts.aspx.designer.cs">
       <DependentUpon>write_posts.aspx</DependentUpon>
@@ -1525,9 +1513,6 @@
     <Content Include="bin\roslyn\vbc.exe.config" />
     <Content Include="bin\roslyn\vbc.rsp" />
     <Content Include="bin\roslyn\VBCSCompiler.exe.config" />
-    <Content Include="obj\Debug\BugTracker.Web.csproj.AssemblyReference.cache" />
-    <Content Include="obj\Debug\BugTracker.Web.csproj.CoreCompileInputs.cache" />
-    <Content Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
     <Content Include="btnet_css_for_email.css.renamed" />
     <Content Include="ckeditor\.htaccess" />
     <Content Include="ckeditor\ckeditor.pack" />
@@ -1541,7 +1526,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="obj\Debug\TempPE\" />
+    <Folder Include="App_Data\logs\" />
+    <Folder Include="App_Data\lucene_index\" />
+    <Folder Include="App_Data\uploads\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
