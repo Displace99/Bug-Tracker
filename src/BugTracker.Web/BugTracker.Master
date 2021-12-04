@@ -1,0 +1,19 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="BugTracker.master.cs" Inherits="BugTracker.Web.BugTracker" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <title id="titl" runat="server">Bug Tracker</title>
+    <link rel="StyleSheet" href="btnet.css" type="text/css">
+
+    <asp:ContentPlaceHolder ID="headerScripts" runat="server"></asp:ContentPlaceHolder>
+</head>
+<body>
+    <% security.write_menu(Response, btnet.Util.get_setting("PluralBugLabel","bugs")); %>
+    <asp:ContentPlaceHolder ID="body" runat="server"></asp:ContentPlaceHolder> 
+    
+</body>
+    <asp:contentplaceholder runat="server" id="footerScripts"></asp:contentplaceholder>
+    <% Response.Write(Application["custom_footer"]); %>
+</html>
