@@ -19,13 +19,13 @@
                     <a href='javascript: sort_by_col(2, \"str\")'>Status</a>
                 </td>
             </tr>
-            <!-- For loop -->
+            <%foreach (var project in projectList) { %>
             <tr>
-                <td class=datad></td>
-                <td class=datad></td>
-                <td class=datad></td>
+                <td class=datad><%= project.Name %></td>
+                <td class=datad><%= project.Description %></td>
+                <td class=datad><%= project.Status %></td>
             </tr>
-            <!-- End of for loop -->
+            <%} %>
         </table>
     </div>
     <br />
