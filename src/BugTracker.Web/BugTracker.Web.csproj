@@ -1194,6 +1194,7 @@
     <Compile Include="mlogin.aspx.designer.cs">
       <DependentUpon>mlogin.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Models\ProjectVM.cs" />
     <Compile Include="notifications.aspx.cs">
       <DependentUpon>notifications.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
