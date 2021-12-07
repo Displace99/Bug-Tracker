@@ -20,7 +20,8 @@ namespace BugTracker.Web
             BugTracker masterPage = Page.Master as BugTracker;
             masterPage.security = new btnet.Security();
             masterPage.security.check_security(HttpContext.Current, btnet.Security.ANY_USER_OK);
-             
+            masterPage.pageLink = "projects";
+
             lblBugLabel.Text = Util.get_setting("PluralBugLabel", "Bug");
 
             int projectId = 0;

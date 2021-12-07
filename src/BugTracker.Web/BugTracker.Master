@@ -10,7 +10,7 @@
     <asp:ContentPlaceHolder ID="headerScripts" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
-    <% security.write_menu(Response, btnet.Util.get_setting("PluralBugLabel","bugs")); %>
+    <% security.write_menu(Response, pageLink); %>
     <asp:ContentPlaceHolder ID="body" runat="server"></asp:ContentPlaceHolder> 
     
 </body>

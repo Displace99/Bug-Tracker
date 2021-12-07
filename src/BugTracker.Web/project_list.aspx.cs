@@ -19,6 +19,7 @@ namespace BugTracker.Web
             BugTracker masterPage = Page.Master as BugTracker;
             masterPage.security = new btnet.Security();
             masterPage.security.check_security(HttpContext.Current, btnet.Security.ANY_USER_OK);
+            masterPage.pageLink = "projects";
 
             int userID = masterPage.security.user.usid;
             string defaultPermissionLevel = btnet.Util.get_setting("DefaultPermissionLevel", "2");

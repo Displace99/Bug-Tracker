@@ -11,6 +11,7 @@ namespace BugTracker.Web
     public partial class BugTracker : System.Web.UI.MasterPage
     {
         public Security security;
+        public string pageLink;
 
         protected void Page_Load(object sender, EventArgs e)
         {
