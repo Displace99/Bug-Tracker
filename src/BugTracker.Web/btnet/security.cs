@@ -288,6 +288,7 @@ function on_submit_search()
             Response.Write(logo);
 
             Response.Write("<td width=20>&nbsp;</td>");
+			write_menu_item(Response, this_link, "projects", "project_list.aspx");
             write_menu_item(Response, this_link, Util.get_setting("PluralBugLabel", "bugs"), "bugs.aspx");
             
             if (user.can_search)
