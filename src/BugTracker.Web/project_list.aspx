@@ -1,5 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/BugTracker.Master" AutoEventWireup="true" CodeBehind="project_list.aspx.cs" Inherits="BugTracker.Web.project_list" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="headerScripts" runat="server">
+    <script type="text/javascript" language="JavaScript" src="sortable.js"></script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="body" runat="server">
     <h2>Projects</h2>
@@ -10,18 +11,18 @@
         <table id=mytable border=1 class=datat>
             <tr>
                 <td class=datah valign=bottom>
-                    <a href='javascript: sort_by_col(0, \"str\")'>Name</a>
+                    <a href='javascript: sort_by_col(0, "str")'>Name</a>
                 </td>
                 <td class=datah valign=bottom>
-                    <a href='javascript: sort_by_col(1, \"str\")'>Description</a>
+                    <a href='javascript: sort_by_col(1, "str")'>Description</a>
                 </td>
                 <td class=datah valign=bottom>
-                    <a href='javascript: sort_by_col(2, \"str\")'>Status</a>
+                    <a href='javascript: sort_by_col(2, "str")'>Status</a>
                 </td>
             </tr>
             <%foreach (var project in projectList) { %>
             <tr>
-                <td class=datad><%= project.Name %></td>
+                <td class=datad><a href="project_detail.aspx?projectId=<%= project.Id %>"><%= project.Name %></a></td>
                 <td class=datad><%= project.Description %></td>
                 <td class=datad><%= project.Status %></td>
             </tr>

@@ -597,6 +597,7 @@
     <Content Include="print_bugs2.aspx" />
     <Content Include="priorities.aspx" />
     <Content Include="projects.aspx" />
+    <Content Include="project_detail.aspx" />
     <Content Include="project_list.aspx" />
     <Content Include="queries.aspx" />
     <Content Include="query.aspx" />
@@ -1194,6 +1195,7 @@
     <Compile Include="mlogin.aspx.designer.cs">
       <DependentUpon>mlogin.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Models\ProjectBugVM.cs" />
     <Compile Include="Models\ProjectVM.cs" />
     <Compile Include="notifications.aspx.cs">
       <DependentUpon>notifications.aspx</DependentUpon>
@@ -1243,6 +1245,13 @@
     </Compile>
     <Compile Include="projects.aspx.designer.cs">
       <DependentUpon>projects.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="project_detail.aspx.cs">
+      <DependentUpon>project_detail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="project_detail.aspx.designer.cs">
+      <DependentUpon>project_detail.aspx</DependentUpon>
     </Compile>
     <Compile Include="project_list.aspx.cs">
       <DependentUpon>project_list.aspx</DependentUpon>
