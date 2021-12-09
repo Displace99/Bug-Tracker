@@ -2,7 +2,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
 <head runat="server">
     <title id="titl" runat="server">Bug Tracker</title>
     <link rel="StyleSheet" href="btnet.css" type="text/css">
