@@ -414,7 +414,7 @@ void prepare_a_bunch_of_links_for_update()
         {
             relationship_cnt = (int)dr_bug["relationship_cnt"];
         }
-        string relationships_link = "<a target=_blank href=relationships.aspx?bgid="
+        string relationships_link = "<a href=relationships.aspx?bgid="
             + Convert.ToString(id)
             + " title='Create a relationship between this item and another item'><img src=database_link.png border=0 align=top>&nbsp;relationships(<span id=relationship_cnt>" + relationship_cnt + "</span>)</a>";
         relationships.InnerHtml = relationships_link;
