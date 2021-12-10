@@ -1,6 +1,7 @@
 using btnet;
 using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -16,6 +17,7 @@ namespace BugTracker.Web
 
 		protected void Page_Load(Object sender, EventArgs e)
 		{
+			int userId = 0;
 
 			Util.do_not_cache(Response);
 
@@ -25,7 +27,6 @@ namespace BugTracker.Web
 			titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
 				+ "view subscribers";
 
-			//If we can't convert the id to an integer, just set it to 0
 			if (!Int32.TryParse(Request["id"], out bugid))
 			{
 				Response.Write("Not able to find this item");
@@ -39,7 +40,6 @@ namespace BugTracker.Web
 				Response.End();
 			}
 
-
 			string action = Request["actn"];
 
 			if (!String.IsNullOrEmpty(action))
@@ -49,28 +49,20 @@ namespace BugTracker.Web
 					Response.Write("You are not allowed to edit this item");
 					Response.End();
 				}
-				if (!string.IsNullOrEmpty(Request["userid"]))
+
+				if (!Int32.TryParse(Request["userid"], out userId))
 				{
-					int new_subscriber_userid = Convert.ToInt32(Request["userid"]);
-
-					sql = @"delete from bug_subscriptions where bs_bug = $bg and bs_user = $us;
-						insert into bug_subscriptions (bs_bug, bs_user) values($bg, $us)"; 
-					sql = sql.Replace("$bg", Convert.ToString(bugid));
-					sql = sql.Replace("$us", Convert.ToString(new_subscriber_userid));
-					btnet.DbUtil.execute_nonquery(sql);
-
-					// send a notification to this user only
-					btnet.Bug.send_notifications(btnet.Bug.UPDATE, bugid, security, new_subscriber_userid);
+					Response.Write("Not able to find the user");
+					Response.End();
 				}
+
+				AddNewSubscriber(bugid, userId);	
 			}
 
-
 			// clean up bug subscriptions that no longer fit the security restrictions
-
 			btnet.Bug.auto_subscribe(bugid);
 
 			// show who is subscribed
-
 			if (security.user.is_admin)
 			{
 				sql = @"
@@ -196,6 +188,23 @@ namespace BugTracker.Web
 				userid.Items.Insert(0, new ListItem("[select to add]", "0"));
 			}
 
+		}
+
+		//Adds a user as a new subscriber to a bug
+		private void AddNewSubscriber(int bugId, int userId)
+        {
+			sql = @"delete from bug_subscriptions where bs_bug = @bg and bs_user = @us;
+						insert into bug_subscriptions (bs_bug, bs_user) values(@bg, @us)";
+			
+			SqlCommand cmd = new SqlCommand(sql);
+			cmd.Parameters.AddWithValue("@bg", bugId);
+			cmd.Parameters.AddWithValue("@us", userId);
+			
+			DbUtil.execute_nonquery(cmd);
+			//btnet.DbUtil.execute_nonquery(sql);
+
+			// send a notification to this user only
+			btnet.Bug.send_notifications(btnet.Bug.UPDATE, bugid, security, userId);
 		}
 	}
 }
