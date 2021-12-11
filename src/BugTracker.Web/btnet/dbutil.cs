@@ -150,6 +150,21 @@ namespace btnet
             }
         }
 
+        public static DataSet get_dataset(SqlCommand cmd)
+        {
+            DataSet ds = new DataSet();
+            using (SqlConnection conn = get_sqlconnection())
+            {
+                cmd.Connection = conn;
+
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                {
+                    da.Fill(ds);
+                    return ds;
+                }
+            }
+        }
+
         ///////////////////////////////////////////////////////////////////////
         public static void log_stopwatch_time(System.Diagnostics.Stopwatch stopwatch)
         {
@@ -164,6 +179,12 @@ namespace btnet
         public static DataView get_dataview(string sql)
         {
             DataSet ds = get_dataset(sql);
+            return new DataView(ds.Tables[0]);
+        }
+
+        public static DataView get_dataview(SqlCommand cmd)
+        {
+            DataSet ds = get_dataset(cmd);
             return new DataView(ds.Tables[0]);
         }
 
