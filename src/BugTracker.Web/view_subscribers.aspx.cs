@@ -81,7 +81,6 @@ namespace BugTracker.Web
 			cmd.Parameters.AddWithValue("@us", userId);
 			
 			DbUtil.execute_nonquery(cmd);
-			//btnet.DbUtil.execute_nonquery(sql);
 
 			// send a notification to this user only
 			btnet.Bug.send_notifications(btnet.Bug.UPDATE, bugid, security, userId);
