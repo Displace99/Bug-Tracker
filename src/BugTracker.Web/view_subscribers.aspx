@@ -14,8 +14,10 @@ Distributed under the terms of the GNU General Public License
 
 <body width=600>
 <div class=align>
-Subscribers for <% Response.Write(Convert.ToString(bugid)); %>
-<p>
+	<% security.write_menu(Response, btnet.Util.get_setting("PluralBugLabel","bugs")); %>
+Subscribers for <%= bugid %><br />
+	<a href="edit_bug.aspx?id=<%=bugid %>">back to <%= btnet.Util.get_setting("SingularBugLabel","bug") %></a>
+<p></p>
 
 <table border=0><tr><td>
 <form class=frm runat="server" action="view_subscribers.aspx">
