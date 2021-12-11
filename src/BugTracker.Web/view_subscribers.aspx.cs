@@ -93,14 +93,14 @@ namespace BugTracker.Web
 			{
 				sql = @"
 					select
-					'<a href=delete_subscriber.aspx?ses=$ses&bg_id=$bg&us_id=' + convert(varchar,us_id) + '>unsubscribe</a>'	[$no_sort_unsubscriber],
+					'<a href=delete_subscriber.aspx?ses=$ses&bg_id=@bg&us_id=' + convert(varchar,us_id) + '>unsubscribe</a>'	[$no_sort_unsubscriber],
 					us_username [user],
 					us_lastname + ', ' + us_firstname [name],
 					us_email [email],
 					case when us_reported_notifications < 4 or us_assigned_notifications < 4 or us_subscribed_notifications < 4 then 'Y' else 'N' end [user is<br>filtering<br>notifications]
 					from bug_subscriptions
 					inner join users on bs_user = us_id
-					where bs_bug = $bg
+					where bs_bug = @bg
 					and us_enable_notifications = 1
 					and us_active = 1
 					order by 1";
@@ -118,14 +118,16 @@ namespace BugTracker.Web
 					case when us_reported_notifications < 4 or us_assigned_notifications < 4 or us_subscribed_notifications < 4 then 'Y' else 'N' end [user is<br>filtering<br>notifications]
 					from bug_subscriptions
 					inner join users on bs_user = us_id
-					where bs_bug = $bg
+					where bs_bug = @bg
 					and us_enable_notifications = 1
 					and us_active = 1
 					order by 1";
 			}
 
-			sql = sql.Replace("$bg", Convert.ToString(bugId));
-			ds = btnet.DbUtil.get_dataset(sql);
+			SqlCommand cmd = new SqlCommand(sql);
+			cmd.Parameters.AddWithValue("@bg", bugId);
+
+			ds = btnet.DbUtil.get_dataset(cmd);
 		}
 
 		//Gets a list of all users that could be added to the bug as a subscriber. 
@@ -135,7 +137,7 @@ namespace BugTracker.Web
 			sql = @"
 				declare @project int;
 				declare @org int;
-				select @project = bg_project, @org = bg_org from bugs where bg_id = $bg;";
+				select @project = bg_project, @org = bg_org from bugs where bg_id = @bg;";
 
 			// Only users explicitly allowed will be listed
 			if (Util.get_setting("DefaultPermissionLevel", "2") == "0")
@@ -152,7 +154,7 @@ namespace BugTracker.Web
 						select us_id
 						from bug_subscriptions
 						inner join users on bs_user = us_id
-						where bs_bug = $bg
+						where bs_bug = @bg
 						and us_enable_notifications = 1
 						and us_active = 1)
 					and us_id not in (
@@ -178,7 +180,7 @@ namespace BugTracker.Web
 						select us_id
 						from bug_subscriptions
 						inner join users on bs_user = us_id
-						where bs_bug = $bg
+						where bs_bug = @bg
 						and us_enable_notifications = 1
 						and us_active = 1)
 					and us_id not in (
@@ -200,10 +202,11 @@ namespace BugTracker.Web
 				sql = sql.Replace("$fullnames", "1 = 1");
 			}
 
-			sql = sql.Replace("$bg", Convert.ToString(bugid));
+			SqlCommand cmd = new SqlCommand(sql);
+			cmd.Parameters.AddWithValue("@bg", bugId);
 
 			//Populating control
-			userid.DataSource = DbUtil.get_dataview(sql);
+			userid.DataSource = DbUtil.get_dataview(cmd);
 			userid.DataTextField = "us_username";
 			userid.DataValueField = "us_id";
 			userid.DataBind();
