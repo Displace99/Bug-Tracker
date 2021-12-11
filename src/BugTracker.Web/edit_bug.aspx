@@ -397,7 +397,7 @@ void prepare_a_bunch_of_links_for_update()
 
     if (permission_level != Security.PERMISSION_READONLY)
     {
-        string subscribers_link = "<a target=_blank href=view_subscribers.aspx?id="
+        string subscribers_link = "<a href=view_subscribers.aspx?id="
             + Convert.ToString(id)
             + " title='View users who have subscribed to email notifications for this item'><img src=telephone_edit.png border=0 align=top>&nbsp;subscribers</a>";
         subscribers.InnerHtml = subscribers_link;
