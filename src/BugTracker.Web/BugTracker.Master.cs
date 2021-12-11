@@ -15,7 +15,7 @@ namespace BugTracker.Web
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            
+            //All logic is handled in aspx page.
         }
     }
 }
