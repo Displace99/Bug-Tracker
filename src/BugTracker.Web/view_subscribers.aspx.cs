@@ -60,8 +60,35 @@ namespace BugTracker.Web
 			}
 
 			// clean up bug subscriptions that no longer fit the security restrictions
-			btnet.Bug.auto_subscribe(bugid);
+			Bug.auto_subscribe(bugid);
 
+			//Get list of currently subscribed users
+			GetSubscriberList(bugid);
+
+			//Gets the list of available users that could be added as subscribers
+			GetAvailableSubscribers(bugid);
+
+		}
+
+		//Adds a user as a new subscriber to a bug
+		private void AddNewSubscriber(int bugId, int userId)
+        {
+			sql = @"delete from bug_subscriptions where bs_bug = @bg and bs_user = @us;
+						insert into bug_subscriptions (bs_bug, bs_user) values(@bg, @us)";
+			
+			SqlCommand cmd = new SqlCommand(sql);
+			cmd.Parameters.AddWithValue("@bg", bugId);
+			cmd.Parameters.AddWithValue("@us", userId);
+			
+			DbUtil.execute_nonquery(cmd);
+			//btnet.DbUtil.execute_nonquery(sql);
+
+			// send a notification to this user only
+			btnet.Bug.send_notifications(btnet.Bug.UPDATE, bugid, security, userId);
+		}
+
+		private void GetSubscriberList(int bugId)
+        {
 			// show who is subscribed
 			if (security.user.is_admin)
 			{
@@ -98,11 +125,14 @@ namespace BugTracker.Web
 					order by 1";
 			}
 
-			sql = sql.Replace("$bg", Convert.ToString(bugid));
+			sql = sql.Replace("$bg", Convert.ToString(bugId));
 			ds = btnet.DbUtil.get_dataset(sql);
+		}
 
-			// Get list of users who could be subscribed to this bug.
-
+		//Gets a list of all users that could be added to the bug as a subscriber. 
+		//This is used to populate the drop down box
+		private void GetAvailableSubscribers(int bugId)
+        {
 			sql = @"
 				declare @project int;
 				declare @org int;
@@ -173,8 +203,8 @@ namespace BugTracker.Web
 
 			sql = sql.Replace("$bg", Convert.ToString(bugid));
 
-			//DataSet ds_users =
-			userid.DataSource = btnet.DbUtil.get_dataview(sql);
+			//Populating control
+			userid.DataSource = DbUtil.get_dataview(sql);
 			userid.DataTextField = "us_username";
 			userid.DataValueField = "us_id";
 			userid.DataBind();
@@ -187,24 +217,6 @@ namespace BugTracker.Web
 			{
 				userid.Items.Insert(0, new ListItem("[select to add]", "0"));
 			}
-
-		}
-
-		//Adds a user as a new subscriber to a bug
-		private void AddNewSubscriber(int bugId, int userId)
-        {
-			sql = @"delete from bug_subscriptions where bs_bug = @bg and bs_user = @us;
-						insert into bug_subscriptions (bs_bug, bs_user) values(@bg, @us)";
-			
-			SqlCommand cmd = new SqlCommand(sql);
-			cmd.Parameters.AddWithValue("@bg", bugId);
-			cmd.Parameters.AddWithValue("@us", userId);
-			
-			DbUtil.execute_nonquery(cmd);
-			//btnet.DbUtil.execute_nonquery(sql);
-
-			// send a notification to this user only
-			btnet.Bug.send_notifications(btnet.Bug.UPDATE, bugid, security, userId);
 		}
 	}
 }
