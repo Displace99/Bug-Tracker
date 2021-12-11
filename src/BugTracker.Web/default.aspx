@@ -181,15 +181,11 @@ void on_logon()
 <body onload="document.forms[0].user.focus()">
 <div style="float: right;">
 <span>
-	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href=http://ifdefined.com/bugtrackernet.html>BugTracker.NET</a>
+	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href="http://ifdefined.com/README.html">Help</a>
 	<br>
-	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href=http://ifdefined.com/README.html>Help</a>
+	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href="https://github.com/Displace99/Bug-Tracker/issues">Feedback</a>
 	<br>
-	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href=mailto:ctrager@yahoo.com>Feedback</a>
-	<br>
-	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href=about.html>About</a>
-	<br>
-	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href=http://ifdefined.com/README.html>Donate</a>
+	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href="about.html">About</a>
 </span>
 </div>
 <table border=0><tr>
