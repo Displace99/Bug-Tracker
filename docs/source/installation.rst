@@ -50,6 +50,7 @@ Creating a SQL Server Login/User
 If are using SQL Server authentication and if you want to create a new SQL Server Login/User with just the minimum permissions, below is the script to do it. The db_ddladmin permission is only needed for creating custom columns via the BugTracker.NET "admin" page. The db_backupoperator permission is only needed to do backups via the BugTracker.NET "admin" page.
 
 .. sourcecode:: sql
+    
     CREATE LOGIN user1 WITH PASSWORD = N'pass1', DEFAULT_DATABASE = btnet
     CREATE USER user1 FOR LOGIN user1
     EXEC sp_addrolemember N'db_datawriter', N'user1'
@@ -58,6 +59,7 @@ If are using SQL Server authentication and if you want to create a new SQL Serve
     EXEC sp_addrolemember N'db_ddladmin', N'user1'
     -- to backup the db
     EXEC sp_addrolemember N'db_backupoperator', N'user1'
+
 
 Upgrading
 ===========================

@@ -10,4 +10,5 @@ See Web.config for details.
 Another way of integrating your BugTracker.NET with your own web pages is to add your own links in the custom_header.html and custom_footer.html files. For details, see the Appearance page.
 
 **CustomMenuLink, CustomBugLink, CustomPostLink:**
+
 .. image:: images/bug_tracker_custom_links.gif

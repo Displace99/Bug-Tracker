@@ -8,7 +8,8 @@ Also, BugTracker.NET can send you email notifications telling you that somebody 
 You configure email by changing settings in Web.config, according to the requirements of your SMTP service provider. For example, here are my settings for my GMail account:
 
 .. source:: xml
-	<mailSettings>
+	
+    <mailSettings>
 		<smtp> 
 			<network
 				host="smtp.gmail.com"

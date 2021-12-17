@@ -48,25 +48,33 @@ Using Subversion Integration
 The following screenshots demonstrate what Subversion integration looks like in BugTracker.NET assuming you have everything configured correctly.
 
 **Doing a commit (checkin) using TortoiseSVN:**
+
 .. image:: images/bug_tracker_tort_commit1.gif
 
 **Enter the BugTracker.NET bug id, "222", in the comment text:**
+
 .. image:: images/bug_tracker_tort_commit2.gif
 
 **Subversion confirms the commit. It was Subversion revision #63:**
+
 .. image:: images/bug_tracker_tort_commit3.gif
 
 **The bug in BugTracker.NET. We changed two files, so there are two revision lines associated with this bug:**
+
 .. image:: images/bug_tracker_svn_bug.gif
 
 **If you click "revisions" above, you see the Subversion file revisions related to the bug:**
+
 .. image:: images/bug_tracker_svn_revs.gif
 
 **Run a "diff" to see what changed:**
+
 .. image:: images/bug_tracker_svn_diff.gif
 
 **View file history, diff between any two versions:**
+
 .. image:: images/bug_tracker_svn_log.gif
 
 **View an annotated copy of the file, showing who changed each line and when:**
+
 .. image:: images/bug_tracker_svn_blame.gif

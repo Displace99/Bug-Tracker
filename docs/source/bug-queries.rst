@@ -27,6 +27,7 @@ There are some "magic words" that you can use to make your queries more powerful
 "$ME" is a magic word you can use in your query that gets replaced by your user ID. For example:
 
 .. source:: sql
+    
     select isnull(pr_background_color,'#ffffff'), bg_id [id], bg_short_desc
         from bugs
         left outer join priorities on bg_priority = pr_id
@@ -35,6 +36,7 @@ There are some "magic words" that you can use to make your queries more powerful
 "$FLAG" is a magic word that controls whether a query shows the "flag" column that lets an individual user flag items for himself. To use it, add the SQL shown below to your select columns and do a "left outer join" to the bug_user_flags table.
 
 .. source:: sql
+    
     Select ...., isnull(fl_flag,0) [$FLAG],...
         from bugs
         left outer join bug_user_flags on fl_bug = bg_id and fl_user = $ME
@@ -42,6 +44,7 @@ There are some "magic words" that you can use to make your queries more powerful
 "$SEEN" is a magic word that controls whether a query shows the "new" column. The new column works the same as an indicator for unread email. To use it, add the SQL shown below to your select columns and do a "left outer join" to the bug_user_seen table.
       
 .. source:: sql
+    
     Select ...., isnull(sn_seen,0) [$SEEN],...
         from bugs
         left outer join bug_user_seen on sn_bug = bg_id and sn_user = $ME
@@ -49,6 +52,7 @@ There are some "magic words" that you can use to make your queries more powerful
 "$VOTE" is a magic word that controls whether a query shows the "votes" column. The number displayed is the total votes. A user can click on the column to upvote.
 
 .. source:: sql
+    
     Select ......., (isnull(vote_total,0) * 10000) + isnull(bu_vote,0) [$VOTE],
 	    from bugs
 	    left outer join bug_user on bu_bug = bg_id and bu_user = $ME
@@ -60,12 +64,15 @@ There are some "magic words" that you can use to make your queries more powerful
 The permission scheme of BugTracker.NET is enforced by logic which alters your SQL just before it is executed, adding to it "WHERE" clauses that reflect the permissions. For example, let's says your query is the following:
 
 .. source:: sql
-	select .... from bugs
+	
+    select .... from bugs
 		order by bg_id desc
 
 The permissions logic will automatically alter it by revising your query to say something like this:
+
 .. source:: sql
-	select .... from bugs
+	
+    select .... from bugs
 		WHERE [the bugs are associated with projects and organizations the user has permissiong to see]
 		order by bg_id desc
 

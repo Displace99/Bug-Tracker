@@ -37,10 +37,13 @@ Setup: Create an organzation and set the "Status" permission for that organizati
 
 
 **Organization permissions:**
+
 .. image:: images/bug_tracker_org.gif
 
 **Project permissions:**
+
 .. image:: images/bug_tracker_project_permissions.gif
 
 **Comments only internal users can see:**
+
 .. image:: images/bug_tracker_internal_comment.gif

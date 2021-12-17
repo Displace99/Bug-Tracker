@@ -21,7 +21,9 @@ The custom html is cached by BugTracker.NET, so if you make changes, you need to
 Below are two screenshots to give you an idea of the changes you can make by editing the files listed here. The first screenshot shows BugTracker.NET's "add a bug" page after installation, before customization. The second screenshot shows it customized using the files previously described.
 
 **Before customization:**
+
 .. image:: images/bug_tracker_default.gif
 
 **After changes to custom_header.html, custom_footer.html, custom_logo.html, and btnet_custom.css:**
+
 .. image:: images/bug_tracker_css.gif
