@@ -23,8 +23,8 @@ You will be prompted to run the www\setup.sql script, which creates the database
 
 6. Read this warning:
 
-..warning::
-    WARNING: If you are planning to use Bugtracker.NET on a public web server, an inTERnet, not an inTRAnet, then after you install you should:
+.. warning::
+    If you are planning to use Bugtracker.NET on a public web server, an inTERnet, not an inTRAnet, then after you install you should:
     1. Change the "admin" password. Of course.
     2. Delete the files "query.aspx" and "install.aspx".
 
@@ -75,4 +75,4 @@ Usually you don't need to make any changes to your Web.config, but once in a whi
 Overlay the files in your virtual directory with the new files from the .zip EXCEPT Web.config and the files in your "custom" folder. Don't overlay your Web.config file.
 
 .. warning::
-Don't accidentally re-copy install.aspx and query.aspx to your public website.
+    Don't accidentally re-copy install.aspx and query.aspx to your public website.
