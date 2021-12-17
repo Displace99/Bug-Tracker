@@ -1,7 +1,5 @@
 .. Bug Tracker documentation master file, created by
    sphinx-quickstart on Fri Dec 17 12:54:45 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Welcome to Bug Tracker's documentation!
 =======================================
@@ -11,6 +9,17 @@ BugTracker.NET is easy to install and learn how to use. When you first install i
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   
+   installation
+   custom-fields
+   bug-queries
+   out-going-email
+   receiving-bugs-by-email
+   customizing-the-appearance
+   user-permissions
+   bug-relationship
+   subversion-integration
+   adding-custom-pages
+   programmers
 
 
