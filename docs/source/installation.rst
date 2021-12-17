@@ -25,7 +25,9 @@ You will be prompted to run the www\setup.sql script, which creates the database
 
 .. warning::
     If you are planning to use Bugtracker.NET on a public web server, an inTERnet, not an inTRAnet, then after you install you should:
+    
     1. Change the "admin" password. Of course.
+    
     2. Delete the files "query.aspx" and "install.aspx".
 
 At this point you should be able to add bugs by clicking on "add a bug". Please take some time to look at the rest of this documentation. Also, please read the comments in the Web.config to learn what else you can do with BugTracker.NET. BugTracker.NET is deceptively simple when you first install it, but by doing a quick read of the comments in Web.config and a quick pass through the documentation pages, you'll get some idea of the things you can customize.
