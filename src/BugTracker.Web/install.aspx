@@ -72,7 +72,7 @@ void Page_Load(Object sender, EventArgs e)
 <p>
 4) Logon at <a href=default.aspx>default.aspx</a> using user "admin" and password "admin"
 <p>
-You probably should spend time looking at the README.HTML and Web.config files.   If you have any questions, post them to the <a href=http://sourceforge.net/projects/btnet/forums/forum/226938>Help Forum</a>.
+You probably should spend time looking at the README.HTML and Web.config files.   If you have any questions, post them to the <a href="https://github.com/Displace99/Bug-Tracker/issues">Help Forum</a>.
 
 <hr>
 <form action="install.aspx" method="GET">

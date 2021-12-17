@@ -52,7 +52,7 @@ void Page_Load(Object sender, EventArgs e)
 		+ e2.Message + "<br>"
 		+ "Check Web.config file \"ConnectionString\" setting.<br>"
 		+ "Check also README.html<br>"
-		+ "Check also <a href=http://sourceforge.net/projects/btnet/forums/forum/226938>Help Forum</a> on Sourceforge.";
+		+ "Check also <a href=https://github.com/Displace99/Bug-Tracker/issues>Help Forum</a> on GitHub.";
 	}
 
 	// Get authentication mode
@@ -181,7 +181,7 @@ void on_logon()
 <body onload="document.forms[0].user.focus()">
 <div style="float: right;">
 <span>
-	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href="http://ifdefined.com/README.html">Help</a>
+	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href="https://bug-tracker.readthedocs.io/en/latest/">Help</a>
 	<br>
 	<a target=_blank style=" font-size: 7pt; font-family: arial; letter-spacing: 1px;" href="https://github.com/Displace99/Bug-Tracker/issues">Feedback</a>
 	<br>
