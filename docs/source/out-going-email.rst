@@ -54,7 +54,7 @@ The user settings page lets you control how noisy the emails are. I suggest you 
  
 
 **Other Troubleshooting Tips**
-If your notification emails are going to Gmail or Yahoo accounts and show up blank there, then you are experiencing the problem described here . To workaround the bug, create "btnet_base_notifications.css" and "btnet_custom_notifications.css" and then the app will use those files as the style sheets for the emails instead of "btnet_base.css" and "btnet_custom.css". You can create those optional files and just leave them empty as a work around for the problems. Unfortunately, these style sheets will apply for all your users that get notifications, not just the ones who use Gmail or Yahoo.
+If your notification emails are going to Gmail or Yahoo accounts and show up blank there, then you are experiencing the `problem described here <https://sourceforge.net/p/btnet/bugs/400/>`_ . To workaround the bug, create "btnet_base_notifications.css" and "btnet_custom_notifications.css" and then the app will use those files as the style sheets for the emails instead of "btnet_base.css" and "btnet_custom.css". You can create those optional files and just leave them empty as a work around for the problems. Unfortunately, these style sheets will apply for all your users that get notifications, not just the ones who use Gmail or Yahoo.
 
 If you are are using GMail's SMTP server, users have reported that GMail limits the number of emails you can send per day and will temporarily disable your outgoing email if you exceed the limit.
 
