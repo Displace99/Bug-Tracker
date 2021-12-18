@@ -1,10 +1,12 @@
 ==============
-Version 3.6.9
+Versions 3.6.x
 ==============
+
+Version 3.6.8
+=============
 Release Date: December 27, 2019
 
-* Fixed "folder not found" errors, especially when running 
-install_btnet.cmd
+* Fixed "folder not found" errors, especially when running install_btnet.cmd
 
 Version 3.6.7   
 =============
@@ -78,15 +80,12 @@ Version 3.6.1
 Release Date: January 27, 2013
 
 * Fixed bug where the email body wasn't always being found in the incoming emails, discussed here:
-https://sourceforge.net/p/btnet/discussion/226938/thread/de976966/
-Thanks to Raphael Saccavini for help fixing this.
-
+    https://sourceforge.net/p/btnet/discussion/226938/thread/de976966/
+    Thanks to Raphael Saccavini for help fixing this.
 * Fixed bug with view-only custom fields disappering in view discussed here:
-https://sourceforge.net/p/btnet/discussion/226938/thread/a109051b/
-
+    https://sourceforge.net/p/btnet/discussion/226938/thread/a109051b/
 * Fixed bug "Validation causes wrong change history for custom fields"
-https://sourceforge.net/p/btnet/bugs/781/
-
+    https://sourceforge.net/p/btnet/bugs/781/
 * Re-arranged the code in edit_bug.aspx A LOT. It's a lot easier to read and work with now. Hopefully, I didn't break anything...  If you encounter a bug with it, contact me at ctrager@yahoo.com and I'll try to fix it ASAP.
 
 
