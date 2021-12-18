@@ -388,7 +388,7 @@ function on_submit_search()
             Response.Write("<td valign=middle align=left'>");
             Response.Write("<a target=_blank href=about.html><span class='menu_item' style='margin-left:3px;'>about</span></a></td>");
             Response.Write("<td nowrap valign=middle>");
-            Response.Write("<a target=_blank href=http://ifdefined.com/README.html><span class='menu_item' style='margin-left:3px;'>help</span></a></td>");
+            Response.Write("<a target=_blank href=https://bug-tracker.readthedocs.io/en/latest/><span class='menu_item' style='margin-left:3px;'>help</span></a></td>");
 
             Response.Write("</tr></table><br>");
         }
