@@ -1,4 +1,6 @@
 # Bug Tracker
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Displace99_Bug-Tracker&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Displace99_Bug-Tracker)
+[![Documentation Status](https://readthedocs.org/projects/bug-tracker/badge/?version=latest)](https://bug-tracker.readthedocs.io/en/latest/?badge=latest)
 
 As time moves forward, we have to continue to keep our applications up to date with the current technology and frameworks. Sometimes that doesn't happen. 
 
