@@ -1,0 +1,106 @@
+==============
+Version 3.6.9
+==============
+Release Date: December 27, 2019
+
+* Fixed "folder not found" errors, especially when running 
+install_btnet.cmd
+
+Version 3.6.7   
+=============
+Release Date: December 21, 2019
+
+It only took me about eight years but I think I fixed the bug related to the error "request not available in this context". The bug occured when running in IIS integrated mode, aka, "DefaultAppPool". One of the symptoms would be that full text search wasn't working.
+
+Sorry it took so long.
+
+If your BugTracker.NET installation is working fine, you don't need this release but for new installs, this should be easier.
+
+I also updated comments in Web.config to make it easier to get started.
+
+As part of my work on this release I went through the excercise of doing a clean install of Windows 10 Pro, SQL Server, SQL Server Management Console, IIS, ASP.NET 4.7, and for my coding, the Community Edition of Visual Studio.
+
+I then followed my own BugTracker.NET setup instructions. The only glitch was the "request not available in this context", hence my motivation to fix it.
+
+
+Version 3.6.6 
+=============
+Release Date:  January 02, 2019
+
+* Possibly fixed undefined "foo" error in add_attachment.aspx.
+
+Sometimes people ask me whether I'm still maintaining BugTracker.NET. The answer is yes. I still do try to fix bugs. But I'm not planning on any new features.
+
+
+Version 3.6.5   
+=============
+Release Date: October 05, 2017
+
+* Fixed bug where custom fields of type "user" would loose their value if the update didn't work because of a validation error.
+* Fixed bug where custom field of type "datetime" didn't display with correct format in view only.
+* Fixed bug where app crashed if somebody update the bug's project when view only fields were being displayed.
+* Custom fields of type datetime now display correctly in view only mode.
+* Deleted stuff that doesn't work anymore: Firefox addon, tropo (phone) thing.
+
+
+Version 3.6.4   
+==============
+Release Date: July 02, 2014
+
+** IMPORTANT **
+
+* Fixed security vulnerability that allows unauthenticated users to post new bugs or add comments to existing bugs. You can either upgrade to this release or just delete the file "tropo_recording.aspx".
+
+Thanks to Tamas Szakaly for identifying this vulnerability.
+
+
+Version 3.6.3 
+=============
+Release Date: April 3, 2014
+
+* Fixed bug with extracting plain text bodies from emails that aren't multipart.  Thanks Mike T for sending me the email sample.
+* Fixed bug where customer user dropdowns weren't getting reloaded. Thanks to Raphael for the fix.
+* Fixed bug where custom date field was recorded as being changed in the history, even though it wasn't changed.  Thanks to Brettski for the fix.
+
+
+Version 3.6.2 
+=============
+Release Date: March 10, 2013
+
+* Bypassing logic to handle SSL certificates when SSL is not being used for email.  This fixes a Medium Trust issue at some hosting providers.
+* No longer setting max-width in css for popop previews that show up when you hover in a bug list (which didn't work in IE, Firefox anyway...).
+* Fixed bug that caused edit_bug.aspx to sometimes complain of null when saving.
+* Fixed return() bug in print_bug.aspx.
+
+
+Version 3.6.1 
+=============
+Release Date: January 27, 2013
+
+* Fixed bug where the email body wasn't always being found in the incoming emails, discussed here:
+https://sourceforge.net/p/btnet/discussion/226938/thread/de976966/
+Thanks to Raphael Saccavini for help fixing this.
+
+* Fixed bug with view-only custom fields disappering in view discussed here:
+https://sourceforge.net/p/btnet/discussion/226938/thread/a109051b/
+
+* Fixed bug "Validation causes wrong change history for custom fields"
+https://sourceforge.net/p/btnet/bugs/781/
+
+* Re-arranged the code in edit_bug.aspx A LOT. It's a lot easier to read and work with now. Hopefully, I didn't break anything...  If you encounter a bug with it, contact me at ctrager@yahoo.com and I'll try to fix it ASAP.
+
+
+Version 3.6.0 
+=============
+Release Date: January 22, 2013
+
+* Fixed null bug in util.cs introduced in 3.5.9
+* Added some mobile pages. Before you enable them via Web.config, note that the mobile pages *DO NOT* obey org permissions at all, nor do they obey project permissions properly. If you rely on the permission scheme, do not enable the mobile pages.
+
+They are also very limited in what they show and what they allow you to edit - description, project, status, assigned to, and comment.
+
+Having said all that, if you want to try them out, add the following to Web.config and then point your browser to mlogin.aspx.
+
+.. sourcecode:: xml
+
+    <add key="EnableMobile" value="1"/>

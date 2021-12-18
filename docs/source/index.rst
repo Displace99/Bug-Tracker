@@ -11,6 +11,7 @@ BugTracker.NET is easy to install and learn how to use. When you first install i
    :maxdepth: 2
    
    installation
+   release-notes/index.rst
    custom-fields
    bug-queries
    out-going-email
