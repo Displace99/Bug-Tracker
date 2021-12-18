@@ -1167,7 +1167,7 @@ order by sc.id, isnull(ccm_sort_seq,sc.colorder)");
             string url = Request.QueryString["url"];
             string qs = Request.QueryString["qs"];
 
-            if (String.IsNullOrEmpty(url))
+            if (String.IsNullOrEmpty(url) || !IsLocalUrl(url))
             {
                 string mobile = Request["mobile"];
                 if (String.IsNullOrEmpty(mobile))
@@ -1207,9 +1207,19 @@ order by sc.id, isnull(ccm_sort_seq,sc.colorder)");
                     + remove_line_breaks(Request.QueryString["qs"]));
             }
         }
-        
-        ///////////////////////////////////////////////////////////////////////
-        public static string remove_line_breaks(String s) {
+
+		/// <summary>
+		/// Checks to see if the url is local to the domain
+		/// </summary>
+		/// <param name="url">url that you want to check</param>
+		/// <returns>True if local url, otherwise false</returns>
+		private static bool IsLocalUrl(string url)
+		{
+			return !string.IsNullOrEmpty(url) && ((url[0] == '/' && (url.Length == 1 || (url[1] != '/' && url[1] != '\\'))) || (url.Length > 1 && url[0] == '~' && url[1] == '/'));
+		}
+
+		///////////////////////////////////////////////////////////////////////
+		public static string remove_line_breaks(String s) {
             if (s == null)
             {
                 return "";
