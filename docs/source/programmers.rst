@@ -54,20 +54,7 @@ There are some major parts of BugTracker.NET that I didn't write:
 * Editing with fonts and colors uses CKEditor.
 * The full text uses Lucene.NET.
 
-Using Visual Studio
-===================
-
-Where is the solution/.sln file? You don't need one. You can work with the code with any text editor. For the best experience working with BugTracker.NET in Visual Studio, open and build it as a "Web Site".
-
-**Opening as a Web Site:**
-From the File menu select Open > Web Site...
-
-**Rebuild Web Site:**
-From the Build menu select Rebuild Web Site
-
 Code Style
 ==========
+The application is written in Web Forms, and has recently been updated to the 4.7.2 Framework. A new update has added "code-behind" files, but not all of the code has been converted over yet.
 
-If you work with the code, you'll notice it's not written in an MVC style, nor even the earlier "code-behind" style.
-
-I started BugTracker.NET in 2002 as a learning project, to teach myself .NET and C#, to get those technologies on my resume. At the time I didn't own Visual Studio, so I went about learning .NET the same way I had learned Java in its early days: I downloaded the SDK, edited files using a text editor, and compiled using the command line.
