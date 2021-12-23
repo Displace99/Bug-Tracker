@@ -1,4 +1,4 @@
-<%@ Page language="C#" CodeBehind="queries.aspx.cs" Inherits="BugTracker.Web.queries" AutoEventWireup="True" %>
+ <%@ Page language="C#" CodeBehind="queries.aspx.cs" Inherits="BugTracker.Web.queries" AutoEventWireup="True" %>
 <!--
 Copyright 2002-2011 Corey Trager
 Distributed under the terms of the GNU General Public License
@@ -42,8 +42,7 @@ void Page_Load(Object sender, EventArgs e)
 			'<a target=_blank href=print_bugs.aspx?format=excel&qu_id=' + convert(varchar,qu_id) + '>export as excel</a>' [export as excel],
 			'<a target=_blank href=print_bugs2.aspx?qu_id=' + convert(varchar,qu_id) + '>print detail</a>' [print list<br>with detail],
 			'<a href=edit_query.aspx?id=' + convert(varchar,qu_id) + '>edit</a>' [edit],
-			'<a href=delete_query.aspx?id=' + convert(varchar,qu_id) + '>delete</a>' [delete],
-			replace(convert(nvarchar(4000),qu_sql), char(10),'<br>') [sql]
+			'<a href=delete_query.aspx?id=' + convert(varchar,qu_id) + '>delete</a>' [delete]
 			from queries
 			left outer join users on qu_user = us_id
 			left outer join orgs on qu_org = og_id
