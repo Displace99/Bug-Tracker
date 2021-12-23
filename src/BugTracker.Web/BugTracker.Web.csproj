@@ -398,6 +398,7 @@
     <Content Include="clock.png" />
     <Content Include="comment.png" />
     <Content Include="complete_registration.aspx" />
+    <Content Include="css\alert.css" />
     <Content Include="customfields.aspx" />
     <Content Include="custom\btnet_custom.css" />
     <Content Include="custom\btnet_edit_bug.css" />
