@@ -1,9 +1,4 @@
-﻿.alert ﻿ {
-    
-}
-
-
-.alert-danger {
+﻿.alert-danger {
     position: relative;
     padding: 1rem 1rem;
     margin-bottom: 1rem;
