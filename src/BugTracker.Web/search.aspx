@@ -471,32 +471,6 @@ void do_query()
 	if (search_sql == "")
 	{
 
-/*
-select isnull(pr_background_color,'#ffffff') [color], bg_id [id],
-bg_short_desc [desc],
-bg_reported_date [reported on],
-isnull(rpt.us_username,'') [reported by],
-isnull(pj_name,'') [project],
-isnull(og_name,'') [organization],
-isnull(ct_name,'') [category],
-isnull(pr_name,'') [priority],
-isnull(asg.us_username,'') [assigned to],
-isnull(st_name,'') [status],
-isnull(udf_name,'') [MyUDF],
-isnull([mycust],'') [mycust],
-isnull([mycust2],'') [mycust2]
-from bugs
-left outer join users rpt on rpt.us_id = bg_reported_user
-left outer join users asg on asg.us_id = bg_assigned_to_user
-left outer join projects on pj_id = bg_project
-left outer join orgs on og_id = bg_org
-left outer join categories on ct_id = bg_category
-left outer join priorities on pr_id = bg_priority
-left outer join statuses on st_id = bg_status
-left outer join user_defined_attribute on udf_id = bg_user_defined_attribute
-order by bg_id desc
-*/
-
 		string select = "select isnull(pr_background_color,'#ffffff') [color], bg_id [id],\nbg_short_desc [desc]";
 
 		// reported
