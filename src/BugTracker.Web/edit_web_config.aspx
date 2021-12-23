@@ -60,34 +60,37 @@ void Page_Load(Object sender, EventArgs e)
 
 <html>
 <head>
-<title id="titl" runat="server">btnet edit custom html</title>
-<link rel="StyleSheet" href="btnet.css" type="text/css">
-<script language="Javascript" type="text/javascript" src="edit_area/edit_area_full.js"></script>
+    <title id="titl" runat="server">btnet edit custom html</title>
+    <link rel="StyleSheet" href="btnet.css" type="text/css">
+    <link rel="stylesheet" href="css/alert.css" type="text/css" />
+    <script language="Javascript" type="text/javascript" src="edit_area/edit_area_full.js"></script>
 
-<script>
-    editAreaLoader.init({
-        id: "myedit"	// id of the textarea to transform
-			, start_highlight: true	// if start with highlight
-			, toolbar: "search, go_to_line, undo, redo, help"
-			, browsers: "all"
-			, language: "en"
-			, syntax: "sql"
-			, allow_toggle: false
-			, min_width: 800
-			, min_height: 400
-    });
+    <script>
+        editAreaLoader.init({
+            id: "myedit"	// id of the textarea to transform
+			    , start_highlight: true	// if start with highlight
+			    , toolbar: "search, go_to_line, undo, redo, help"
+			    , browsers: "all"
+			    , language: "en"
+			    , syntax: "sql"
+			    , allow_toggle: false
+			    , min_width: 800
+			    , min_height: 400
+        });
 
-    function load_custom_file() {
-        var sel = document.getElementById("which")
-        window.location = "edit_custom_html.aspx?which=" + sel.options[sel.selectedIndex].value
-    }    
-</script>	
+        function load_custom_file() {
+            var sel = document.getElementById("which")
+            window.location = "edit_custom_html.aspx?which=" + sel.options[sel.selectedIndex].value
+        }    
+    </script>	
 
 </head>
 <body>
 <% security.write_menu(Response, "admin"); %>
 
-<div class=align><table border=0 style="margin-left:20px; margin-top:20px; width:80%;"><tr><td>
+<div class=align>
+    <div class="alert-danger">Due to potential security concerns, this page will be removed in a future update.</div>  
+    <table border=0 style="margin-left:20px; margin-top:20px; width:80%;"><tr><td>
 <form  runat="server">
 
 <textarea id="myedit" runat="server" style="width:100%"></textarea>

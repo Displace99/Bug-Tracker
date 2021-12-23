@@ -193,7 +193,7 @@ void on_update()
 <body>
 <% security.write_menu(Response, "reports"); %>
 <div class='align'>
-	<div class="alert alert-danger">Due to potential security concerns, this page will be removed in a future update.</div>  
+	<div class="alert-danger">Due to potential security concerns, this page will be removed in a future update.</div>  
 <a href='reports.aspx'>back to reports</a>
 <br><br>
 <table border='0'>

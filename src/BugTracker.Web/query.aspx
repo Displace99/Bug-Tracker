@@ -66,46 +66,48 @@ void Page_Load(Object sender, EventArgs e)
 
 <html>
 <head>
-<title id="titl" runat="server">btnet query</title>
-<link rel="StyleSheet" href="btnet.css" type="text/css">
-<script type="text/javascript" language="JavaScript" src="sortable.js"></script>
+	<title id="titl" runat="server">btnet query</title>
+	<link rel="StyleSheet" href="btnet.css" type="text/css">
+	<link rel="stylesheet" href="css/alert.css" type="text/css" />
+	<script type="text/javascript" language="JavaScript" src="sortable.js"></script>
 
-<script>
+	<script>
 
-var shown = true;
+	var shown = true;
 
-function showhide_form()
-{
-	var frm =  document.getElementById("<% Response.Write(Util.get_form_name()); %>");
-	if (shown)
+	function showhide_form()
 	{
-		frm.style.display = "none";
-		shown = false;
-		showhide.firstChild.nodeValue = "show form";
+		var frm =  document.getElementById("<% Response.Write(Util.get_form_name()); %>");
+		if (shown)
+		{
+			frm.style.display = "none";
+			shown = false;
+			showhide.firstChild.nodeValue = "show form";
+		}
+		else
+		{
+			frm.style.display = "block";
+			shown = true;
+			showhide.firstChild.nodeValue = "hide form";
+		}
 	}
-	else
-	{
-		frm.style.display = "block";
-		shown = true;
-		showhide.firstChild.nodeValue = "hide form";
-	}
-}
 
-function on_dbtables_changed()
-{
-    var tables_sel = document.getElementById("dbtables_select")
-    selected_text = tables_sel.options[tables_sel.selectedIndex].text;
-    if (selected_text != "Select Table") 
-    {
-        document.getElementById("query").value = "select * from " + selected_text;
-    }
-}
-</script>
+	function on_dbtables_changed()
+	{
+		var tables_sel = document.getElementById("dbtables_select")
+		selected_text = tables_sel.options[tables_sel.selectedIndex].text;
+		if (selected_text != "Select Table") 
+		{
+			document.getElementById("query").value = "select * from " + selected_text;
+		}
+	}
+	</script>
 </head>
 
 <body>
 
 <div class=align>
+	<div class="alert-danger">Due to potential security concerns, this page will be removed in a future update.</div>  
 <table border=0>
 
 <tr>
