@@ -67,14 +67,7 @@ void Page_Load(Object sender, EventArgs e) {
 			// Fill in this form
 			desc.Value = (string) dr["rp_desc"];
 			
-//			if (Util.get_setting("HtmlEncodeSql","0") == "1")
-//			{
-//				sql_text.Value = Server.HtmlEncode((string) dr["rp_sql"]);
-//			}
-//			else
-//			{
-				sql_text.Value = (string) dr["rp_sql"];
-//			}
+			sql_text.Value = (string) dr["rp_sql"];
 			
 			switch ((string) dr["rp_chart_type"]) {
 				case "pie":
@@ -177,28 +170,30 @@ void on_update()
 
 <html>
 <head>
-<title id="titl" runat="server">btnet edit report</title>
-<link rel="stylesheet" href="btnet.css" type="text/css">
-<script language="Javascript" type="text/javascript" src="edit_area/edit_area_full.js"></script>
+	<title id="titl" runat="server">btnet edit report</title>
+	<link rel="stylesheet" href="btnet.css" type="text/css">
+	<link rel="stylesheet" href="css/alert.css" type="text/css" />
+	<script language="Javascript" type="text/javascript" src="edit_area/edit_area_full.js"></script>
 
-<script>
-		editAreaLoader.init({
-			id: "sql_text"	// id of the textarea to transform
-			,start_highlight: true	// if start with highlight
-			,toolbar: "search, go_to_line, undo, redo, help"
-			,browsers: "all"
-			,language: "en"
-			,syntax: "sql"
-			,allow_toggle: false
-			,min_height: 300
-			,min_width: 400
-		});
-</script>
+	<script>
+			editAreaLoader.init({
+				id: "sql_text"	// id of the textarea to transform
+				,start_highlight: true	// if start with highlight
+				,toolbar: "search, go_to_line, undo, redo, help"
+				,browsers: "all"
+				,language: "en"
+				,syntax: "sql"
+				,allow_toggle: false
+				,min_height: 300
+				,min_width: 400
+			});
+	</script>
 </head>
 
 <body>
 <% security.write_menu(Response, "reports"); %>
 <div class='align'>
+	<div class="alert-danger">Due to potential security concerns, this page will be removed in a future update.</div>  
 <a href='reports.aspx'>back to reports</a>
 <br><br>
 <table border='0'>

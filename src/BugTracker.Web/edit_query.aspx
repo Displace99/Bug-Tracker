@@ -131,14 +131,7 @@ select us_id, us_username from users order by us_username";
 			// Fill in this form
 			desc.Value = (string) dr["qu_desc"];
 
-//			if (Util.get_setting("HtmlEncodeSql","0") == "1")
-//			{
-//				sql_text.Value = Server.HtmlEncode((string) dr["qu_sql"]);
-//			}
-//			else
-//			{
-				sql_text.Value = (string) dr["qu_sql"];
-//			}
+			sql_text.Value = (string) dr["qu_sql"];
 
 			if ((int) dr["qu_user"] == 0 && (int) dr["qu_org"] == 0)
 			{
@@ -289,14 +282,8 @@ void on_update()
 
 		}
 		sql = sql.Replace("$de", desc.Value.Replace("'","''"));
-//		if (Util.get_setting("HtmlEncodeSql","0") == "1")
-//		{
-//			sql = sql.Replace("$sq", Server.HtmlDecode(sql_text.Value.Replace("'","''")));
-//		}
-//		else
-//		{
-			sql = sql.Replace("$sq", sql_text.Value.Replace("'","''"));
-//		}
+
+		sql = sql.Replace("$sq", sql_text.Value.Replace("'","''"));
 
 		if (security.user.is_admin || security.user.can_edit_sql)
 		{
@@ -345,29 +332,32 @@ void on_update()
 
 <html>
 <head>
-<title id="titl" runat="server">btnet edit query</title>
-<link rel="StyleSheet" href="btnet.css" type="text/css">
-<script language="Javascript" type="text/javascript" src="edit_area/edit_area_full.js"></script>
+	<title id="titl" runat="server">btnet edit query</title>
+	<link rel="StyleSheet" href="btnet.css" type="text/css">
+	<link rel="stylesheet" href="css/alert.css" type="text/css" />
+	<script language="Javascript" type="text/javascript" src="edit_area/edit_area_full.js"></script>
 
-<script>
-		editAreaLoader.init({
-			id: "sql_text"	// id of the textarea to transform
-			,start_highlight: true	// if start with highlight
-			,toolbar: "search, go_to_line, undo, redo, help"
-			,browsers: "all"
-			,language: "en"
-			,syntax: "sql"
-			,allow_toggle: false
-			,min_height: 300
-			,min_width: 400
-		});
-</script>		
+	<script>
+			editAreaLoader.init({
+				id: "sql_text"	// id of the textarea to transform
+				,start_highlight: true	// if start with highlight
+				,toolbar: "search, go_to_line, undo, redo, help"
+				,browsers: "all"
+				,language: "en"
+				,syntax: "sql"
+				,allow_toggle: false
+				,min_height: 300
+				,min_width: 400
+			});
+	</script>		
 
 </head>
 <body>
 <% security.write_menu(Response, "queries"); %>
 
-<div class=align><table border=0><tr><td>
+<div class=align>
+	<div class="alert-danger">Due to potential security concerns, this page will be removed in a future update.</div>  
+	<table border=0><tr><td>
 <a href=queries.aspx>back to queries</a>
 <form class=frm runat="server">
 	<table border=0 cellspacing=8 cellpadding=0>
