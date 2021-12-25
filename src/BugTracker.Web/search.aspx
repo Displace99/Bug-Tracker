@@ -268,7 +268,10 @@ string format_in_not_in(string s)
 }
 
 
-///////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Returns a list of of Projects selected in the Project List Item control
+/// </summary>
+/// <returns>List of ListItems</returns>
 List<ListItem> get_selected_projects()
 {
     List<ListItem> selected_projects = new List<ListItem>();
@@ -276,7 +279,7 @@ List<ListItem> get_selected_projects()
 	foreach (ListItem li in project.Items)
 	{
         if (li.Selected)
-			{
+		{
             selected_projects.Add(li);
 		}
 	}
@@ -735,7 +738,13 @@ string format_to_date(string dt)
 	return Util.format_local_date_into_db_format(dt).Replace(" 12:00:00"," 23:59:59").Replace(" 00:00:00"," 23:59:59");
 }
 
-///////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Loads a list box control with values for the selected projects custom dropdown
+/// There will only be two ListBoxes shown on the page so values from multiple dropdowns will appear in a single ListBox
+/// </summary>
+/// <param name="dropdown">ListBox control for a projects custom dropdown</param>
+/// <param name="vals_string">Values of the custom dropdown</param>
+/// <param name="duplicate_detection_dictionary">Dictionary that holds duplicate values</param>
 void load_project_custom_dropdown(ListBox dropdown, string vals_string, Dictionary<String, String> duplicate_detection_dictionary)
 {
 	string[] vals_array = btnet.Util.split_dropdown_vals(vals_string);
@@ -749,7 +758,9 @@ void load_project_custom_dropdown(ListBox dropdown, string vals_string, Dictiona
 	}
 }
 
-///////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Finds and loads the list of custom project dropdowns based on the selected projects
+/// </summary>
 void handle_project_custom_dropdowns()
 {
 
@@ -799,11 +810,10 @@ void handle_project_custom_dropdowns()
     project_custom_dropdown2.Items.Clear();
     project_custom_dropdown3.Items.Clear();
 
+	//For each project selected, get a list of any project specific dropdowns and populate the listbox
 	foreach (ListItem selected_project in selected_projects)
 	{
-		// Read the project dropdown info from the db.
-		// Load the dropdowns as necessary
-
+	
         if (selected_project.Value == "0")
             continue;
 
@@ -862,6 +872,8 @@ void handle_project_custom_dropdowns()
 		}
 	}
 
+	//Chose to show or hide the dropdown list. This is based off of the label which is set in the above loop.
+	//If we deselect a project we need to be able to hide the listbbox for any custom dropdowns that no longer exist 
     if (project_custom_dropdown1_label.InnerText == "")
 	{
 		project_custom_dropdown1.Items.Clear();
@@ -904,7 +916,7 @@ void handle_project_custom_dropdowns()
             += ",\\nisnull(bg_project_custom_dropdown_value3,'') [" + project_custom_dropdown3_label.InnerText + "]";
     }
 
-    // Restore user's previous selections.
+    // Since this method fires on auto postback, we want to preserve the users previous selections
     foreach (ListItem li in project_custom_dropdown1.Items)
     {
         li.Selected = (previous_selection_dictionaries[0].ContainsKey(li.Value));
@@ -919,7 +931,9 @@ void handle_project_custom_dropdowns()
     }
 }
 
-///////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Loads standard drop downs related to all bugs
+/// </summary>
 void load_drop_downs()
 {
 
@@ -1050,7 +1064,10 @@ void load_drop_downs()
 
 }
 
-///////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Adds a javascript calendar control to the 
+/// </summary>
+/// <param name="name"></param>
 void write_custom_date_control(string name)
 {
 
@@ -1433,8 +1450,6 @@ function on_change()
 	like2_string = like2_string.replace(/\[/gi,"[[]");
 	like2_string = like2_string.replace(/%/gi,"[%]");
 	like2_string = like2_string.replace(/_/gi,"[_]");
-
-	// "    this line is only here to help unconfuse the syntax coloring in my editor
 
 	var desc_clause = ""
 	if (frm.like.value != "") {
