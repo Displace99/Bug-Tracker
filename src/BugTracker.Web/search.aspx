@@ -31,7 +31,6 @@ class BtnetProject
 
 Dictionary<int, BtnetProject> map_projects = new Dictionary<int, BtnetProject>();
 
-///////////////////////////////////////////////////////////////////////
 void Page_Load(Object sender, EventArgs e)
 {
 	Util.do_not_cache(Response);
@@ -179,7 +178,13 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
 
 
 
-///////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Used to build the full where clause for a sql statement. 
+/// This is called multiple times to build out the where clause for all possible selections.
+/// </summary>
+/// <param name="where">The current where clause</param>
+/// <param name="clause">What needs to be added to the where clause</param>
+/// <returns>Full where clause for a specific property</returns>
 string build_where(string where, string clause)
 {
 	if (clause == "")
@@ -206,7 +211,12 @@ string build_where(string where, string clause)
 }
 
 
-///////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Takes the list of selected values from a list box and builds part of the where clause 
+/// </summary>
+/// <param name="lb">ListBox element to pull selected values from</param>
+/// <param name="column_name">Name of the database column</param>
+/// <returns>part of the where clause of a sql statement</returns>
 string build_clause_from_listbox(ListBox lb, string column_name)
 {
 
@@ -467,10 +477,11 @@ void do_query()
 		}
 	}
 
-	// The rest of the SQL is either built in or comes from Web.config
-
+	//Checks to see if there is a default select statement in the webconfig. By default this is commented out
+	//and only used if you want to customize the columns that are displayed on the "search" page
 	string search_sql = Util.get_setting("SearchSQL","");
 
+	//If nothing is is found in the web config, build out the standard select statement.
 	if (search_sql == "")
 	{
 
@@ -710,6 +721,7 @@ void do_query()
 			select += "left outer join user_defined_attribute on udf_id = bg_user_defined_attribute";
 		}
 
+		//Adds the where clause to the select statement to complete the sql statement
 		sql = select + where + " order by bg_id desc";
 
 	}
@@ -727,12 +739,21 @@ void do_query()
 	Session["bugs_unfiltered"] = ds.Tables[0];
 }
 
-
+/// <summary>
+/// Changes the date from a page element into a database date format
+/// </summary>
+/// <param name="dt">Date that you want to format</param>
+/// <returns>Database formatted date</returns>
 string format_from_date(string dt)
 {
 	return Util.format_local_date_into_db_format(dt).Replace(" 12:00:00","").Replace(" 00:00:00","");
 }
 
+/// <summary>
+/// Changes the date from a page element into a database date format
+/// </summary>
+/// <param name="dt">Date that you want to format</param>
+/// <returns>Database formatted date</returns>
 string format_to_date(string dt)
 {
 	return Util.format_local_date_into_db_format(dt).Replace(" 12:00:00"," 23:59:59").Replace(" 00:00:00"," 23:59:59");
@@ -1065,7 +1086,7 @@ void load_drop_downs()
 }
 
 /// <summary>
-/// Adds a javascript calendar control to the 
+/// Adds a javascript calendar control to the UI element 
 /// </summary>
 /// <param name="name"></param>
 void write_custom_date_control(string name)
