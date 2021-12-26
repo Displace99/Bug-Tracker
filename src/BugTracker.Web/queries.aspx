@@ -41,7 +41,7 @@ else
 
 if (ds.Tables[0].Rows.Count > 0)
 {
-	SortableHtmlTable.create_from_dataset(
+	btnet.SortableHtmlTable.create_from_dataset(
 		Response, ds, "", "", false);
 }
 else
