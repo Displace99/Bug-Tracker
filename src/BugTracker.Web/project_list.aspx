@@ -22,7 +22,7 @@
             </tr>
             <%foreach (var project in projectList) { %>
             <tr>
-                <td class=datad><a href="project_detail.aspx?projectId=<%= project.Id %>"><%= project.Name %></a></td>
+                <td class=datad><a href="project_detail.aspx?projectId=<%= project.Id %>"><%: project.Name %></a></td>
                 <td class=datad><%= project.Description %></td>
                 <td class=datad><%= project.Status %></td>
             </tr>
