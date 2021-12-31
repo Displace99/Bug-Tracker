@@ -1181,9 +1181,9 @@ else
 %>
 
 <p>
-<span id="visible_sql_label" runat="server">SQL:</span>
+<span id="visible_sql_label" style="display: none;" runat="server">SQL:</span>
 </p>
-<pre style="font-family: courier new; font-size: 8pt" id="visible_sql_text" runat="server">&nbsp;</pre>
+<pre style="font-family: courier new; font-size: 8pt; display: none;" id="visible_sql_text" runat="server">&nbsp;</pre>
 
 <!-- form 3 -->
 <form id="save_query_form" target="_blank" method="post" action="edit_query.aspx">

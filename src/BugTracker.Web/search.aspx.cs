@@ -158,16 +158,6 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
             hit_submit_button.Value = "0";
             project_changed.Value = "0";
 
-            if (security.user.is_admin || security.user.can_edit_sql)
-            {
-
-            }
-            else
-            {
-                visible_sql_label.Style["display"] = "none";
-                visible_sql_text.Style["display"] = "none";
-            }
-
         }
 
         /// <summary>
