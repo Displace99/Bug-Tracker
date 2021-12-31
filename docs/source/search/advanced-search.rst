@@ -50,7 +50,7 @@ Custom Dropdowns and Multiple Projects
 
 There are only 3 dropdowns allowed per project. In the below image "Severity" is Custom Dropdown 1 and "Risk" is Custom Dropdown 2. Only 2 are showing because there is no Custom Dropdown 3 created for this project.
 
-.. image:: media/search-custom-dropdowns.png
+.. image:: media/search-custom-project-dropdowns.png
 
 If you select another project that also has custom dropdowns, the list boxes will be combined based on the order of the dropdowns. In the below example we have two projects, one of them has 2 custom dropdowns and the other has 3.
 
