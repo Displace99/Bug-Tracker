@@ -53,7 +53,7 @@
                 <%foreach (var bug in BugList) { %>
                 <tr>
                     <td class=datad><%= bug.Id %></td>
-                    <td class=datad><a href="edit_bug.aspx?id=<%= bug.Id %>"><%= bug.Description %></a></td>
+                    <td class=datad><a href="edit_bug.aspx?id=<%= bug.Id %>"><%: bug.Description %></a></td>
                     <td class=datad><%= bug.Organization %></td>
                     <td class=datad><%= bug.Category %></td>
                     <td class=datad><%= bug.ReportedBy %></td>
