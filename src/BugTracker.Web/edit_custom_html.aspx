@@ -120,6 +120,7 @@ string get_file_name(string which_file)
 <head>
 <title id="titl" runat="server">btnet edit web config</title>
 <link rel="StyleSheet" href="btnet.css" type="text/css">
+    <link rel="stylesheet" href="css/alert.css" type="text/css" />
 <script language="Javascript" type="text/javascript" src="edit_area/edit_area_full.js"></script>
 
 <script>
@@ -145,7 +146,9 @@ string get_file_name(string which_file)
 <body>
 <% security.write_menu(Response, "admin"); %>
 
-<div class=align><table border=0 style="margin-left:20px; margin-top:20px; width:80%;"><tr><td>
+<div class=align>
+    <div class="alert-danger">Due to potential security concerns, this page will be removed in a future update.</div>  
+    <table border=0 style="margin-left:20px; margin-top:20px; width:80%;"><tr><td>
 <form runat="server">
 
 Select custom html file: 
