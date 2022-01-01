@@ -6,10 +6,78 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Scripts\00001 - Org Table.sql" />
+    <None Remove="Scripts\00002 - Users Table.sql" />
+    <None Remove="Scripts\00003 - Sessions Table.sql" />
+    <None Remove="Scripts\00004 - EmailedLinks Table.sql" />
+    <None Remove="Scripts\00005 - Categories Table.sql" />
+    <None Remove="Scripts\00006 - Projects Table.sql" />
+    <None Remove="Scripts\00007 - Bug Table.sql" />
+    <None Remove="Scripts\00008 - BugPost Table.sql" />
+    <None Remove="Scripts\00009 - BugTasks Table.sql" />
+    <None Remove="Scripts\00010 - BugPostAttachments Table.sql" />
+    <None Remove="Scripts\00011 - BugSubscription Table.sql" />
+    <None Remove="Scripts\00012 - BugUser Table.sql" />
+    <None Remove="Scripts\00013 - BugRelationships Table.sql" />
+    <None Remove="Scripts\00014 - ProjectUserXref Table.sql" />
+    <None Remove="Scripts\00015 - UserDefinedAttribute Table.sql" />
+    <None Remove="Scripts\00016 - Statuses Table.sql" />
+    <None Remove="Scripts\00017 - Priorities Table.sql" />
+    <None Remove="Scripts\00018 - CustomColMetadata Table.sql" />
+    <None Remove="Scripts\00019 - SvnRevisions Table.sql" />
+    <None Remove="Scripts\00020 - SnvAffectedPaths Table.sql" />
+    <None Remove="Scripts\00021 - GitCommits Table.sql" />
+    <None Remove="Scripts\00022 - GitAffectedPaths Table.sql" />
+    <None Remove="Scripts\00023 - HgRevisions Table.sql" />
+    <None Remove="Scripts\00024 - HgAffectedPaths Table.sql" />
+    <None Remove="Scripts\00025 - Reports Table.sql" />
+    <None Remove="Scripts\00026 - Queries Table.sql" />
+    <None Remove="Scripts\00027 - QueuedNotifications Table.sql" />
+    <None Remove="Scripts\00028 - DashboardItems Table.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\00001 - Org Table.sql" />
+    <EmbeddedResource Include="Scripts\00002 - Users Table.sql" />
+    <EmbeddedResource Include="Scripts\00003 - Sessions Table.sql" />
+    <EmbeddedResource Include="Scripts\00004 - EmailedLinks Table.sql" />
+    <EmbeddedResource Include="Scripts\00005 - Categories Table.sql" />
+    <EmbeddedResource Include="Scripts\00006 - Projects Table.sql" />
+    <EmbeddedResource Include="Scripts\00007 - Bug Table.sql" />
+    <EmbeddedResource Include="Scripts\00008 - BugPost Table.sql" />
+    <EmbeddedResource Include="Scripts\00009 - BugTasks Table.sql" />
+    <EmbeddedResource Include="Scripts\00010 - BugPostAttachments Table.sql" />
+    <EmbeddedResource Include="Scripts\00011 - BugSubscription Table.sql" />
+    <EmbeddedResource Include="Scripts\00012 - BugUser Table.sql" />
+    <EmbeddedResource Include="Scripts\00013 - BugRelationships Table.sql" />
+    <EmbeddedResource Include="Scripts\00014 - ProjectUserXref Table.sql" />
+    <EmbeddedResource Include="Scripts\00015 - UserDefinedAttribute Table.sql" />
+    <EmbeddedResource Include="Scripts\00016 - Statuses Table.sql" />
+    <EmbeddedResource Include="Scripts\00017 - Priorities Table.sql" />
+    <EmbeddedResource Include="Scripts\00018 - CustomColMetadata Table.sql" />
+    <EmbeddedResource Include="Scripts\00019 - SvnRevisions Table.sql" />
+    <EmbeddedResource Include="Scripts\00020 - SnvAffectedPaths Table.sql" />
+    <EmbeddedResource Include="Scripts\00021 - GitCommits Table.sql" />
+    <EmbeddedResource Include="Scripts\00022 - GitAffectedPaths Table.sql" />
+    <EmbeddedResource Include="Scripts\00023 - HgRevisions Table.sql" />
+    <EmbeddedResource Include="Scripts\00024 - HgAffectedPaths Table.sql" />
+    <EmbeddedResource Include="Scripts\00025 - Reports Table.sql" />
+    <EmbeddedResource Include="Scripts\00026 - Queries Table.sql" />
+    <EmbeddedResource Include="Scripts\00027 - QueuedNotifications Table.sql" />
+    <EmbeddedResource Include="Scripts\00028 - DashboardItems Table.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="dbup" Version="4.5.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
