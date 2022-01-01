@@ -42,7 +42,7 @@ void Page_Load(Object sender, EventArgs e)
 			Util.write_to_log (e1.Message);
 			Util.write_to_log (Util.get_setting("ConnectionString","?"));
 			msg.InnerHtml = "Unable to find \"bugs\" table.<br>"
-			+ "Click to <a href=install.aspx>setup database tables</a>";
+			+ "Please make sure the database is set up correctly</a>";
 		}
 
 	}
