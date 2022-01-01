@@ -20,14 +20,14 @@ Setup: Set "DefaultPermissionLevel" in Web.config to 0. This denies everybody pe
 Setup: Set "DefaultProjectLevel" in Web.config to 1. Leave the setting for the other projects to "view only".
 
 
-4. Scenario: Your team has several customers. You want your customers to use BugTracker.NET too, but you don�t want one customer to see another customer�s bugs. You also want to be able to post comments to bugs that you don�t want the customers to see.
+4. Scenario: Your team has several customers. You want your customers to use BugTracker.NET too, but you don�t want one customer to see another customer's bugs. You also want to be able to post comments to bugs that you don't want the customers to see.
 
-Setup: Set "EnableInternalOnlyPosts" to "1" in Web.config. This allows you to post comments to bugs that user who are marked "external" can�t see. Create a BugTracker.NET organization for each customer. Check the "external" flag on the organization. Set "Permission level for bugs associated with other (or no) organizations" to "None". Create another organization naming it something like "Internal" and set "Permission level for bugs associated with other (or no) organizations" to "Add/Edit". When a customer-user adds a bug, it will automatically be associated with the organization, and other customers won�t be able to see it. Your internal users will be able to see the bugs for all customers.
+Setup: Set "EnableInternalOnlyPosts" to "1" in Web.config. This allows you to post comments to bugs that user who are marked "external" can't see. Create a BugTracker.NET organization for each customer. Check the "external" flag on the organization. Set "Permission level for bugs associated with other (or no) organizations" to "None". Create another organization naming it something like "Internal" and set "Permission level for bugs associated with other (or no) organizations" to "Add/Edit". When a customer-user adds a bug, it will automatically be associated with the organization, and other customers won't be able to see it. Your internal users will be able to see the bugs for all customers.
 
 
 5. Scenario: You want people to be able to view bugs without having to create a user account for them.
 
-Setup: Create a user named "guest". There is special logic in BugTracker.NET to handle the guest user differently. First of all, you can�t give the guest user permissions any stronger than Reporter. Second, the link to "settings" and the button to "Save search as query" are not available to the guest user. You can also set the Web.config setting "AllowGuestWithoutLogin" to "1" which allows anybody to access your BugTracker.NET as "guest" without logging in at all.
+Setup: Create a user named "guest". There is special logic in BugTracker.NET to handle the guest user differently. First of all, you can't give the guest user permissions any stronger than Reporter. Second, the link to "settings" and the button to "Save search as query" are not available to the guest user. You can also set the Web.config setting "AllowGuestWithoutLogin" to "1" which allows anybody to access your BugTracker.NET as "guest" without logging in at all.
 
 
 6. Scenario: Some people can see the status but can't change it. Some people are not allowed to even see the "assigned to" field.

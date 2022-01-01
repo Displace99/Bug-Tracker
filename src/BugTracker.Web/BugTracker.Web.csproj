@@ -546,7 +546,6 @@
     <Content Include="inc_bugs2.inc" />
     <Content Include="inc_diff.inc" />
     <Content Include="insert_bug.aspx" />
-    <Content Include="install.aspx" />
     <Content Include="jquery\grippie.png" />
     <Content Include="jquery\images\ajax-loader.gif" />
     <Content Include="jquery\images\icons-18-black.png" />
@@ -612,7 +611,6 @@
     <Content Include="select_report.aspx" />
     <Content Include="send_email.aspx" />
     <Content Include="server_variables.aspx" />
-    <Content Include="setup.sql" />
     <Content Include="sortable.js" />
     <Content Include="statuses.aspx" />
     <Content Include="subscribe.aspx" />
@@ -1129,13 +1127,6 @@
     </Compile>
     <Compile Include="insert_bug.aspx.designer.cs">
       <DependentUpon>insert_bug.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="install.aspx.cs">
-      <DependentUpon>install.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="install.aspx.designer.cs">
-      <DependentUpon>install.aspx</DependentUpon>
     </Compile>
     <Compile Include="loginnt.aspx.cs">
       <DependentUpon>loginnt.aspx</DependentUpon>
