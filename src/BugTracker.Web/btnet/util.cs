@@ -549,26 +549,26 @@ namespace btnet
 
 
 		///////////////////////////////////////////////////////////////////////
-		public static string encrypt_string_using_MD5(string s)
-		{
+		//public static string encrypt_string_using_MD5(string s)
+		//{
 
-			byte[] byte_array = System.Text.Encoding.Default.GetBytes(s);
+		//	byte[] byte_array = System.Text.Encoding.Default.GetBytes(s);
 
-			System.Security.Cryptography.HashAlgorithm alg =
-				System.Security.Cryptography.HashAlgorithm.Create("MD5");
+		//	System.Security.Cryptography.HashAlgorithm alg =
+		//		System.Security.Cryptography.HashAlgorithm.Create("MD5");
 
-			byte[] byte_array2 = alg.ComputeHash(byte_array);
+		//	byte[] byte_array2 = alg.ComputeHash(byte_array);
 
-			System.Text.StringBuilder sb
-				= new System.Text.StringBuilder(byte_array2.Length);
+		//	System.Text.StringBuilder sb
+		//		= new System.Text.StringBuilder(byte_array2.Length);
 
-			foreach(byte b in byte_array2)
-			{
-				sb.AppendFormat("{0:X2}", b);
-			}
+		//	foreach(byte b in byte_array2)
+		//	{
+		//		sb.AppendFormat("{0:X2}", b);
+		//	}
 
-			return sb.ToString();
-		}
+		//	return sb.ToString();
+		//}
 
         ///////////////////////////////////////////////////////////////////////
         public static void update_user_password(int us_id, string unencypted)
@@ -576,7 +576,7 @@ namespace btnet
             Random random = new Random();
             int salt = random.Next(10000, 99999);
 
-            string encrypted = Util.encrypt_string_using_MD5(unencypted + Convert.ToString(salt));
+			string encrypted = EncryptionService.HashString(unencypted, Convert.ToString(salt));
 
             string sql = "update users set us_password = N'$en', us_salt = $salt where us_id = $id";
 
