@@ -1326,6 +1326,7 @@
     <Compile Include="server_variables.aspx.designer.cs">
       <DependentUpon>server_variables.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Services\EncryptionService.cs" />
     <Compile Include="statuses.aspx.cs">
       <DependentUpon>statuses.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using BugTracker.Web.Services;
 
 namespace btnet
 {
