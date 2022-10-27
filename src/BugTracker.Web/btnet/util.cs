@@ -11,6 +11,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using BugTracker.Web.Services;
+using System.Text;
 
 namespace btnet
 {
@@ -586,6 +587,19 @@ namespace btnet
 
             btnet.DbUtil.execute_nonquery(sql);
         }
+
+		//private static Random _random = new Random();
+		public static string GenerateRandomString()
+		{
+			Random _random = new Random();
+			var characters = "ABCDEFGHIJKLMNOPQURSTUVWXYZabcdefghijklmnopqurtuvwxyz1234567890".ToCharArray();
+			var builder = new StringBuilder();
+			for (int i = 0; i < _random.Next(10, 100); i++)
+			{
+				builder.Append(characters[_random.Next(characters.Length - 1)]);
+			}
+			return builder.ToString();
+		}
 
 		///////////////////////////////////////////////////////////////////////
 		public static string capitalize_first_letter(string s)
