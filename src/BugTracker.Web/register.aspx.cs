@@ -3,7 +3,9 @@ using BugTracker.Web.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.UI;
 namespace BugTracker.Web
@@ -47,28 +49,26 @@ namespace BugTracker.Web
 				{
 					string guid = Guid.NewGuid().ToString();
 
-					// encrypt the password
-					Random random = new Random();
-					int salt = random.Next(10000, 99999);
-					string encrypted = EncryptionService.HashString(password.Value, Convert.ToString(salt));
+					string salt = Util.GenerateRandomString();
+					string hashedPassword = EncryptionService.HashString(password.Value, Convert.ToString(salt));
 
+					StringBuilder sql = new StringBuilder();
+					sql.Append("insert into emailed_links ");
+					sql.Append("(el_id, el_date, el_email, el_action, el_username, el_salt, el_password, el_firstname, el_lastname) ");
+					sql.Append("values (@Id, getdate(), @email, @register, @username, @salt, @password, @firstname, @lastname)");
 
-					string sql = @"
-						insert into emailed_links
-							(el_id, el_date, el_email, el_action,
-								el_username, el_salt, el_password, el_firstname, el_lastname)
-							values ('$guid', getdate(), N'$email', N'register',
-								N'$username', $salt, N'$password', N'$firstname', N'$lastname')";
+					SqlCommand cmd = new SqlCommand();
+					cmd.CommandText = sql.ToString();
+					cmd.Parameters.AddWithValue("@Id", guid);
+					cmd.Parameters.AddWithValue("@email", email.Value);
+					cmd.Parameters.AddWithValue("@register", "register");
+					cmd.Parameters.AddWithValue("@username", username.Value);
+					cmd.Parameters.AddWithValue("@salt", salt);
+					cmd.Parameters.AddWithValue("@password", hashedPassword);
+					cmd.Parameters.AddWithValue("@firstname", firstname.Value);
+					cmd.Parameters.AddWithValue("@lastname", lastname.Value);
 
-					sql = sql.Replace("$guid", guid);
-					sql = sql.Replace("$password", encrypted);
-					sql = sql.Replace("$salt", Convert.ToString(salt));
-					sql = sql.Replace("$username", username.Value.Replace("'", "''"));
-					sql = sql.Replace("$email", email.Value.Replace("'", "''"));
-					sql = sql.Replace("$firstname", firstname.Value.Replace("'", "''"));
-					sql = sql.Replace("$lastname", lastname.Value.Replace("'", "''"));
-
-					btnet.DbUtil.execute_nonquery(sql);
+					btnet.DbUtil.execute_nonquery(cmd);
 
 					string result = btnet.Email.send_email(
 						email.Value,
