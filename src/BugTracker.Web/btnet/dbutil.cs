@@ -30,6 +30,28 @@ namespace btnet
             }
         }
 
+        public static object execute_scalar(SqlCommand cmd)
+        {
+            log_command(cmd);
+            object returnValue;
+            using (SqlConnection conn = get_sqlconnection())
+            {
+                try
+                {
+                    cmd.Connection = conn; 
+                    returnValue = cmd.ExecuteScalar();
+                    conn.Close(); // redundant, but just to be clear
+                }
+                finally
+                {
+                    conn.Close(); // redundant, but just to be clear
+                    cmd.Connection = null;
+                }
+            }
+
+            return returnValue;
+        }
+
         ///////////////////////////////////////////////////////////////////////
         public static void execute_nonquery_without_logging(string sql)
         {

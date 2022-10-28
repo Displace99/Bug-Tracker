@@ -7,6 +7,7 @@ using System;
 using System.Data;
 using System.Collections.Generic;
 using System.Text;
+using System.Data.SqlClient;
 
 namespace btnet
 {
@@ -195,7 +196,7 @@ namespace btnet
         	string firstname,
         	string lastname,
             string signature,
-        	int salt,
+        	string salt,
         	string password,
         	string template_username,
             bool use_domain_as_org_name)
@@ -204,6 +205,7 @@ namespace btnet
 
             btnet.Util.write_to_log("copy_user creating " + username + " from template user " + template_username);
             StringBuilder org_columns = new StringBuilder();
+            string org_columns_final = String.Empty;
 
             string sql = "";
 
@@ -227,117 +229,79 @@ and sc.name not in ('og_id', 'og_name', 'og_domain')";
 
             }
 
+            SqlCommand copyUserCmd = new SqlCommand();
 
-			sql = @"
-/* copy user */
-declare @template_user_id int
-declare @template_org_id int
-select @template_user_id = us_id,
-@template_org_id = us_org 
-from users where us_username = N'$template_user'
+            StringBuilder copyUserSql = new StringBuilder();
+            copyUserSql.Append("/* copy user */");
+            copyUserSql.AppendLine("declare @template_user_id int");
+            copyUserSql.AppendLine("declare @template_org_id int");
+            copyUserSql.AppendLine("select @template_user_id = us_id, @template_org_id = us_org from users where us_username = @template_user");
+            copyUserSql.AppendLine("declare @org_id int");
+            copyUserSql.AppendLine("set @org_id = -1");
 
-declare @org_id int
-set @org_id = -1
+            //This is used to copy domain information. Currently only used when we are adding an user from an email, when they submit a bug via email.
+            copyUserSql.AppendLine("IF @use_domain_as_org_name = 1");
+            copyUserSql.AppendLine("BEGIN");
+            copyUserSql.AppendLine("select @org_id = og_id from orgs where og_domain = @domain");
+            copyUserSql.AppendLine(" IF @org_id = -1");
+            copyUserSql.AppendLine("BEGIN");
+            copyUserSql.AppendLine("insert into orgs (og_name, og_domain @ORG_COLUMNS) select @domain, @domain @ORG_COLUMNS from orgs where og_id = @template_org_id select @org_id = scope_identity()");
+            copyUserSql.AppendLine("END");
+            copyUserSql.AppendLine("END");
+            //-----------------------------------------------------------------------------------------------------------------------------------------
 
-IF $use_domain_as_org_name = 1
-BEGIN
-    select @org_id = og_id from orgs where og_domain = N'$domain'
-    IF @org_id = -1
-    BEGIN
-        insert into orgs
-        (
-            og_name,
-            og_domain       
-            $ORG_COLUMNS        
-        )
-        select 
-        N'$domain',
-        N'$domain'
-        $ORG_COLUMNS
-        from orgs where og_id = @template_org_id
-        select @org_id = scope_identity()
-    END
-END
+            //Copies the information from the emailed_links table over to the users table and adds appropriate project links.
+            copyUserSql.AppendLine("declare @new_user_id int");
+            copyUserSql.AppendLine("set @new_user_id = -1");
+            copyUserSql.AppendLine("IF NOT EXISTS (SELECT us_id FROM users WHERE us_username = @username)");
+            copyUserSql.AppendLine("BEGIN");
+            copyUserSql.AppendLine("insert into users (us_username, us_email, us_firstname, us_lastname, us_signature, us_salt, us_password, us_default_query, us_enable_notifications, us_auto_subscribe, us_auto_subscribe_own_bugs, us_auto_subscribe_reported_bugs, us_send_notifications_to_self, us_active, us_bugs_per_page, us_forced_project, us_reported_notifications, us_assigned_notifications, us_subscribed_notifications, us_use_fckeditor, us_enable_bug_list_popups, us_org)");
+            copyUserSql.AppendLine("select @username, @email, @firstname, @lastname, @signature, @salt, @password, us_default_query, us_enable_notifications, us_auto_subscribe, us_auto_subscribe_own_bugs, us_auto_subscribe_reported_bugs, us_send_notifications_to_self, 1, us_bugs_per_page, us_forced_project, us_reported_notifications, us_assigned_notifications, us_subscribed_notifications, us_use_fckeditor, us_enable_bug_list_popups, case when @org_id = -1 then us_org else @org_id end from users where us_id = @template_user_id");
+            copyUserSql.AppendLine("select @new_user_id = scope_identity()");
+            copyUserSql.AppendLine("insert into project_user_xref (pu_project, pu_user, pu_auto_subscribe, pu_permission_level, pu_admin)");
+            copyUserSql.AppendLine("select pu_project, @new_user_id, pu_auto_subscribe, pu_permission_level, pu_admin from project_user_xref where pu_user = @template_user_id");
+            copyUserSql.AppendLine("select @new_user_id");
+            copyUserSql.AppendLine("END");
 
-declare @new_user_id int
-set @new_user_id = -1
+            //TODO: Need to change this. Not a fan of string replacement.
+            //This is replacing @ORG_COLUMNS with the actual columns. Not sure why he did this,
+            //only to maybe save some typing as there are quite a few fields in the Org table.
+            //See syscolumns query at the beginning of this method
+            if (!use_domain_as_org_name)
+            {
+                copyUserSql.Replace("@ORG_COLUMNS", "");
+            }
+            else
+            {
+                copyUserSql.Replace("@ORG_COLUMNS", org_columns.ToString());
+            }
+            
+            copyUserCmd.CommandText = copyUserSql.ToString();
+            copyUserCmd.Parameters.AddWithValue("@username", username);
+            copyUserCmd.Parameters.AddWithValue("@email", email);
+            copyUserCmd.Parameters.AddWithValue("@firstname", firstname);
+            copyUserCmd.Parameters.AddWithValue("@lastname", lastname);
+            copyUserCmd.Parameters.AddWithValue("@signature", signature);
+            copyUserCmd.Parameters.AddWithValue("@salt", Convert.ToString(salt));
+            copyUserCmd.Parameters.AddWithValue("@password", password);
+            copyUserCmd.Parameters.AddWithValue("@template_user", template_username);
+            copyUserCmd.Parameters.AddWithValue("@use_domain_as_org_name", Convert.ToString(use_domain_as_org_name ? "1" : "0"));
 
-IF NOT EXISTS (SELECT us_id FROM users WHERE us_username = '$username')
-BEGIN
-
-insert into users
-	(us_username, us_email, us_firstname, us_lastname, us_signature, us_salt, us_password,
-	us_default_query,
-	us_enable_notifications,
-	us_auto_subscribe,
-	us_auto_subscribe_own_bugs,
-	us_auto_subscribe_reported_bugs,
-	us_send_notifications_to_self,
-	us_active,
-	us_bugs_per_page,
-	us_forced_project,
-	us_reported_notifications,
-	us_assigned_notifications,
-	us_subscribed_notifications,
-	us_use_fckeditor,
-	us_enable_bug_list_popups,
-	us_org)
-
-select
-	N'$username', N'$email', N'$firstname', N'$lastname', N'$signature', $salt, N'$password',
-	us_default_query,
-	us_enable_notifications,
-	us_auto_subscribe,
-	us_auto_subscribe_own_bugs,
-	us_auto_subscribe_reported_bugs,
-	us_send_notifications_to_self,
-	1, -- active
-	us_bugs_per_page,
-	us_forced_project,
-	us_reported_notifications,
-	us_assigned_notifications,
-	us_subscribed_notifications,
-	us_use_fckeditor,
-	us_enable_bug_list_popups,
-	case when @org_id = -1 then us_org else @org_id end
-	from users where us_id = @template_user_id
-
-select @new_user_id = scope_identity()
-
-insert into project_user_xref
-	(pu_project, pu_user, pu_auto_subscribe, pu_permission_level, pu_admin)
-
-select pu_project, @new_user_id, pu_auto_subscribe, pu_permission_level, pu_admin
-	from project_user_xref
-	where pu_user = @template_user_id
-
-select @new_user_id
-
-END
-";
-            sql = sql.Replace("$username", username.Replace("'","''"));
-			sql = sql.Replace("$email", email.Replace("'","''"));
-			sql = sql.Replace("$firstname", firstname.Replace("'","''"));
-			sql = sql.Replace("$lastname", lastname.Replace("'","''"));
-            sql = sql.Replace("$signature", signature.Replace("'", "''"));
-			sql = sql.Replace("$salt", Convert.ToString(salt));
-			sql = sql.Replace("$password", password);
-            sql = sql.Replace("$template_user", template_username.Replace("'", "''"));
-
-            sql = sql.Replace("$use_domain_as_org_name", Convert.ToString(use_domain_as_org_name ? "1" : "0"));
+            string emailDomain = String.Empty;
 
             string[] email_parts = email.Split('@');
             if (email_parts.Length == 2)
             {
-                sql = sql.Replace("$domain", email_parts[1].Replace("'", "''"));
+                emailDomain = email_parts[1];
             }
             else
             {
-                sql = sql.Replace("$domain", email.Replace("'", "''"));
+                emailDomain = email;
             }
+
+            copyUserCmd.Parameters.AddWithValue("@domain", emailDomain);
             
-            sql = sql.Replace("$ORG_COLUMNS", org_columns.ToString());
-            return Convert.ToInt32(btnet.DbUtil.execute_scalar(sql));
+            return Convert.ToInt32(btnet.DbUtil.execute_scalar(copyUserCmd));
         
         }
         
