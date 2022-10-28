@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -34,6 +34,7 @@
     <None Remove="Scripts\00026 - Queries Table.sql" />
     <None Remove="Scripts\00027 - QueuedNotifications Table.sql" />
     <None Remove="Scripts\00028 - DashboardItems Table.sql" />
+    <None Remove="Scripts\00029 - UpdatePasswordTable.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,6 +66,7 @@
     <EmbeddedResource Include="Scripts\00026 - Queries Table.sql" />
     <EmbeddedResource Include="Scripts\00027 - QueuedNotifications Table.sql" />
     <EmbeddedResource Include="Scripts\00028 - DashboardItems Table.sql" />
+    <EmbeddedResource Include="Scripts\00029 - UpdatePasswordTable.sql" />
   </ItemGroup>
 
   <ItemGroup>
