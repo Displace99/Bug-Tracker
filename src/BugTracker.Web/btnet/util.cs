@@ -571,24 +571,50 @@ namespace btnet
 		//	return sb.ToString();
 		//}
 
-        ///////////////////////////////////////////////////////////////////////
-        public static void update_user_password(int us_id, string unencypted)
+        /// <summary>
+		/// Updates the users password using the User ID
+		/// </summary>
+		/// <param name="us_id">ID of the User</param>
+		/// <param name="unencypted">Unencrypted Password</param>
+        public static void UpdateUserPassword(int us_id, string unencypted)
         {
-            Random random = new Random();
-            int salt = random.Next(10000, 99999);
+			string salt = GenerateRandomString();
 
-			string encrypted = EncryptionService.HashString(unencypted, Convert.ToString(salt));
+			string hashed = EncryptionService.HashString(unencypted, Convert.ToString(salt));
 
             string sql = "update users set us_password = N'$en', us_salt = $salt where us_id = $id";
 
-            sql = sql.Replace("$en", encrypted);
+            sql = sql.Replace("$en", hashed);
             sql = sql.Replace("$salt", Convert.ToString(salt));
             sql = sql.Replace("$id", Convert.ToString(us_id));
 
             btnet.DbUtil.execute_nonquery(sql);
         }
 
-		//private static Random _random = new Random();
+		/// <summary>
+		/// Updates the users password using their user name
+		/// </summary>
+		/// <param name="username">The unique user name representing the user</param>
+		/// <param name="unencypted">Unencrypted Password</param>
+		public static void UpdateUserPassword(string username, string unencypted)
+		{
+			string salt = GenerateRandomString();
+
+			string hashed = EncryptionService.HashString(unencypted, Convert.ToString(salt));
+
+			string sql = "update users set us_password = N'$en', us_salt = $salt where us_username = $username";
+
+			sql = sql.Replace("$en", hashed);
+			sql = sql.Replace("$salt", Convert.ToString(salt));
+			sql = sql.Replace("$username", Convert.ToString(username));
+
+			btnet.DbUtil.execute_nonquery(sql);
+		}
+
+		/// <summary>
+		/// Generates a random string
+		/// </summary>
+		/// <returns></returns>
 		public static string GenerateRandomString()
 		{
 			Random _random = new Random();
