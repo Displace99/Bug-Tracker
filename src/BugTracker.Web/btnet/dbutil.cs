@@ -211,10 +211,32 @@ namespace btnet
         }
 
 
-        ///////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Returns the first DataRow from a SQL statement
+        /// </summary>
+        /// <param name="sql">SQL statement in string format</param>
+        /// <returns>DataRow</returns>
         public static DataRow get_datarow(string sql)
         {
             DataSet ds = get_dataset(sql);
+            if (ds.Tables[0].Rows.Count != 1)
+            {
+                return null;
+            }
+            else
+            {
+                return ds.Tables[0].Rows[0];
+            }
+        }
+
+        /// <summary>
+        /// Returns the first DataRow from a SqlCommand
+        /// </summary>
+        /// <param name="cmd">The SQL Command statement to run</param>
+        /// <returns>DataRow</returns>
+        public static DataRow get_datarow(SqlCommand cmd)
+        {
+            DataSet ds = get_dataset(cmd);
             if (ds.Tables[0].Rows.Count != 1)
             {
                 return null;

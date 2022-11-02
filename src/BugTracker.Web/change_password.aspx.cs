@@ -1,8 +1,8 @@
 using btnet;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
+using System.Data.SqlClient;
+using System.Text;
 using System.Web;
 using System.Web.UI;
 namespace BugTracker.Web
@@ -50,22 +50,24 @@ namespace BugTracker.Web
 						Response.End();
 					}
 
-					string sql = @"
-declare @expiration datetime
-set @expiration = dateadd(n,-$minutes,getdate())
+					StringBuilder sqlText = new StringBuilder();
+					sqlText.AppendLine("declare @expiration datetime");
+					sqlText.AppendLine("set @expiration = dateadd(n,-@minutes,getdate())");
+					sqlText.AppendLine("select *, case when el_date < @expiration then 1 else 0 end[expired] from emailed_links	where el_id = @linkId");
+					
+					//TODO: This should be a separate process. Nightly job or something. Or we delete the row upon successful completion of the password reset.
+					sqlText.AppendLine("delete from emailed_links where el_date < dateadd(n,-240,getdate())");
 
-select *,
-	case when el_date < @expiration then 1 else 0 end [expired]
-	from emailed_links
-	where el_id = '$guid'
+					int expirationMinutes = Int32.Parse(Util.get_setting("RegistrationExpiration", "20"));
 
-delete from emailed_links
-	where el_date < dateadd(n,-240,getdate())";
+					SqlCommand cmd = new SqlCommand();
+					cmd.CommandText = sqlText.ToString();
+					cmd.Parameters.AddWithValue("@minutes", expirationMinutes);
+					cmd.Parameters.AddWithValue("@linkId", guid);
 
-					sql = sql.Replace("$minutes", Util.get_setting("RegistrationExpiration", "20"));
-					sql = sql.Replace("$guid", guid.Replace("'", "''"));
+					DataRow dr = DbUtil.get_datarow(cmd);
 
-					DataRow dr = btnet.DbUtil.get_datarow(sql);
+					// DataRow dr = btnet.DbUtil.get_datarow(sql);
 
 					if (dr == null)
 					{

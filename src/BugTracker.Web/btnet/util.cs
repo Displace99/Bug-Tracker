@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using BugTracker.Web.Services;
 using System.Text;
+using System.Data.SqlClient;
 
 namespace btnet
 {
@@ -580,15 +581,18 @@ namespace btnet
         {
 			string salt = GenerateRandomString();
 
-			string hashed = EncryptionService.HashString(unencypted, Convert.ToString(salt));
+			string hashedPassword = EncryptionService.HashString(unencypted, Convert.ToString(salt));
 
-            string sql = "update users set us_password = N'$en', us_salt = $salt where us_id = $id";
+			StringBuilder sql = new StringBuilder();
+			sql.Append("update users set us_password = @password, us_salt = @salt where us_id = @Id");
 
-            sql = sql.Replace("$en", hashed);
-            sql = sql.Replace("$salt", Convert.ToString(salt));
-            sql = sql.Replace("$id", Convert.ToString(us_id));
+			SqlCommand cmd = new SqlCommand();
+			cmd.CommandText = sql.ToString();
+			cmd.Parameters.AddWithValue("@password", hashedPassword);
+			cmd.Parameters.AddWithValue("@salt", salt);
+			cmd.Parameters.AddWithValue("@Id", us_id);
 
-            btnet.DbUtil.execute_nonquery(sql);
+			btnet.DbUtil.execute_nonquery(cmd);
         }
 
 		/// <summary>
@@ -600,15 +604,18 @@ namespace btnet
 		{
 			string salt = GenerateRandomString();
 
-			string hashed = EncryptionService.HashString(unencypted, Convert.ToString(salt));
+			string hashedPassword = EncryptionService.HashString(unencypted, Convert.ToString(salt));
 
-			string sql = "update users set us_password = N'$en', us_salt = $salt where us_username = $username";
+			StringBuilder sql = new StringBuilder();
+			sql.Append("update users set us_password = @password, us_salt = @salt where us_username = @username");
 
-			sql = sql.Replace("$en", hashed);
-			sql = sql.Replace("$salt", Convert.ToString(salt));
-			sql = sql.Replace("$username", Convert.ToString(username));
-
-			btnet.DbUtil.execute_nonquery(sql);
+			SqlCommand cmd = new SqlCommand();
+			cmd.CommandText = sql.ToString();
+			cmd.Parameters.AddWithValue("@password", hashedPassword);
+			cmd.Parameters.AddWithValue("@salt", salt);
+			cmd.Parameters.AddWithValue("@username", username);
+			
+			btnet.DbUtil.execute_nonquery(cmd);
 		}
 
 		/// <summary>
