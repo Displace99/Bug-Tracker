@@ -46,8 +46,8 @@ namespace BugTracker.Web
 
 					if (string.IsNullOrEmpty(guid))
 					{
-						Response.Write("no guid");
-						Response.End();
+						msg.InnerHtml = "The change password link is invalid. Please request a new Password Reset.";
+						return;
 					}
 
 					StringBuilder sqlText = new StringBuilder();
