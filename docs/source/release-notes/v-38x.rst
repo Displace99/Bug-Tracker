@@ -1,16 +1,15 @@
-##############
-Versions 3.8.x
-##############
+==============
+Versions 3.8
+==============
 
-**************
+
 Version 3.8.0
-**************
+==============
 Release Date: November, 2, 2022
 
 This release focuses on highlighting some of the security concerns of the application. 
 
-Updated
-=========
+**Updated**
 
 * Database
 
@@ -41,7 +40,6 @@ Updated
     To be more inline with current industry standards, we have updated the hashing algorithm to a more secure version. This means that the current way to check passwords no longer works, and will require all users to reset their passwords. 
 
 
-Fixed
-======
+**Fixed**
 
-Fixed an issue with the Project Detail page that was added in the 3.7.0 release. The description wasn't being encoded properly and arbitrary html and javascript could be executed when viewing bugs related to a specific project. 
+* Fixed an issue with the Project Detail page that was added in the 3.7.0 release. The description wasn't being encoded properly and arbitrary html and javascript could be executed when viewing bugs related to a specific project. 
