@@ -10,6 +10,9 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using BugTracker.Web.Services;
+using System.Text;
+using System.Data.SqlClient;
 
 namespace btnet
 {
@@ -548,43 +551,88 @@ namespace btnet
 
 
 		///////////////////////////////////////////////////////////////////////
-		public static string encrypt_string_using_MD5(string s)
+		//public static string encrypt_string_using_MD5(string s)
+		//{
+
+		//	byte[] byte_array = System.Text.Encoding.Default.GetBytes(s);
+
+		//	System.Security.Cryptography.HashAlgorithm alg =
+		//		System.Security.Cryptography.HashAlgorithm.Create("MD5");
+
+		//	byte[] byte_array2 = alg.ComputeHash(byte_array);
+
+		//	System.Text.StringBuilder sb
+		//		= new System.Text.StringBuilder(byte_array2.Length);
+
+		//	foreach(byte b in byte_array2)
+		//	{
+		//		sb.AppendFormat("{0:X2}", b);
+		//	}
+
+		//	return sb.ToString();
+		//}
+
+        /// <summary>
+		/// Updates the users password using the User ID
+		/// </summary>
+		/// <param name="us_id">ID of the User</param>
+		/// <param name="unencypted">Unencrypted Password</param>
+        public static void UpdateUserPassword(int us_id, string unencypted)
+        {
+			string salt = GenerateRandomString();
+
+			string hashedPassword = EncryptionService.HashString(unencypted, Convert.ToString(salt));
+
+			StringBuilder sql = new StringBuilder();
+			sql.Append("update users set us_password = @password, us_salt = @salt where us_id = @Id");
+
+			SqlCommand cmd = new SqlCommand();
+			cmd.CommandText = sql.ToString();
+			cmd.Parameters.AddWithValue("@password", hashedPassword);
+			cmd.Parameters.AddWithValue("@salt", salt);
+			cmd.Parameters.AddWithValue("@Id", us_id);
+
+			btnet.DbUtil.execute_nonquery(cmd);
+        }
+
+		/// <summary>
+		/// Updates the users password using their user name
+		/// </summary>
+		/// <param name="username">The unique user name representing the user</param>
+		/// <param name="unencypted">Unencrypted Password</param>
+		public static void UpdateUserPassword(string username, string unencypted)
 		{
+			string salt = GenerateRandomString();
 
-			byte[] byte_array = System.Text.Encoding.Default.GetBytes(s);
+			string hashedPassword = EncryptionService.HashString(unencypted, Convert.ToString(salt));
 
-			System.Security.Cryptography.HashAlgorithm alg =
-				System.Security.Cryptography.HashAlgorithm.Create("MD5");
+			StringBuilder sql = new StringBuilder();
+			sql.Append("update users set us_password = @password, us_salt = @salt where us_username = @username");
 
-			byte[] byte_array2 = alg.ComputeHash(byte_array);
-
-			System.Text.StringBuilder sb
-				= new System.Text.StringBuilder(byte_array2.Length);
-
-			foreach(byte b in byte_array2)
-			{
-				sb.AppendFormat("{0:X2}", b);
-			}
-
-			return sb.ToString();
+			SqlCommand cmd = new SqlCommand();
+			cmd.CommandText = sql.ToString();
+			cmd.Parameters.AddWithValue("@password", hashedPassword);
+			cmd.Parameters.AddWithValue("@salt", salt);
+			cmd.Parameters.AddWithValue("@username", username);
+			
+			btnet.DbUtil.execute_nonquery(cmd);
 		}
 
-        ///////////////////////////////////////////////////////////////////////
-        public static void update_user_password(int us_id, string unencypted)
-        {
-            Random random = new Random();
-            int salt = random.Next(10000, 99999);
-
-            string encrypted = Util.encrypt_string_using_MD5(unencypted + Convert.ToString(salt));
-
-            string sql = "update users set us_password = N'$en', us_salt = $salt where us_id = $id";
-
-            sql = sql.Replace("$en", encrypted);
-            sql = sql.Replace("$salt", Convert.ToString(salt));
-            sql = sql.Replace("$id", Convert.ToString(us_id));
-
-            btnet.DbUtil.execute_nonquery(sql);
-        }
+		/// <summary>
+		/// Generates a random string
+		/// </summary>
+		/// <returns></returns>
+		public static string GenerateRandomString()
+		{
+			Random _random = new Random();
+			var characters = "ABCDEFGHIJKLMNOPQURSTUVWXYZabcdefghijklmnopqurtuvwxyz1234567890".ToCharArray();
+			var builder = new StringBuilder();
+			for (int i = 0; i < _random.Next(10, 100); i++)
+			{
+				builder.Append(characters[_random.Next(characters.Length - 1)]);
+			}
+			return builder.ToString();
+		}
 
 		///////////////////////////////////////////////////////////////////////
 		public static string capitalize_first_letter(string s)

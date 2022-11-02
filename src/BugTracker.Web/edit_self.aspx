@@ -266,7 +266,7 @@ void on_update ()
         // update the password
         if (pw.Value != "")
         {
-            btnet.Util.update_user_password(id, pw.Value);
+            btnet.Util.UpdateUserPassword(id, pw.Value);
         }
 
 		// Now update project_user_xref

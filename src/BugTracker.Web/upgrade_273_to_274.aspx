@@ -39,7 +39,7 @@ void Page_Load(Object sender, EventArgs e)
 		string us_password = (string) dr["us_password"];
 		{
 			Response.Write ("encrypting " + us_username + "<br>");
-            btnet.Util.update_user_password(us_id, us_password);
+            btnet.Util.UpdateUserPassword(us_id, us_password);
 		}
 	}
 

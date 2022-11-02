@@ -201,7 +201,7 @@ where us_username = N'$us'";
                         username,
                         username,
                         "", "", "",  // first, last, signature
-                        0,  // salt
+                        "0",  // salt
                         Guid.NewGuid().ToString(), // random value for password,
                         Util.get_setting("CreateUsersFromEmailTemplate", "[error - missing user template]"),
                         use_domain_as_org_name);
