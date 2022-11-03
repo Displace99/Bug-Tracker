@@ -148,7 +148,7 @@ void Page_Load(Object sender, EventArgs e)
 				first_name,
 				last_name,
                 signature,
-				0, // salt
+				"0", // salt
 				Guid.NewGuid().ToString(), // random value for password
 				template_user,
                 false); 
