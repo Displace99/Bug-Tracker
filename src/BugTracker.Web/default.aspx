@@ -12,7 +12,7 @@ Distributed under the terms of the GNU General Public License
 
 <html lang="en">
 	<head>
-		<title id="titl" runat="server">btnet logon</title>
+		<title id="title" runat="server">btnet logon</title>
 		<link rel="StyleSheet" href="btnet.css" type="text/css">
 		<link rel="shortcut icon" href="favicon.ico">
 	</head>
