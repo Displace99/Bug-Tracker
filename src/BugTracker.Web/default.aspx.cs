@@ -20,48 +20,13 @@ namespace BugTracker.Web
 
 			Util.do_not_cache(Response);
 
-			title.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-				+ "Log in";
+			title.InnerText = String.Format("{0} - Log in", Util.get_setting("AppTitle", "BugTracker.NET"));
 
 			msg.InnerText = "";
+			
+			//Determines if we need to stay here or redirect to Windows Auth login page.
+			GetAuthenticationMode();
 
-			// Get authentication mode
-			string auth_mode = Util.get_setting("WindowsAuthentication", "0");
-			HttpCookie username_cookie = Request.Cookies["user"];
-			string previous_auth_mode = "0";
-			if (username_cookie != null)
-			{
-				previous_auth_mode = username_cookie["NTLM"];
-			}
-
-			// If an error occured, then force the authentication to manual
-			if (Request.QueryString["msg"] == null)
-			{
-				// If windows authentication only, then redirect
-				if (auth_mode == "1")
-				{
-					btnet.Util.redirect("loginNT.aspx", Request, Response);
-				}
-
-				// If previous login was with windows authentication, then try it again
-				if (previous_auth_mode == "1" && auth_mode == "2")
-				{
-					Response.Cookies["user"]["name"] = "";
-					Response.Cookies["user"]["NTLM"] = "0";
-					btnet.Util.redirect("loginNT.aspx", Request, Response);
-				}
-			}
-			else
-			{
-				if (Request.QueryString["msg"] != "logged off")
-				{
-					msg.InnerHtml = "Error during windows authentication:<br>"
-						+ HttpUtility.HtmlEncode(Request.QueryString["msg"]);
-				}
-			}
-
-
-			// fill in the username first time in
 			if (IsPostBack)
 			{
 				Login();
@@ -69,6 +34,7 @@ namespace BugTracker.Web
 
 		}
 
+		//Logs the user into the system
 		private void Login()
 		{
 
@@ -114,6 +80,45 @@ namespace BugTracker.Web
 				msg.InnerText = "Invalid User or Password.";
 			}
 
+		}
+
+		//Determines the authetication mode set in the App Settings and redirects if necessary
+		private void GetAuthenticationMode()
+        {
+			// Get authentication mode
+			string auth_mode = Util.get_setting("WindowsAuthentication", "0");
+			HttpCookie username_cookie = Request.Cookies["user"];
+			string previous_auth_mode = "0";
+			if (username_cookie != null)
+			{
+				previous_auth_mode = username_cookie["NTLM"];
+			}
+
+			// If an error occured, then force the authentication to manual
+			if (Request.QueryString["msg"] == null)
+			{
+				// If windows authentication only, then redirect
+				if (auth_mode == "1")
+				{
+					btnet.Util.redirect("loginNT.aspx", Request, Response);
+				}
+
+				// If previous login was with windows authentication, then try it again
+				if (previous_auth_mode == "1" && auth_mode == "2")
+				{
+					Response.Cookies["user"]["name"] = "";
+					Response.Cookies["user"]["NTLM"] = "0";
+					btnet.Util.redirect("loginNT.aspx", Request, Response);
+				}
+			}
+			else
+			{
+				if (Request.QueryString["msg"] != "logged off")
+				{
+					msg.InnerHtml = "Error during windows authentication:<br>"
+						+ HttpUtility.HtmlEncode(Request.QueryString["msg"]);
+				}
+			}
 		}
 	}
 }
