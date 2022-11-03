@@ -20,17 +20,16 @@ namespace BugTracker.Web
 
 			if (Util.get_setting("AllowSelfRegistration", "0") == "0")
 			{
-				Response.Write("Sorry, Web.config AllowSelfRegistration is set to 0");
-				Response.End();
+				Response.Redirect("Default.aspx");
 			}
 
 			if (!IsPostBack)
 			{
-				titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-					+ "register";
+				title.InnerText = String.Format("{0} - Register", Util.get_setting("AppTitle", "BugTracker.NET"));
 			}
 			else
 			{
+				//Resets all error message fields
 				msg.InnerHtml = "&nbsp;";
 				username_err.InnerHtml = "&nbsp;";
 				email_err.InnerHtml = "&nbsp;";
@@ -39,9 +38,9 @@ namespace BugTracker.Web
 				firstname_err.InnerHtml = "&nbsp;";
 				lastname_err.InnerHtml = "&nbsp;";
 
-				bool valid = validate();
+				bool isValid = validate();
 
-				if (!valid)
+				if (!isValid)
 				{
 					msg.InnerHtml = "Registration was not submitted.";
 				}
