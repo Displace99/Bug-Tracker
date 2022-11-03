@@ -25,36 +25,6 @@ namespace BugTracker.Web
 
 			msg.InnerText = "";
 
-			// see if the connection string works
-			try
-			{
-				// Intentionally getting an extra connection here so that we fall into the right "catch"
-				SqlConnection conn = btnet.DbUtil.get_sqlconnection();
-				conn.Close();
-
-				try
-				{
-					btnet.DbUtil.execute_nonquery("select count(1) from users");
-
-				}
-				catch (SqlException e1)
-				{
-					Util.write_to_log(e1.Message);
-					Util.write_to_log(Util.get_setting("ConnectionString", "?"));
-					msg.InnerHtml = "Unable to find \"bugs\" table.<br>"
-					+ "Please make sure the database is set up correctly</a>";
-				}
-
-			}
-			catch (SqlException e2)
-			{
-				msg.InnerHtml = "Unable to connect.<br>"
-				+ e2.Message + "<br>"
-				+ "Check Web.config file \"ConnectionString\" setting.<br>"
-				+ "Check also README.html<br>"
-				+ "Check also <a href=https://github.com/Displace99/Bug-Tracker/issues>Help Forum</a> on GitHub.";
-			}
-
 			// Get authentication mode
 			string auth_mode = Util.get_setting("WindowsAuthentication", "0");
 			HttpCookie username_cookie = Request.Cookies["user"];
