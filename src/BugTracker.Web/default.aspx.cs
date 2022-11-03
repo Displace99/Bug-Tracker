@@ -62,40 +62,14 @@ namespace BugTracker.Web
 
 
 			// fill in the username first time in
-			if (!IsPostBack)
+			if (IsPostBack)
 			{
-				if (previous_auth_mode == "0")
-				{
-					if ((Request.QueryString["user"] == null) || (Request.QueryString["password"] == null))
-					{
-						//	User name and password are not on the querystring.
-
-						if (username_cookie != null)
-						{
-							//	Set the user name from the last logon.
-
-							user.Value = username_cookie["name"];
-						}
-					}
-					else
-					{
-						//	User name and password have been passed on the querystring.
-
-						user.Value = Request.QueryString["user"];
-						pw.Value = Request.QueryString["password"];
-
-						on_logon();
-					}
-				}
-			}
-			else
-			{
-				on_logon();
+				Login();
 			}
 
 		}
 
-		private void on_logon()
+		private void Login()
 		{
 
 			string auth_mode = Util.get_setting("WindowsAuthentication", "0");
