@@ -20,8 +20,8 @@ namespace BugTracker.Web
 
 			Util.do_not_cache(Response);
 
-			titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-				+ "logon";
+			title.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
+				+ "Log in";
 
 			msg.InnerText = "";
 
