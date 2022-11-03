@@ -6,12 +6,15 @@ using System.Web.UI;
 using System.Data;
 using System.Data.SqlClient;
 using btnet;
+using BugTracker.Web.Services;
 
 namespace BugTracker.Web
 {
     public partial class @default : Page
     {
         string sql;
+		UserService userService = new UserService();
+		SignInService signInService = new SignInService();
 
 		protected void Page_Load(Object sender, EventArgs e)
 		{
@@ -47,37 +50,33 @@ namespace BugTracker.Web
 				}
 			}
 
-			bool authenticated = btnet.Authenticate.check_password(user.Value, pw.Value);
+			string userName = user.Value;
+			string password = pw.Value;
 
-			if (authenticated)
+			bool validCustomer = signInService.ValidateCustomer(userName, password);
+
+			if (validCustomer)
 			{
-				sql = "select us_id from users where us_username = N'$us'";
-				sql = sql.Replace("$us", user.Value.Replace("'", "''"));
-                DataRow dr = btnet.DbUtil.get_datarow(sql);
-				if (dr != null)
-				{
-					int us_id = (int)dr["us_id"];
+				var customerDataRow = userService.FindByUserName(userName);
+				int userId = (int)customerDataRow["us_id"];
+				
 
-					btnet.Security.create_session(
-						Request,
-						Response,
-						us_id,
-						user.Value,
-						"0");
+				btnet.Security.create_session(
+					Request,
+					Response,
+					userId,
+					userName,
+					"0");
 
-					btnet.Util.redirect(Request, Response);
-				}
-				else
-				{
-					// How could this happen?  If someday the authentication
-					// method uses, say LDAP, then check_password could return
-					// true, even though there's no user in the database";
-					msg.InnerText = "User not found in database";
-				}
+				btnet.Util.redirect(Request, Response);
+				
 			}
 			else
 			{
-				msg.InnerText = "Invalid User or Password.";
+				//This can also happen if someday the authentication
+				//method uses, say LDAP, then check_password could return
+				//true, even though there's no user in the database";
+				msg.InnerText = "Invalid Log in attempt.";
 			}
 
 		}
