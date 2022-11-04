@@ -7,8 +7,7 @@ pu_id int identity constraint pk_project_user_xref primary key not null,
 pu_project int not null,
 pu_user int not null,
 pu_auto_subscribe int not null default(0),
-/* 0=none, 1=view only, 2=edit, 3=reporter */
-pu_permission_level int not null default(2),
+pu_permission_level int not null default(2), -- 0=none, 1=view only, 2=edit, 3=reporter 
 pu_admin int not null default(0),
 )
 

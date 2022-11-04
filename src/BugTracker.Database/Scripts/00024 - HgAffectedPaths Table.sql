@@ -1,7 +1,7 @@
 ﻿IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[hg_affected_paths]') AND type in (N'U'))
 BEGIN
 
-/* Table holds information regarding Mercurial Source Control Management */
+-- Table holds information regarding Mercurial Source Control Management 
 CREATE TABLE hg_affected_paths
 (
 hgap_id int identity constraint pk_hg_affected_paths primary key nonclustered not null,
