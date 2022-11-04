@@ -7,7 +7,7 @@ og_id int identity constraint pk_orgs primary key not null,
 og_name nvarchar(80) not null,
 og_domain nvarchar(80),
 og_non_admins_can_use int not null default(0),
-og_external_user int not null default(0), /* external user can't view post marked internal */
+og_external_user int not null default(0), -- external user can't view post marked internal 
 og_can_be_assigned_to int not null default(1),
 og_can_only_see_own_reported int not null default(0),
 og_can_edit_sql int not null default(0),

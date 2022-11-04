@@ -1,7 +1,7 @@
 ﻿IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[hg_revisions]') AND type in (N'U'))
 BEGIN
 
-/* Table holds information regarding Mercurial Source Control Management */
+-- Table holds information regarding Mercurial Source Control Management 
 CREATE TABLE hg_revisions
 (
 hgrev_id int identity constraint pk_hg_revisions primary key nonclustered not null,

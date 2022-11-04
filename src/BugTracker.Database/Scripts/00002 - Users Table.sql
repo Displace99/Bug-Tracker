@@ -26,8 +26,7 @@ us_subscribed_notifications int not null default(4),
 us_signature nvarchar(1000) null,
 us_use_fckeditor int not null default(0),
 us_enable_bug_list_popups int not null default(1),
-/* who created this user */
-us_created_user int not null default(1),
+us_created_user int not null default(1), -- who created this user
 us_org int not null default(1),
 us_most_recent_login_datetime datetime null
 )
