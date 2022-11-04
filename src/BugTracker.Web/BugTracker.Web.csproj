@@ -1329,6 +1329,7 @@
     </Compile>
     <Compile Include="Services\EncryptionService.cs" />
     <Compile Include="Services\SignInService.cs" />
+    <Compile Include="Services\UserRegistrationResult.cs" />
     <Compile Include="Services\UserService.cs" />
     <Compile Include="statuses.aspx.cs">
       <DependentUpon>statuses.aspx</DependentUpon>
