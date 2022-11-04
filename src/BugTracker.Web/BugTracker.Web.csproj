@@ -1186,6 +1186,8 @@
     </Compile>
     <Compile Include="Models\ProjectBugVM.cs" />
     <Compile Include="Models\ProjectVM.cs" />
+    <Compile Include="Models\RegisterVM.cs" />
+    <Compile Include="Models\Registration\RegisteredUser.cs" />
     <Compile Include="notifications.aspx.cs">
       <DependentUpon>notifications.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1327,6 +1329,9 @@
       <DependentUpon>server_variables.aspx</DependentUpon>
     </Compile>
     <Compile Include="Services\EncryptionService.cs" />
+    <Compile Include="Services\SignInService.cs" />
+    <Compile Include="Services\UserRegistrationResult.cs" />
+    <Compile Include="Services\UserService.cs" />
     <Compile Include="statuses.aspx.cs">
       <DependentUpon>statuses.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

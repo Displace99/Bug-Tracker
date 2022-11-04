@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Models;
 using BugTracker.Web.Services;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace BugTracker.Web
 {
     public partial class register : Page
     {
+		SignInService signInService = new SignInService();
+
 		void Page_Load(Object sender, EventArgs e)
 		{
 
@@ -20,17 +23,16 @@ namespace BugTracker.Web
 
 			if (Util.get_setting("AllowSelfRegistration", "0") == "0")
 			{
-				Response.Write("Sorry, Web.config AllowSelfRegistration is set to 0");
-				Response.End();
+				Response.Redirect("Default.aspx");
 			}
 
 			if (!IsPostBack)
 			{
-				titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-					+ "register";
+				title.InnerText = String.Format("{0} - Register", Util.get_setting("AppTitle", "BugTracker.NET"));
 			}
 			else
 			{
+				//Resets all error message fields
 				msg.InnerHtml = "&nbsp;";
 				username_err.InnerHtml = "&nbsp;";
 				email_err.InnerHtml = "&nbsp;";
@@ -39,62 +41,53 @@ namespace BugTracker.Web
 				firstname_err.InnerHtml = "&nbsp;";
 				lastname_err.InnerHtml = "&nbsp;";
 
-				bool valid = validate();
+				bool isValid = ValidateForm();
 
-				if (!valid)
+				if (!isValid)
 				{
 					msg.InnerHtml = "Registration was not submitted.";
 				}
 				else
 				{
-					string guid = Guid.NewGuid().ToString();
+					
+					RegisterVM model = new RegisterVM
+					{
+						UserName = username.Value,
+						Email = email.Value,
+						Password = password.Value,
+						FirstName = firstname.Value,
+						LastName = lastname.Value
+					};
 
-					string salt = Util.GenerateRandomString();
-					string hashedPassword = EncryptionService.HashString(password.Value, Convert.ToString(salt));
+					var registrationResult = signInService.RegisterUser(model);
 
-					StringBuilder sql = new StringBuilder();
-					sql.Append("insert into emailed_links ");
-					sql.Append("(el_id, el_date, el_email, el_action, el_username, el_salt, el_password, el_firstname, el_lastname) ");
-					sql.Append("values (@Id, getdate(), @email, @register, @username, @salt, @password, @firstname, @lastname)");
+					if (registrationResult.Success)
+					{
+						msg.InnerHtml = "An email has been sent to " + email.Value;
+						msg.InnerHtml += "<br>Please click on the link in the email message to complete registration.";
+					}
+                    else
+                    {
+						StringBuilder errorMessages = new StringBuilder();
 
-					SqlCommand cmd = new SqlCommand();
-					cmd.CommandText = sql.ToString();
-					cmd.Parameters.AddWithValue("@Id", guid);
-					cmd.Parameters.AddWithValue("@email", email.Value);
-					cmd.Parameters.AddWithValue("@register", "register");
-					cmd.Parameters.AddWithValue("@username", username.Value);
-					cmd.Parameters.AddWithValue("@salt", salt);
-					cmd.Parameters.AddWithValue("@password", hashedPassword);
-					cmd.Parameters.AddWithValue("@firstname", firstname.Value);
-					cmd.Parameters.AddWithValue("@lastname", lastname.Value);
+						foreach(var error in registrationResult.Errors)
+                        {
+							errorMessages.AppendLine(error);	
+                        }
 
-					btnet.DbUtil.execute_nonquery(cmd);
-
-					string result = btnet.Email.send_email(
-						email.Value,
-						Util.get_setting("NotificationEmailFrom", ""),
-						"", // cc
-						"Please complete registration",
-
-						"Click to <a href='"
-							+ Util.get_setting("AbsoluteUrlPrefix", "")
-							+ "complete_registration.aspx?id="
-							+ guid
-							+ "'>complete registration</a>.",
-
-						BtnetMailFormat.Html);
-
-					msg.InnerHtml = "An email has been sent to " + email.Value;
-					msg.InnerHtml += "<br>Please click on the link in the email message to complete registration.";
-
+						msg.InnerHtml = errorMessages.ToString();
+                    }
 				}
 			}
 		}
 
-		///////////////////////////////////////////////////////////////////////
-		bool validate()
-		{
 
+		/// <summary>
+		/// Validates the properties on the form
+		/// </summary>
+		/// <returns></returns>
+		private bool ValidateForm()
+		{
 			bool valid = true;
 
 			if (username.Value == "")
@@ -154,50 +147,6 @@ namespace BugTracker.Web
 				lastname_err.InnerText = "Lastname is required.";
 				valid = false;
 			}
-
-			// check for dupes
-
-
-
-			string sql = @"
-				declare @user_cnt int
-				declare @email_cnt int
-				declare @pending_user_cnt int
-				declare @pending_email_cnt int
-				select @user_cnt = count(1) from users where us_username = N'$us'
-				select @email_cnt = count(1) from users where us_email = N'$em'
-				select @pending_user_cnt = count(1) from emailed_links where el_username = N'$us'
-				select @pending_email_cnt = count(1) from emailed_links where el_email = N'$em'
-				select @user_cnt, @email_cnt, @pending_user_cnt, @pending_email_cnt";
-			sql = sql.Replace("$us", username.Value.Replace("'", "''"));
-			sql = sql.Replace("$em", email.Value.Replace("'", "''"));
-
-			DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-			if ((int)dr[0] > 0)
-			{
-				username_err.InnerText = "Username already being used. Choose another.";
-				valid = false;
-			}
-
-			if ((int)dr[1] > 0)
-			{
-				email_err.InnerText = "Email already being used. Choose another.";
-				valid = false;
-			}
-
-			if ((int)dr[2] > 0)
-			{
-				username_err.InnerText = "Registration pending for this username. Choose another.";
-				valid = false;
-			}
-
-			if ((int)dr[3] > 0)
-			{
-				email_err.InnerText = "Registration pending for this email. Choose another.";
-				valid = false;
-			}
-
 
 			return valid;
 		}
