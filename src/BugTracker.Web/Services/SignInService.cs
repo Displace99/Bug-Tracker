@@ -132,7 +132,11 @@ namespace BugTracker.Web.Services
             DbUtil.execute_nonquery(cmd);
         }
 
-        public void RemoveSessionFromDatabase(string sessionId)
+        /// <summary>
+        /// Removes the session information from the database
+        /// </summary>
+        /// <param name="sessionId"></param>
+        public void RemoveSession(string sessionId)
         {
             string sql = @"delete from sessions	where se_id = @sessionId or datediff(d, se_date, getdate()) > 2";
             SqlCommand cmd = new SqlCommand();
