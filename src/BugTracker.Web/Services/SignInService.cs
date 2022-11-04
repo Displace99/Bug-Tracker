@@ -12,12 +12,12 @@ namespace BugTracker.Web.Services
 {
     public class SignInService
     {
-        public UserService userService = new UserService();
+        private UserService _userService = new UserService();
 
         public bool ValidateCustomer(string userName, string password)
         {
             //Checks to see if the user exists. If not return false
-            DataRow dr = userService.GetUserByUserName(userName);
+            DataRow dr = _userService.GetUserByUserName(userName);
 
             if(dr == null)
             {
@@ -33,21 +33,22 @@ namespace BugTracker.Web.Services
             var result = new UserRegistrationResult();
 
             //Validate unique user
-            //TODO: Currently if the user has registered, but not confirmed, there is no way to get the confirmation email to resend.
-            if (userService.GetUserByEmail(model.Email) != null || userService.GetPendingUserByEmail(model.Email) != null)
+            //Currently if the user has registered, but not confirmed, there is no way to get the confirmation email to resend.
+            //They will need to wait the configured number of minutes until the link expires
+            if (_userService.GetUserByEmail(model.Email) != null || _userService.GetPendingUserByEmail(model.Email) != null)
             {
                 result.AddError("Email is already registered.");
                 return result;
             }
 
-            if (userService.GetUserByUserName(model.UserName) != null || userService.GetPendingUserByUserName(model.UserName) != null)
+            if (_userService.GetUserByUserName(model.UserName) != null || _userService.GetPendingUserByUserName(model.UserName) != null)
             {
                 result.AddError("Username is already taken.");
                 return result;
             }
 
             //At this point everything is valid
-            string registrationCode = userService.AddRegisteredUser(model);
+            string registrationCode = _userService.AddRegisteredUser(model);
 
             Email.send_email(
                 model.Email,
@@ -101,7 +102,7 @@ namespace BugTracker.Web.Services
 
         public void AddConfirmedUser(string linkId)
         {
-            var registeredUser = userService.GetRegisteredUser(linkId);
+            var registeredUser = _userService.GetRegisteredUser(linkId);
 
             if (registeredUser != null)
             {
