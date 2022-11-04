@@ -28,44 +28,42 @@ namespace BugTracker.Web.Services
             return btnet.Authenticate.check_password(userName, password);
         }
 
-        public void RegisterUser(RegisterVM model)
+        public UserRegistrationResult RegisterUser(RegisterVM model)
         {
-			string guid = Guid.NewGuid().ToString();
+            var result = new UserRegistrationResult();
 
-			string salt = Util.GenerateRandomString();
-			string hashedPassword = EncryptionService.HashString(model.Password, Convert.ToString(salt));
+            //Validate unique user
+            //TODO: Currently if the user has registered, but not confirmed, there is no way to get the confirmation email to resend.
+            if (userService.GetUserByEmail(model.Email) != null || userService.GetPendingUserByEmail(model.Email) != null)
+            {
+                result.AddError("Email is already registered.");
+                return result;
+            }
 
-			StringBuilder sql = new StringBuilder();
-			sql.Append("insert into emailed_links ");
-			sql.Append("(el_id, el_date, el_email, el_action, el_username, el_salt, el_password, el_firstname, el_lastname) ");
-			sql.Append("values (@Id, getdate(), @email, @register, @username, @salt, @password, @firstname, @lastname)");
+            if (userService.GetUserByUserName(model.UserName) != null || userService.GetPendingUserByUserName(model.UserName) != null)
+            {
+                result.AddError("Username is already taken.");
+                return result;
+            }
 
-			SqlCommand cmd = new SqlCommand();
-			cmd.CommandText = sql.ToString();
-			cmd.Parameters.AddWithValue("@Id", guid);
-			cmd.Parameters.AddWithValue("@email", model.Email);
-			cmd.Parameters.AddWithValue("@register", "register");
-			cmd.Parameters.AddWithValue("@username", model.UserName);
-			cmd.Parameters.AddWithValue("@salt", salt);
-			cmd.Parameters.AddWithValue("@password", hashedPassword);
-			cmd.Parameters.AddWithValue("@firstname", model.FirstName);
-			cmd.Parameters.AddWithValue("@lastname", model.LastName);
+            //At this point everything is valid
+            string registrationCode = userService.AddRegisteredUser(model);
 
-			DbUtil.execute_nonquery(cmd);
+            Email.send_email(
+                model.Email,
+                Util.get_setting("NotificationEmailFrom", ""),
+                "", // cc
+                "Please complete registration",
 
-			Email.send_email(
-				model.Email,
-				Util.get_setting("NotificationEmailFrom", ""),
-				"", // cc
-				"Please complete registration",
+                "Click to <a href='"
+                    + Util.get_setting("AbsoluteUrlPrefix", "")
+                    + "complete_registration.aspx?id="
+                    + registrationCode
+                    + "'>complete registration</a>.",
 
-				"Click to <a href='"
-					+ Util.get_setting("AbsoluteUrlPrefix", "")
-					+ "complete_registration.aspx?id="
-					+ guid
-					+ "'>complete registration</a>.",
+                BtnetMailFormat.Html);
 
-				BtnetMailFormat.Html);
-		}
+            return result;
+        }
     }
 }
