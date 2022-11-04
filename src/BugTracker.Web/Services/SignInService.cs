@@ -65,5 +65,71 @@ namespace BugTracker.Web.Services
 
             return result;
         }
+
+        /// <summary>
+        /// Checks to see if the registration link is valid
+        /// </summary>
+        /// <param name="linkId">Id of the registration link</param>
+        /// <returns>True if it there is a record and it is not expired, otherwise returns false</returns>
+        public bool IsRegistrationLinkValid(string linkId)
+        {
+            bool isValid = true;
+
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("declare @expiration datetime");
+            sql.AppendLine("set @expiration = dateadd(n,-@minutes,getdate())");
+            sql.AppendLine("select *, case when el_date < @expiration then 1 else 0 end[expired]");
+            sql.AppendLine("from emailed_links where el_id = @linkId");
+            sql.AppendLine("delete from emailed_links where el_date < dateadd(n, -240, getdate())");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            cmd.Parameters.AddWithValue("@minutes", int.Parse(Util.get_setting("RegistrationExpiration", "20")));
+            cmd.Parameters.AddWithValue("@linkId", linkId);
+
+            DataRow dr = DbUtil.get_datarow(cmd);
+
+            if (dr == null || (int)dr["expired"] == 1)
+            {
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+
+        public void AddConfirmedUser(string linkId)
+        {
+            var registeredUser = userService.GetRegisteredUser(linkId);
+
+            if (registeredUser != null)
+            {
+                //Copy the user from the registration table to the Users table
+                User.copy_user(
+                        registeredUser.UserName,
+                        registeredUser.Email,
+                        registeredUser.FirstName,
+                        registeredUser.LastName,
+                        "",
+                        registeredUser.Salt,
+                        registeredUser.Password,
+                        Util.get_setting("SelfRegisteredUserTemplate", "[error - missing user template]"),
+                        false);
+
+                DeleteRegisteredUser(linkId);
+            }
+        }
+
+        public void DeleteRegisteredUser(string linkId)
+        {
+            string sql = @"delete from emailed_links where el_id = @linkId";
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql;
+            cmd.Parameters.AddWithValue("@linkId", linkId);
+            
+            DbUtil.execute_nonquery(cmd);
+        }
     }
 }
