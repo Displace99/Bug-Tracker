@@ -57,7 +57,7 @@ namespace BugTracker.Web
 
 			if (validCustomer)
 			{
-				var customerDataRow = userService.FindByUserName(userName);
+				var customerDataRow = userService.GetUserByUserName(userName);
 				int userId = (int)customerDataRow["us_id"];
 				
 

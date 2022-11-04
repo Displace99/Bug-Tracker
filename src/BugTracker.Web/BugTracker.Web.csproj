@@ -1186,6 +1186,7 @@
     </Compile>
     <Compile Include="Models\ProjectBugVM.cs" />
     <Compile Include="Models\ProjectVM.cs" />
+    <Compile Include="Models\RegisterVM.cs" />
     <Compile Include="notifications.aspx.cs">
       <DependentUpon>notifications.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

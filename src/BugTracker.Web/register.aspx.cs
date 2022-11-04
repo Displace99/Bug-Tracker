@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Models;
 using BugTracker.Web.Services;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace BugTracker.Web
 {
     public partial class register : Page
     {
+		SignInService signInService = new SignInService();
+
 		void Page_Load(Object sender, EventArgs e)
 		{
 
@@ -46,42 +49,16 @@ namespace BugTracker.Web
 				}
 				else
 				{
-					string guid = Guid.NewGuid().ToString();
+					RegisterVM model = new RegisterVM
+					{
+						UserName = username.Value,
+						Email = email.Value,
+						Password = password.Value,
+						FirstName = firstname.Value,
+						LastName = lastname.Value
+					};
 
-					string salt = Util.GenerateRandomString();
-					string hashedPassword = EncryptionService.HashString(password.Value, Convert.ToString(salt));
-
-					StringBuilder sql = new StringBuilder();
-					sql.Append("insert into emailed_links ");
-					sql.Append("(el_id, el_date, el_email, el_action, el_username, el_salt, el_password, el_firstname, el_lastname) ");
-					sql.Append("values (@Id, getdate(), @email, @register, @username, @salt, @password, @firstname, @lastname)");
-
-					SqlCommand cmd = new SqlCommand();
-					cmd.CommandText = sql.ToString();
-					cmd.Parameters.AddWithValue("@Id", guid);
-					cmd.Parameters.AddWithValue("@email", email.Value);
-					cmd.Parameters.AddWithValue("@register", "register");
-					cmd.Parameters.AddWithValue("@username", username.Value);
-					cmd.Parameters.AddWithValue("@salt", salt);
-					cmd.Parameters.AddWithValue("@password", hashedPassword);
-					cmd.Parameters.AddWithValue("@firstname", firstname.Value);
-					cmd.Parameters.AddWithValue("@lastname", lastname.Value);
-
-					btnet.DbUtil.execute_nonquery(cmd);
-
-					string result = btnet.Email.send_email(
-						email.Value,
-						Util.get_setting("NotificationEmailFrom", ""),
-						"", // cc
-						"Please complete registration",
-
-						"Click to <a href='"
-							+ Util.get_setting("AbsoluteUrlPrefix", "")
-							+ "complete_registration.aspx?id="
-							+ guid
-							+ "'>complete registration</a>.",
-
-						BtnetMailFormat.Html);
+					signInService.RegisterUser(model);
 
 					msg.InnerHtml = "An email has been sent to " + email.Value;
 					msg.InnerHtml += "<br>Please click on the link in the email message to complete registration.";
