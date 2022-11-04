@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
-using System.Data;
-using System.Data.SqlClient;
 using btnet;
 using BugTracker.Web.Services;
 
@@ -12,7 +8,6 @@ namespace BugTracker.Web
 {
     public partial class @default : Page
     {
-        string sql;
 		UserService userService = new UserService();
 		SignInService signInService = new SignInService();
 
