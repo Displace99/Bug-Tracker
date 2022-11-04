@@ -1,8 +1,11 @@
-﻿using System;
+﻿using btnet;
+using BugTracker.Web.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace BugTracker.Web.Services
@@ -64,13 +67,46 @@ namespace BugTracker.Web.Services
         /// <returns></returns>
         public DataRow GetPendingUserByEmail(string email)
         {
-            string sql = "select @pending_email_cnt = count(1) from emailed_links where el_email = @email";
+            string sql = "select el_id from emailed_links where el_email = @email";
             
             SqlCommand cmd = new SqlCommand();
             cmd.CommandText = sql;
             cmd.Parameters.AddWithValue("@email", email);
 
             return btnet.DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
+        /// Adds a user to the Registration Table
+        /// </summary>
+        /// <param name="model">Registered User</param>
+        /// <returns>Id from the registration table</returns>
+        public string AddRegisteredUser(RegisterVM model)
+        {
+            string guid = Guid.NewGuid().ToString();
+
+            string salt = Util.GenerateRandomString();
+            string hashedPassword = EncryptionService.HashString(model.Password, Convert.ToString(salt));
+
+            StringBuilder sql = new StringBuilder();
+            sql.Append("insert into emailed_links ");
+            sql.Append("(el_id, el_date, el_email, el_action, el_username, el_salt, el_password, el_firstname, el_lastname) ");
+            sql.Append("values (@Id, getdate(), @email, @register, @username, @salt, @password, @firstname, @lastname)");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+            cmd.Parameters.AddWithValue("@Id", guid);
+            cmd.Parameters.AddWithValue("@email", model.Email);
+            cmd.Parameters.AddWithValue("@register", "register");
+            cmd.Parameters.AddWithValue("@username", model.UserName);
+            cmd.Parameters.AddWithValue("@salt", salt);
+            cmd.Parameters.AddWithValue("@password", hashedPassword);
+            cmd.Parameters.AddWithValue("@firstname", model.FirstName);
+            cmd.Parameters.AddWithValue("@lastname", model.LastName);
+
+            DbUtil.execute_nonquery(cmd);
+
+            return guid;
         }
     }
 }
