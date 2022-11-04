@@ -41,7 +41,7 @@ namespace BugTracker.Web
 				firstname_err.InnerHtml = "&nbsp;";
 				lastname_err.InnerHtml = "&nbsp;";
 
-				bool isValid = validate();
+				bool isValid = ValidateForm();
 
 				if (!isValid)
 				{
@@ -49,6 +49,7 @@ namespace BugTracker.Web
 				}
 				else
 				{
+					
 					RegisterVM model = new RegisterVM
 					{
 						UserName = username.Value,
@@ -58,19 +59,35 @@ namespace BugTracker.Web
 						LastName = lastname.Value
 					};
 
-					signInService.RegisterUser(model);
+					var registrationResult = signInService.RegisterUser(model);
 
-					msg.InnerHtml = "An email has been sent to " + email.Value;
-					msg.InnerHtml += "<br>Please click on the link in the email message to complete registration.";
+					if (registrationResult.Success)
+					{
+						msg.InnerHtml = "An email has been sent to " + email.Value;
+						msg.InnerHtml += "<br>Please click on the link in the email message to complete registration.";
+					}
+                    else
+                    {
+						StringBuilder errorMessages = new StringBuilder();
 
+						foreach(var error in registrationResult.Errors)
+                        {
+							errorMessages.AppendLine(error);	
+                        }
+
+						msg.InnerHtml = errorMessages.ToString();
+                    }
 				}
 			}
 		}
 
-		///////////////////////////////////////////////////////////////////////
-		bool validate()
-		{
 
+		/// <summary>
+		/// Validates the properties on the form
+		/// </summary>
+		/// <returns></returns>
+		private bool ValidateForm()
+		{
 			bool valid = true;
 
 			if (username.Value == "")
@@ -130,50 +147,6 @@ namespace BugTracker.Web
 				lastname_err.InnerText = "Lastname is required.";
 				valid = false;
 			}
-
-			// check for dupes
-
-
-
-			string sql = @"
-				declare @user_cnt int
-				declare @email_cnt int
-				declare @pending_user_cnt int
-				declare @pending_email_cnt int
-				select @user_cnt = count(1) from users where us_username = N'$us'
-				select @email_cnt = count(1) from users where us_email = N'$em'
-				select @pending_user_cnt = count(1) from emailed_links where el_username = N'$us'
-				select @pending_email_cnt = count(1) from emailed_links where el_email = N'$em'
-				select @user_cnt, @email_cnt, @pending_user_cnt, @pending_email_cnt";
-			sql = sql.Replace("$us", username.Value.Replace("'", "''"));
-			sql = sql.Replace("$em", email.Value.Replace("'", "''"));
-
-			DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-			if ((int)dr[0] > 0)
-			{
-				username_err.InnerText = "Username already being used. Choose another.";
-				valid = false;
-			}
-
-			if ((int)dr[1] > 0)
-			{
-				email_err.InnerText = "Email already being used. Choose another.";
-				valid = false;
-			}
-
-			if ((int)dr[2] > 0)
-			{
-				username_err.InnerText = "Registration pending for this username. Choose another.";
-				valid = false;
-			}
-
-			if ((int)dr[3] > 0)
-			{
-				email_err.InnerText = "Registration pending for this email. Choose another.";
-				valid = false;
-			}
-
 
 			return valid;
 		}
