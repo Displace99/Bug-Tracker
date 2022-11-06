@@ -20,8 +20,7 @@ namespace BugTracker.Web
 			security = new Security();
 			security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
-			titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-				+ "admin";
+			title.InnerText = String.Format("{0} - admin", Util.get_setting("AppTitle", "BugTracker.NET")); 
 
 			if (false) // change this to if(true) to make the donation nag message go away
 			{
