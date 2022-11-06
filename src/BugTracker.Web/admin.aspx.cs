@@ -7,7 +7,7 @@ namespace BugTracker.Web
 {
     public partial class admin : Page
     {
-		public Security security;
+		protected Security security;
 
 		void Page_Load(Object sender, EventArgs e)
 		{
