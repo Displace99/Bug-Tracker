@@ -3,43 +3,7 @@
 Copyright 2002-2011 Corey Trager
 Distributed under the terms of the GNU General Public License
 -->
-<!-- #include file = "inc.aspx" -->
 
-
-<script language="C#" runat="server">
-
-
-Security security;
-bool nag = false;
-
-///////////////////////////////////////////////////////////////////////
-void Page_Load(Object sender, EventArgs e)
-{
-
-	Util.do_not_cache(Response);
-	
-	security = new Security();
-	security.check_security( HttpContext.Current, Security.MUST_BE_ADMIN);
-
-	titl.InnerText = Util.get_setting("AppTitle","BugTracker.NET") + " - "
-		+ "admin";
-		
-	if (false) // change this to if(true) to make the donation nag message go away
-	{
-	
-	}
-	else
-	{
-		int bugs = Convert.ToInt32(btnet.DbUtil.execute_scalar("select count(1) from bugs"));
-		if (bugs > 100)
-		{
-			nag = true;
-		}
-	}
-}
-
-
-</script>
 
 <html>
 <head>
