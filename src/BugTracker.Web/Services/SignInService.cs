@@ -133,6 +133,16 @@ namespace BugTracker.Web.Services
             DbUtil.execute_nonquery(cmd);
         }
 
+        public void DeleteLinksOverFourHours()
+        {
+            string sql = "DELETE FROM emailed_links WHERE el_date < dateadd(n,-240,getdate())";
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql;
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
         /// <summary>
         /// Removes the session information from the database
         /// </summary>
@@ -146,6 +156,18 @@ namespace BugTracker.Web.Services
             cmd.Parameters.AddWithValue("@sessionId", sessionId);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        public void ResetUsersPassword(string linkId, string password)
+        {
+            var registeredUser = _userService.GetPasswordResetUser(linkId);
+
+            if (registeredUser != null)
+            {
+                Util.UpdateUserPassword(registeredUser.UserId.Value, password);
+
+                DeleteRegisteredUser(linkId);
+            }
         }
     }
 }

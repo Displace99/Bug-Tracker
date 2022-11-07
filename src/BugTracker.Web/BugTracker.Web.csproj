@@ -1188,6 +1188,7 @@
     <Compile Include="Models\ProjectVM.cs" />
     <Compile Include="Models\RegisterVM.cs" />
     <Compile Include="Models\Registration\RegisteredUser.cs" />
+    <Compile Include="Models\User\PasswordResetUser.cs" />
     <Compile Include="notifications.aspx.cs">
       <DependentUpon>notifications.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
