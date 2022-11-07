@@ -1,6 +1,7 @@
 ﻿using btnet;
 using BugTracker.Web.Models;
 using BugTracker.Web.Models.Registration;
+using BugTracker.Web.Models.User;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -143,6 +144,36 @@ namespace BugTracker.Web.Services
 
             return user;
         }
-        
+
+        public RegisteredUser GetPasswordResetUser(string linkId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("declare @expiration datetime");
+            sql.AppendLine("set @expiration = dateadd(n,-@minutes,getdate())");
+            sql.AppendLine("select * from emailed_links where @expiration < el_date AND el_id = @linkId");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            cmd.Parameters.AddWithValue("@minutes", int.Parse(Util.get_setting("RegistrationExpiration", "20")));
+            cmd.Parameters.AddWithValue("@linkId", linkId);
+
+            DataRow dr = DbUtil.get_datarow(cmd);
+
+            RegisteredUser user = null;
+
+            if (dr != null)
+            {
+                user = new RegisteredUser();
+
+                user.Id = linkId;
+                user.Email = (string)dr["el_email"];
+                user.UserId = (int)dr["el_user_id"];
+
+            }
+
+            return user;
+        }
+
     }
 }
