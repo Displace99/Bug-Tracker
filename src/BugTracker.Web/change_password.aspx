@@ -6,7 +6,7 @@ Distributed under the terms of the GNU General Public License
 
 <html>
 <head>
-	<title id="titl" runat="server">btnet change password</title>
+	<title id="title" runat="server">btnet change password</title>
 	<link rel="StyleSheet" href="btnet.css" type="text/css">
 </head>
 <body onload="document.forms[0].password.focus()">

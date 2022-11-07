@@ -17,8 +17,7 @@ namespace BugTracker.Web
 
 			if (!IsPostBack)
 			{
-				titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-					+ "change password";
+				title.InnerText = String.Format("{0} - Change Password", Util.get_setting("AppTitle", "BugTracker.NET"));
 			}
 			else
 			{
