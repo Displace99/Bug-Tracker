@@ -113,18 +113,7 @@ namespace BugTracker.Web.Services
 
         public RegisteredUser GetRegisteredUser(string linkId)
         {
-            StringBuilder sql = new StringBuilder();
-            sql.AppendLine("declare @expiration datetime");
-            sql.AppendLine("set @expiration = dateadd(n,-@minutes,getdate())");
-            sql.AppendLine("select * from emailed_links where @expiration < el_date AND el_id = @linkId");
-
-            SqlCommand cmd = new SqlCommand();
-            cmd.CommandText = sql.ToString();
-
-            cmd.Parameters.AddWithValue("@minutes", int.Parse(Util.get_setting("RegistrationExpiration", "20")));
-            cmd.Parameters.AddWithValue("@linkId", linkId);
-
-            DataRow dr = DbUtil.get_datarow(cmd);
+            var dr = GetEmailedLink(linkId);
 
             RegisteredUser user = null;
 
@@ -147,18 +136,7 @@ namespace BugTracker.Web.Services
 
         public RegisteredUser GetPasswordResetUser(string linkId)
         {
-            StringBuilder sql = new StringBuilder();
-            sql.AppendLine("declare @expiration datetime");
-            sql.AppendLine("set @expiration = dateadd(n,-@minutes,getdate())");
-            sql.AppendLine("select * from emailed_links where @expiration < el_date AND el_id = @linkId");
-
-            SqlCommand cmd = new SqlCommand();
-            cmd.CommandText = sql.ToString();
-
-            cmd.Parameters.AddWithValue("@minutes", int.Parse(Util.get_setting("RegistrationExpiration", "20")));
-            cmd.Parameters.AddWithValue("@linkId", linkId);
-
-            DataRow dr = DbUtil.get_datarow(cmd);
+            var dr = GetEmailedLink(linkId);
 
             RegisteredUser user = null;
 
@@ -173,6 +151,22 @@ namespace BugTracker.Web.Services
             }
 
             return user;
+        }
+
+        private DataRow GetEmailedLink(string linkId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("declare @expiration datetime");
+            sql.AppendLine("set @expiration = dateadd(n,-@minutes,getdate())");
+            sql.AppendLine("select * from emailed_links where @expiration < el_date AND el_id = @linkId");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            cmd.Parameters.AddWithValue("@minutes", int.Parse(Util.get_setting("RegistrationExpiration", "20")));
+            cmd.Parameters.AddWithValue("@linkId", linkId);
+
+            return DbUtil.get_datarow(cmd);
         }
 
     }
