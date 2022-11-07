@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -9,6 +10,8 @@ namespace BugTracker.Web
 {
     public partial class change_password : Page
     {
+		private SignInService _signInService = new SignInService();
+
 		void Page_Load(Object sender, EventArgs e)
 		{
 
@@ -23,67 +26,55 @@ namespace BugTracker.Web
 			{
 				msg.InnerHtml = "";
 
-				if (string.IsNullOrEmpty(password.Value))
-				{
-					msg.InnerHtml = "Enter your password twice.";
-				}
-				else if (password.Value != confirm.Value)
-				{
-					msg.InnerHtml = "Re-entered password doesn't match password.";
-				}
-				else if (!Util.check_password_strength(password.Value))
-				{
-					msg.InnerHtml = "Password is not difficult enough to guess.";
-					msg.InnerHtml += "<br>Avoid common words.";
-					msg.InnerHtml += "<br>Try using a mixture of lowercase, uppercase, digits, and special characters.";
-				}
-				else
-				{
+				bool isValid = ValidateForm();
 
+				if (isValid)
+				{
+					string linkId = Request["id"];
 
-					string guid = Request["id"];
-
-					if (string.IsNullOrEmpty(guid))
+					if (string.IsNullOrEmpty(linkId))
 					{
 						msg.InnerHtml = "The change password link is invalid. Please request a new Password Reset.";
 						return;
 					}
 
-					StringBuilder sqlText = new StringBuilder();
-					sqlText.AppendLine("declare @expiration datetime");
-					sqlText.AppendLine("set @expiration = dateadd(n,-@minutes,getdate())");
-					sqlText.AppendLine("select *, case when el_date < @expiration then 1 else 0 end[expired] from emailed_links	where el_id = @linkId");
-					
-					//TODO: This should be a separate process. Nightly job or something. Or we delete the row upon successful completion of the password reset.
-					sqlText.AppendLine("delete from emailed_links where el_date < dateadd(n,-240,getdate())");
-
-					int expirationMinutes = Int32.Parse(Util.get_setting("RegistrationExpiration", "20"));
-
-					SqlCommand cmd = new SqlCommand();
-					cmd.CommandText = sqlText.ToString();
-					cmd.Parameters.AddWithValue("@minutes", expirationMinutes);
-					cmd.Parameters.AddWithValue("@linkId", guid);
-
-					DataRow dr = DbUtil.get_datarow(cmd);
-
-					// DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-					if (dr == null)
-					{
-						msg.InnerHtml = "The link you clicked on is expired or invalid.<br>Please start over again.";
-					}
-					else if ((int)dr["expired"] == 1)
-					{
-						msg.InnerHtml = "The link you clicked has expired.<br>Please start over again.";
+                    if (_signInService.IsRegistrationLinkValid(linkId))
+                    {
+						_signInService.ResetUsersPassword(linkId, password.Value);
+						
+						msg.InnerHtml = "Your password has been changed.";
 					}
 					else
 					{
-						Util.UpdateUserPassword((int)dr["el_user_id"], password.Value);
-						msg.InnerHtml = "Your password has been changed.";
+						msg.InnerHtml = "The change password link is invalid. Please request a new Password Reset.";
 					}
-
 				}
 			}
+		}
+
+		public bool ValidateForm()
+        {
+			bool valid = true;
+
+			if (string.IsNullOrEmpty(password.Value))
+			{
+				msg.InnerHtml = "Enter your password twice.";
+				valid = false;
+			}
+			else if (password.Value != confirm.Value)
+			{
+				msg.InnerHtml = "Re-entered password doesn't match password.";
+				valid = false;
+			}
+			else if (!Util.check_password_strength(password.Value))
+			{
+				msg.InnerHtml = "Password is not difficult enough to guess.";
+				msg.InnerHtml += "<br>Avoid common words.";
+				msg.InnerHtml += "<br>Try using a mixture of lowercase, uppercase, digits, and special characters.";
+				valid = false;
+			}
+
+			return valid;
 		}
 	}
 }
