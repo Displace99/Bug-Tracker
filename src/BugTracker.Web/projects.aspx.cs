@@ -21,8 +21,7 @@ namespace BugTracker.Web
 			security = new Security();
 			security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
-			titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-				+ "projects";
+			title.InnerText = String.Format("{0} - Projects", Util.get_setting("AppTitle", "BugTracker.NET"));
 
 			ds = _projectService.GetAllProjectList();
 		}

@@ -9,7 +9,7 @@ Distributed under the terms of the GNU General Public License
 
 <html lang="en">
 	<head>
-		<title id="titl" runat="server">btnet projects</title>
+		<title id="title" runat="server">btnet projects</title>
 		<link rel="StyleSheet" href="btnet.css" type="text/css">
 		<script type="text/javascript" language="JavaScript" src="sortable.js"></script>
 	</head>
