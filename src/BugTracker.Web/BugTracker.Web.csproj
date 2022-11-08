@@ -91,7 +91,7 @@
     <Content Include="ajax2.aspx" />
     <Content Include="img\arrow_down.png" />
     <Content Include="img\arrow_up.png" />
-    <Content Include="attach.gif" />
+    <Content Include="img\attach.gif" />
     <Content Include="backup_db.aspx" />
     <Content Include="bin\BugTracker.Web.dll" />
     <Content Include="bin\BugTracker.Web.pdb" />
@@ -115,7 +115,7 @@
     <Content Include="bin\roslyn\System.Reflection.Metadata.dll" />
     <Content Include="bin\roslyn\vbc.exe" />
     <Content Include="bin\roslyn\VBCSCompiler.exe" />
-    <Content Include="brick.png" />
+    <Content Include="img\brick.png" />
     <Content Include="btnet.css" />
     <Content Include="btnet_base.css" />
     <Content Include="bugs.aspx" />

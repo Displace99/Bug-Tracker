@@ -800,7 +800,7 @@ namespace btnet
 				Response.Write ("<span class=pst>");
 				if (write_links)
 				{
-					Response.Write("<img src=attach.gif>");
+					Response.Write("<img src='img/attach.gif'>");
 				}
 				Response.Write ("attachment:&nbsp;</span><span class=cmt_text>");
 				Response.Write (dr["bp_file"]);
@@ -859,7 +859,7 @@ namespace btnet
 			Response.Write ("\n<p><span class=pst>");
 			if (write_links)
 			{
-				Response.Write("<img src=attach.gif>");
+				Response.Write("<img src='img/attach.gif'>");
 			}
 			Response.Write("attachment:&nbsp;</span>");
 			Response.Write (dr["ba_file"]); // intentially "ba"

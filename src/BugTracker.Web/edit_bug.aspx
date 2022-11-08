@@ -364,7 +364,7 @@ void prepare_a_bunch_of_links_for_update()
 
     if (permission_level != Security.PERMISSION_READONLY)
     {
-        string attachment_link = "<img src=attach.gif align=top>&nbsp;<a href=add_attachment.aspx?id="
+        string attachment_link = "<img src='img/attach.gif' align=top>&nbsp;<a href=add_attachment.aspx?id="
             + Convert.ToString(id)
             + " title='Attach an image, document, or other file to this item'>add attachment</a>";
         attachment.InnerHtml = attachment_link;
@@ -559,7 +559,7 @@ void prepare_a_bunch_of_links_for_update()
             + btnet.Util.get_setting("CustomBugLinkUrl", "")
             + "?bugid="
             + Convert.ToString(id)
-            + "><img src=brick.png border=0 align=top>&nbsp;"
+            + "><img src='img/brick.png' border=0 align=top>&nbsp;"
             + btnet.Util.get_setting("CustomBugLinkLabel", "")
             + "</a>";
 
