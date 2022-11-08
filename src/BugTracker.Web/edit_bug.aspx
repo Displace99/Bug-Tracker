@@ -1818,7 +1818,7 @@ void format_prev_next_bug()
 				prev_next_link =
 					"&nbsp;&nbsp;&nbsp;&nbsp;<a class=warn href=edit_bug.aspx?id="
 					+ Convert.ToString(prev_bug)
-					+ "><img src=arrow_up.png border=0 align=top>prev</a>";
+					+ "><img src='img/arrow_up.png' border=0 align=top>prev</a>";
 			}
 			else
 			{
@@ -1830,7 +1830,7 @@ void format_prev_next_bug()
 				prev_next_link +=
 					"&nbsp;&nbsp;&nbsp;&nbsp;<a class=warn href=edit_bug.aspx?id="
 					+ Convert.ToString(next_bug)
-					+ ">next<img src=arrow_down.png border=0 align=top></a>";
+					+ ">next<img src='img/arrow_down.png' border=0 align=top></a>";
 
 			}
 			else

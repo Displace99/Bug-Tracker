@@ -89,8 +89,8 @@
     <Content Include="admin.aspx" />
     <Content Include="ajax.aspx" />
     <Content Include="ajax2.aspx" />
-    <Content Include="arrow_down.png" />
-    <Content Include="arrow_up.png" />
+    <Content Include="img\arrow_down.png" />
+    <Content Include="img\arrow_up.png" />
     <Content Include="attach.gif" />
     <Content Include="backup_db.aspx" />
     <Content Include="bin\BugTracker.Web.dll" />
