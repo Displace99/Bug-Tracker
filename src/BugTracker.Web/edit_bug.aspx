@@ -357,7 +357,7 @@ void prepare_a_bunch_of_links_for_update()
     if (permission_level == Security.PERMISSION_ALL)
     {
         string clone_link = "<a class=warn href=\"javascript:clone()\" "
-            + " title='Create a copy of this item'><img src=paste_plain.png border=0 align=top>&nbsp;create copy</a>";
+            + " title='Create a copy of this item'><img src='img/paste_plain.png' border=0 align=top>&nbsp;create copy</a>";
         clone.InnerHtml = clone_link;
     }
 
@@ -399,7 +399,7 @@ void prepare_a_bunch_of_links_for_update()
     {
         string subscribers_link = "<a href=view_subscribers.aspx?id="
             + Convert.ToString(id)
-            + " title='View users who have subscribed to email notifications for this item'><img src=telephone_edit.png border=0 align=top>&nbsp;subscribers</a>";
+            + " title='View users who have subscribed to email notifications for this item'><img src='img/telephone_edit.png' border=0 align=top>&nbsp;subscribers</a>";
         subscribers.InnerHtml = subscribers_link;
     }
     else
@@ -505,7 +505,7 @@ void prepare_a_bunch_of_links_for_update()
 
     print.InnerHtml = "<a target=_blank href=print_bug.aspx?id="
         + Convert.ToString(id)
-        + " title='Display this item in a printer-friendly format'><img src=printer.png border=0 align=top>&nbsp;print</a>";
+        + " title='Display this item in a printer-friendly format'><img src='img/printer.png' border=0 align=top>&nbsp;print</a>";
 
 
     // merge
@@ -1461,7 +1461,7 @@ void format_subcribe_cancel_link()
 			string subscription_link = "<a id='notifications' title='Get or stop getting email notifications about changes to this item.'"
 				+ " href='javascript:toggle_notifications("
 				+ Convert.ToString(id)
-				+ ")'><img src=telephone.png border=0 align=top>&nbsp;<span id='get_stop_notifications'>";
+				+ ")'><img src='img/telephone.png' border=0 align=top>&nbsp;<span id='get_stop_notifications'>";
 
 			if (subscribed > 0)
 			{

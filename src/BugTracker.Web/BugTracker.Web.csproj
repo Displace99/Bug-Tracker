@@ -587,8 +587,8 @@
     <Content Include="mlogin.aspx" />
     <Content Include="notifications.aspx" />
     <Content Include="orgs.aspx" />
-    <Content Include="paste_plain.png" />
-    <Content Include="printer.png" />
+    <Content Include="img\paste_plain.png" />
+    <Content Include="img\printer.png" />
     <Content Include="print_bug.aspx" />
     <Content Include="print_bugs.aspx" />
     <Content Include="print_bugs2.aspx" />
@@ -626,8 +626,8 @@
     <Content Include="tasks.aspx" />
     <Content Include="tasks_all.aspx" />
     <Content Include="tasks_all_excel.aspx" />
-    <Content Include="telephone.png" />
-    <Content Include="telephone_edit.png" />
+    <Content Include="img\telephone.png" />
+    <Content Include="img\telephone_edit.png" />
     <Content Include="translate.aspx" />
     <Content Include="udfs.aspx" />
     <Content Include="update_dashboard.aspx" />
@@ -641,7 +641,7 @@
     <Content Include="view_web_config.aspx" />
     <Content Include="view_whatsnew.aspx" />
     <Content Include="vote.aspx" />
-    <Content Include="vote_up.png" />
+    <Content Include="img\vote_up.png" />
     <Content Include="Web.config" />
     <Content Include="whatsnew.aspx" />
     <Content Include="write_posts.aspx" />
