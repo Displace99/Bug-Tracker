@@ -487,7 +487,7 @@ void prepare_a_bunch_of_links_for_update()
             }
             string tasks_link = "<a href=tasks.aspx?bugid="
                 + Convert.ToString(id)
-            + " title='View sub-tasks/time-tracking entries related to this item'><img src=clock.png border=0 align=top>&nbsp;tasks/time(<span id=task_cnt>" + task_cnt + "</span>)</a>";
+            + " title='View sub-tasks/time-tracking entries related to this item'><img src='img/clock.png' border=0 align=top>&nbsp;tasks/time(<span id=task_cnt>" + task_cnt + "</span>)</a>";
             tasks.InnerHtml = tasks_link;
         }
         else

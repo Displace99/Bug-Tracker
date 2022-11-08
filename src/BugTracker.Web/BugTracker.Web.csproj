@@ -119,9 +119,9 @@
     <Content Include="btnet.css" />
     <Content Include="btnet_base.css" />
     <Content Include="bugs.aspx" />
-    <Content Include="bugtracker_screen_capture.jpeg" />
+    <Content Include="img\bugtracker_screen_capture.jpeg" />
     <Content Include="bug_list.js" />
-    <Content Include="camera.png" />
+    <Content Include="img\camera.png" />
     <Content Include="categories.aspx" />
     <Content Include="change_password.aspx" />
     <Content Include="ckeditor\CHANGES.html" />
@@ -395,7 +395,7 @@
     <Content Include="ckeditor\skins\v2\skin.js" />
     <Content Include="ckeditor\skins\v2\templates.css" />
     <Content Include="ckeditor\themes\default\theme.js" />
-    <Content Include="clock.png" />
+    <Content Include="img\clock.png" />
     <Content Include="comment.png" />
     <Content Include="complete_registration.aspx" />
     <Content Include="css\alert.css" />
