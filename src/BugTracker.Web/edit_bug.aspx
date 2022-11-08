@@ -381,7 +381,7 @@ void prepare_a_bunch_of_links_for_update()
         {
             string send_email_link = "<a href='javascript:send_email("
                 + Convert.ToString(id)
-                + ")' title='Send an email about this item'><img src=email_edit.png border=0 align=top>&nbsp;send email</a>";
+                + ")' title='Send an email about this item'><img src='img/email_edit.png' border=0 align=top>&nbsp;send email</a>";
             send_email.InnerHtml = send_email_link;
         }
         else
@@ -450,7 +450,7 @@ void prepare_a_bunch_of_links_for_update()
         }
         string git_commits_link = "<a target=_blank href=git_view_revisions.aspx?id="
             + Convert.ToString(id)
-        + " title='View git git_commits related to this item'><img src=git.png border=0 align=top>&nbsp;git commits(" + revision_cnt + ")</a>";
+        + " title='View git git_commits related to this item'><img src='img/git.png' border=0 align=top>&nbsp;git commits(" + revision_cnt + ")</a>";
         git_commits.InnerHtml = git_commits_link;
     }
     else
@@ -467,7 +467,7 @@ void prepare_a_bunch_of_links_for_update()
         }
         string hg_revisions_link = "<a target=_blank href=hg_view_revisions.aspx?id="
             + Convert.ToString(id)
-        + " title='View mercurial git_hg_revisions related to this item'><img src=hg.png border=0 align=top>&nbsp;hg revisions(" + revision_cnt + ")</a>";
+        + " title='View mercurial git_hg_revisions related to this item'><img src='img/hg.png' border=0 align=top>&nbsp;hg revisions(" + revision_cnt + ")</a>";
         hg_revisions.InnerHtml = hg_revisions_link;
     }
     else

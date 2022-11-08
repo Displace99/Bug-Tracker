@@ -555,7 +555,7 @@ namespace btnet
 			{
 				if (write_links)
 				{
-					Response.Write ("<img src=email_edit.png align=top>&nbsp;");
+					Response.Write ("<img src='img/email_edit.png' align=top>&nbsp;");
 				}
 				
 				Response.Write ("<span class=pst>email <a name=" + Convert.ToString(post_id) +  "></a>" + Convert.ToString(post_id) + " sent to ");
@@ -604,7 +604,7 @@ namespace btnet
 			{
 				if (write_links)
 				{
-					Response.Write ("<img src=email_open.png align=top>&nbsp;");
+					Response.Write ("<img src='img/email_open.png' align=top>&nbsp;");
 				}
 				Response.Write ("<span class=pst>email <a name=" + Convert.ToString(post_id) +  "></a>" + Convert.ToString(post_id) + " received from ");
 				if (write_links)

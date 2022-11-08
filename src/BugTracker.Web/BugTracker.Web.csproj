@@ -518,14 +518,14 @@
     <Content Include="edit_user.aspx" />
     <Content Include="edit_user_permissions2.aspx" />
     <Content Include="edit_web_config.aspx" />
-    <Content Include="email_edit.png" />
-    <Content Include="email_open.png" />
+    <Content Include="img\email_edit.png" />
+    <Content Include="img\email_open.png" />
     <Content Include="favicon.ico" />
     <Content Include="flag.aspx" />
     <Content Include="forgot.aspx" />
     <Content Include="generate_btnetsc_reg.aspx" />
     <Content Include="get_db_datetime.aspx" />
-    <Content Include="git.png" />
+    <Content Include="img\git.png" />
     <Content Include="git_blame.aspx" />
     <Content Include="git_diff.aspx" />
     <Content Include="git_hook.aspx" />
@@ -534,7 +534,7 @@
     <Content Include="git_view_revisions.aspx" />
     <Content Include="Global.asax" />
     <Content Include="hello.aspx" />
-    <Content Include="hg.png" />
+    <Content Include="img\hg.png" />
     <Content Include="hg_blame.aspx" />
     <Content Include="hg_diff.aspx" />
     <Content Include="hg_hook.aspx" />
