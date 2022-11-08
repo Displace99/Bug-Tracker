@@ -538,7 +538,7 @@ namespace btnet
 			{
 				if (write_links)
 				{
-					Response.Write ("<img src=database.png align=top>&nbsp;");
+					Response.Write ("<img src='img/database.png' align=top>&nbsp;");
 				}			
 			
 				// posted by
@@ -642,7 +642,7 @@ namespace btnet
 				
 				if (write_links)
 				{
-					Response.Write ("<img src=comment.png align=top>&nbsp;");
+					Response.Write ("<img src='img/comment.png' align=top>&nbsp;");
 				}
 				
 				Response.Write ("<span class=pst>comment <a name=" + Convert.ToString(post_id) +  "></a>" + Convert.ToString(post_id) + " posted by ");

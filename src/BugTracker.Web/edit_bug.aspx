@@ -416,7 +416,7 @@ void prepare_a_bunch_of_links_for_update()
         }
         string relationships_link = "<a href=relationships.aspx?bgid="
             + Convert.ToString(id)
-            + " title='Create a relationship between this item and another item'><img src=database_link.png border=0 align=top>&nbsp;relationships(<span id=relationship_cnt>" + relationship_cnt + "</span>)</a>";
+            + " title='Create a relationship between this item and another item'><img src='img/database_link.png' border=0 align=top>&nbsp;relationships(<span id=relationship_cnt>" + relationship_cnt + "</span>)</a>";
         relationships.InnerHtml = relationships_link;
     }
     else
@@ -516,7 +516,7 @@ void prepare_a_bunch_of_links_for_update()
         {
             string merge_bug_link = "<a href=merge_bug.aspx?id="
                 + Convert.ToString(id)
-                + " title='Merge this item and another item together'><img src=database_refresh.png border=0 align=top>&nbsp;merge</a>";
+                + " title='Merge this item and another item together'><img src='img/database_refresh.png' border=0 align=top>&nbsp;merge</a>";
 
             merge_bug.InnerHtml = merge_bug_link;
         }
@@ -538,7 +538,7 @@ void prepare_a_bunch_of_links_for_update()
         {
             string delete_bug_link = "<a href=delete_bug.aspx?id="
                 + Convert.ToString(id)
-                + " title='Delete this item'><img src=delete.png border=0 align=top>&nbsp;delete</a>";
+                + " title='Delete this item'><img src='img/delete.png' border=0 align=top>&nbsp;delete</a>";
 
             delete_bug.InnerHtml = delete_bug_link;
         }

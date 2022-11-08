@@ -396,7 +396,7 @@
     <Content Include="ckeditor\skins\v2\templates.css" />
     <Content Include="ckeditor\themes\default\theme.js" />
     <Content Include="img\clock.png" />
-    <Content Include="comment.png" />
+    <Content Include="img\comment.png" />
     <Content Include="complete_registration.aspx" />
     <Content Include="css\alert.css" />
     <Content Include="customfields.aspx" />
@@ -408,14 +408,14 @@
     <Content Include="custom\custom_logo.html" />
     <Content Include="custom\custom_welcome.html" />
     <Content Include="dashboard.aspx" />
-    <Content Include="database.png" />
-    <Content Include="database_link.png" />
-    <Content Include="database_refresh.png" />
+    <Content Include="img\database.png" />
+    <Content Include="img\database_link.png" />
+    <Content Include="img\database_refresh.png" />
     <Content Include="datejs\date-de-DE.js" />
     <Content Include="datejs\date-fr-FR.js" />
     <Content Include="datejs\date.js" />
     <Content Include="default.aspx" />
-    <Content Include="delete.png" />
+    <Content Include="img\delete.png" />
     <Content Include="delete_attachment.aspx" />
     <Content Include="delete_bug.aspx" />
     <Content Include="delete_category.aspx" />
