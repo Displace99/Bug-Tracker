@@ -82,8 +82,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="about.html" />
-    <Content Include="accept.png" />
-    <Content Include="add.png" />
+    <Content Include="img\accept.png" />
+    <Content Include="img\add.png" />
     <Content Include="add_attachment.aspx" />
     <Content Include="add_customfield.aspx" />
     <Content Include="admin.aspx" />

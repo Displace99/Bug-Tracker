@@ -2955,7 +2955,7 @@ function do_doc_ready()
 <div class=align>
 
 <%  if (!security.user.adds_not_allowed && id > 0) { %>
-<a class=warn href="edit_bug.aspx?id=0"><img src=add.png border=0 align=top>&nbsp;add new <% Response.Write(btnet.Util.get_setting("SingularBugLabel", "bug")); %></a>
+<a class=warn href="edit_bug.aspx?id=0"><img src="img/add.png" border=0 align=top>&nbsp;add new <% Response.Write(btnet.Util.get_setting("SingularBugLabel", "bug")); %></a>
 &nbsp;&nbsp;&nbsp;&nbsp;
 <% } %>
 
