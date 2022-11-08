@@ -357,14 +357,14 @@ void prepare_a_bunch_of_links_for_update()
     if (permission_level == Security.PERMISSION_ALL)
     {
         string clone_link = "<a class=warn href=\"javascript:clone()\" "
-            + " title='Create a copy of this item'><img src=paste_plain.png border=0 align=top>&nbsp;create copy</a>";
+            + " title='Create a copy of this item'><img src='img/paste_plain.png' border=0 align=top>&nbsp;create copy</a>";
         clone.InnerHtml = clone_link;
     }
 
 
     if (permission_level != Security.PERMISSION_READONLY)
     {
-        string attachment_link = "<img src=attach.gif align=top>&nbsp;<a href=add_attachment.aspx?id="
+        string attachment_link = "<img src='img/attach.gif' align=top>&nbsp;<a href=add_attachment.aspx?id="
             + Convert.ToString(id)
             + " title='Attach an image, document, or other file to this item'>add attachment</a>";
         attachment.InnerHtml = attachment_link;
@@ -381,7 +381,7 @@ void prepare_a_bunch_of_links_for_update()
         {
             string send_email_link = "<a href='javascript:send_email("
                 + Convert.ToString(id)
-                + ")' title='Send an email about this item'><img src=email_edit.png border=0 align=top>&nbsp;send email</a>";
+                + ")' title='Send an email about this item'><img src='img/email_edit.png' border=0 align=top>&nbsp;send email</a>";
             send_email.InnerHtml = send_email_link;
         }
         else
@@ -399,7 +399,7 @@ void prepare_a_bunch_of_links_for_update()
     {
         string subscribers_link = "<a href=view_subscribers.aspx?id="
             + Convert.ToString(id)
-            + " title='View users who have subscribed to email notifications for this item'><img src=telephone_edit.png border=0 align=top>&nbsp;subscribers</a>";
+            + " title='View users who have subscribed to email notifications for this item'><img src='img/telephone_edit.png' border=0 align=top>&nbsp;subscribers</a>";
         subscribers.InnerHtml = subscribers_link;
     }
     else
@@ -416,7 +416,7 @@ void prepare_a_bunch_of_links_for_update()
         }
         string relationships_link = "<a href=relationships.aspx?bgid="
             + Convert.ToString(id)
-            + " title='Create a relationship between this item and another item'><img src=database_link.png border=0 align=top>&nbsp;relationships(<span id=relationship_cnt>" + relationship_cnt + "</span>)</a>";
+            + " title='Create a relationship between this item and another item'><img src='img/database_link.png' border=0 align=top>&nbsp;relationships(<span id=relationship_cnt>" + relationship_cnt + "</span>)</a>";
         relationships.InnerHtml = relationships_link;
     }
     else
@@ -450,7 +450,7 @@ void prepare_a_bunch_of_links_for_update()
         }
         string git_commits_link = "<a target=_blank href=git_view_revisions.aspx?id="
             + Convert.ToString(id)
-        + " title='View git git_commits related to this item'><img src=git.png border=0 align=top>&nbsp;git commits(" + revision_cnt + ")</a>";
+        + " title='View git git_commits related to this item'><img src='img/git.png' border=0 align=top>&nbsp;git commits(" + revision_cnt + ")</a>";
         git_commits.InnerHtml = git_commits_link;
     }
     else
@@ -467,7 +467,7 @@ void prepare_a_bunch_of_links_for_update()
         }
         string hg_revisions_link = "<a target=_blank href=hg_view_revisions.aspx?id="
             + Convert.ToString(id)
-        + " title='View mercurial git_hg_revisions related to this item'><img src=hg.png border=0 align=top>&nbsp;hg revisions(" + revision_cnt + ")</a>";
+        + " title='View mercurial git_hg_revisions related to this item'><img src='img/hg.png' border=0 align=top>&nbsp;hg revisions(" + revision_cnt + ")</a>";
         hg_revisions.InnerHtml = hg_revisions_link;
     }
     else
@@ -487,7 +487,7 @@ void prepare_a_bunch_of_links_for_update()
             }
             string tasks_link = "<a href=tasks.aspx?bugid="
                 + Convert.ToString(id)
-            + " title='View sub-tasks/time-tracking entries related to this item'><img src=clock.png border=0 align=top>&nbsp;tasks/time(<span id=task_cnt>" + task_cnt + "</span>)</a>";
+            + " title='View sub-tasks/time-tracking entries related to this item'><img src='img/clock.png' border=0 align=top>&nbsp;tasks/time(<span id=task_cnt>" + task_cnt + "</span>)</a>";
             tasks.InnerHtml = tasks_link;
         }
         else
@@ -505,7 +505,7 @@ void prepare_a_bunch_of_links_for_update()
 
     print.InnerHtml = "<a target=_blank href=print_bug.aspx?id="
         + Convert.ToString(id)
-        + " title='Display this item in a printer-friendly format'><img src=printer.png border=0 align=top>&nbsp;print</a>";
+        + " title='Display this item in a printer-friendly format'><img src='img/printer.png' border=0 align=top>&nbsp;print</a>";
 
 
     // merge
@@ -516,7 +516,7 @@ void prepare_a_bunch_of_links_for_update()
         {
             string merge_bug_link = "<a href=merge_bug.aspx?id="
                 + Convert.ToString(id)
-                + " title='Merge this item and another item together'><img src=database_refresh.png border=0 align=top>&nbsp;merge</a>";
+                + " title='Merge this item and another item together'><img src='img/database_refresh.png' border=0 align=top>&nbsp;merge</a>";
 
             merge_bug.InnerHtml = merge_bug_link;
         }
@@ -538,7 +538,7 @@ void prepare_a_bunch_of_links_for_update()
         {
             string delete_bug_link = "<a href=delete_bug.aspx?id="
                 + Convert.ToString(id)
-                + " title='Delete this item'><img src=delete.png border=0 align=top>&nbsp;delete</a>";
+                + " title='Delete this item'><img src='img/delete.png' border=0 align=top>&nbsp;delete</a>";
 
             delete_bug.InnerHtml = delete_bug_link;
         }
@@ -559,7 +559,7 @@ void prepare_a_bunch_of_links_for_update()
             + btnet.Util.get_setting("CustomBugLinkUrl", "")
             + "?bugid="
             + Convert.ToString(id)
-            + "><img src=brick.png border=0 align=top>&nbsp;"
+            + "><img src='img/brick.png' border=0 align=top>&nbsp;"
             + btnet.Util.get_setting("CustomBugLinkLabel", "")
             + "</a>";
 
@@ -1461,7 +1461,7 @@ void format_subcribe_cancel_link()
 			string subscription_link = "<a id='notifications' title='Get or stop getting email notifications about changes to this item.'"
 				+ " href='javascript:toggle_notifications("
 				+ Convert.ToString(id)
-				+ ")'><img src=telephone.png border=0 align=top>&nbsp;<span id='get_stop_notifications'>";
+				+ ")'><img src='img/telephone.png' border=0 align=top>&nbsp;<span id='get_stop_notifications'>";
 
 			if (subscribed > 0)
 			{
@@ -1818,7 +1818,7 @@ void format_prev_next_bug()
 				prev_next_link =
 					"&nbsp;&nbsp;&nbsp;&nbsp;<a class=warn href=edit_bug.aspx?id="
 					+ Convert.ToString(prev_bug)
-					+ "><img src=arrow_up.png border=0 align=top>prev</a>";
+					+ "><img src='img/arrow_up.png' border=0 align=top>prev</a>";
 			}
 			else
 			{
@@ -1830,7 +1830,7 @@ void format_prev_next_bug()
 				prev_next_link +=
 					"&nbsp;&nbsp;&nbsp;&nbsp;<a class=warn href=edit_bug.aspx?id="
 					+ Convert.ToString(next_bug)
-					+ ">next<img src=arrow_down.png border=0 align=top></a>";
+					+ ">next<img src='img/arrow_down.png' border=0 align=top></a>";
 
 			}
 			else
@@ -2955,7 +2955,7 @@ function do_doc_ready()
 <div class=align>
 
 <%  if (!security.user.adds_not_allowed && id > 0) { %>
-<a class=warn href="edit_bug.aspx?id=0"><img src=add.png border=0 align=top>&nbsp;add new <% Response.Write(btnet.Util.get_setting("SingularBugLabel", "bug")); %></a>
+<a class=warn href="edit_bug.aspx?id=0"><img src="img/add.png" border=0 align=top>&nbsp;add new <% Response.Write(btnet.Util.get_setting("SingularBugLabel", "bug")); %></a>
 &nbsp;&nbsp;&nbsp;&nbsp;
 <% } %>
 

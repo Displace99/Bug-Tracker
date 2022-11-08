@@ -305,7 +305,7 @@ function on_query_changed()
 <table border=0><tr>
 	<td  nowrap>
 	<% if (!security.user.adds_not_allowed) { %>
-	<a href=edit_bug.aspx><img src=add.png border=0 align=top>&nbsp;add new <% Response.Write(Util.get_setting("SingularBugLabel","bug")); %></a>
+	<a href=edit_bug.aspx><img src="img/add.png" border=0 align=top>&nbsp;add new <% Response.Write(Util.get_setting("SingularBugLabel","bug")); %></a>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<% } %>
 
@@ -320,7 +320,7 @@ function on_query_changed()
 	<td  nowrap>
 	&nbsp;&nbsp;&nbsp;&nbsp;<a target=_blank href=print_bugs.aspx?format=excel>export to excel</a>
 	<td  nowrap align=right width=100%>
-	<a target=_blank href=btnet_screen_capture.exe><img src=camera.png border=0 align=top>&nbsp;download screen capture utility</a>
+	<a target=_blank href=btnet_screen_capture.exe><img src="img/camera.png" border=0 align=top>&nbsp;download screen capture utility</a>
 </table>
 <br>
 <%

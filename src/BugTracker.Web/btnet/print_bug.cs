@@ -538,7 +538,7 @@ namespace btnet
 			{
 				if (write_links)
 				{
-					Response.Write ("<img src=database.png align=top>&nbsp;");
+					Response.Write ("<img src='img/database.png' align=top>&nbsp;");
 				}			
 			
 				// posted by
@@ -555,7 +555,7 @@ namespace btnet
 			{
 				if (write_links)
 				{
-					Response.Write ("<img src=email_edit.png align=top>&nbsp;");
+					Response.Write ("<img src='img/email_edit.png' align=top>&nbsp;");
 				}
 				
 				Response.Write ("<span class=pst>email <a name=" + Convert.ToString(post_id) +  "></a>" + Convert.ToString(post_id) + " sent to ");
@@ -604,7 +604,7 @@ namespace btnet
 			{
 				if (write_links)
 				{
-					Response.Write ("<img src=email_open.png align=top>&nbsp;");
+					Response.Write ("<img src='img/email_open.png' align=top>&nbsp;");
 				}
 				Response.Write ("<span class=pst>email <a name=" + Convert.ToString(post_id) +  "></a>" + Convert.ToString(post_id) + " received from ");
 				if (write_links)
@@ -642,7 +642,7 @@ namespace btnet
 				
 				if (write_links)
 				{
-					Response.Write ("<img src=comment.png align=top>&nbsp;");
+					Response.Write ("<img src='img/comment.png' align=top>&nbsp;");
 				}
 				
 				Response.Write ("<span class=pst>comment <a name=" + Convert.ToString(post_id) +  "></a>" + Convert.ToString(post_id) + " posted by ");
@@ -800,7 +800,7 @@ namespace btnet
 				Response.Write ("<span class=pst>");
 				if (write_links)
 				{
-					Response.Write("<img src=attach.gif>");
+					Response.Write("<img src='img/attach.gif'>");
 				}
 				Response.Write ("attachment:&nbsp;</span><span class=cmt_text>");
 				Response.Write (dr["bp_file"]);
@@ -859,7 +859,7 @@ namespace btnet
 			Response.Write ("\n<p><span class=pst>");
 			if (write_links)
 			{
-				Response.Write("<img src=attach.gif>");
+				Response.Write("<img src='img/attach.gif'>");
 			}
 			Response.Write("attachment:&nbsp;</span>");
 			Response.Write (dr["ba_file"]); // intentially "ba"
