@@ -5,32 +5,35 @@ Copyright 2002-2011 Corey Trager
 Distributed under the terms of the GNU General Public License
 -->
 
-<html>
-<head>
-<title id="titl" runat="server">btnet projects</title>
-<link rel="StyleSheet" href="btnet.css" type="text/css">
-<script type="text/javascript" language="JavaScript" src="sortable.js"></script>
-</head>
+<!DOCTYPE html>
 
-<body>
-<% security.write_menu(Response, "admin"); %>
+<html lang="en">
+	<head>
+		<title id="titl" runat="server">btnet projects</title>
+		<link rel="StyleSheet" href="btnet.css" type="text/css">
+		<script type="text/javascript" language="JavaScript" src="sortable.js"></script>
+	</head>
 
-<div class=align>
-<a href=edit_project.aspx>add new project</a>
-</p>
-<%
+	<body>
+		<% security.write_menu(Response, "admin"); %>
 
-if (ds.Tables[0].Rows.Count > 0)
-{
-	SortableHtmlTable.create_from_dataset(
-		Response, ds, "", "", false);
+		<div class=align>
+			<a href=edit_project.aspx>add new project</a>
+			<p></p>
+			<%
 
-}
-else
-{
-	Response.Write ("No projects in the database.");
-}
-%>
-</div>
-<% Response.Write(Application["custom_footer"]); %></body>
+			if (ds.Tables[0].Rows.Count > 0)
+			{
+				SortableHtmlTable.create_from_dataset(
+					Response, ds, "", "", false);
+			}
+			else
+			{
+				Response.Write ("No projects in the database.");
+			}
+			%>
+		</div>
+		<% Response.Write(Application["custom_footer"]); %>
+
+	</body>
 </html>
