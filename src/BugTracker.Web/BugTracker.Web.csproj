@@ -1329,7 +1329,9 @@
     <Compile Include="server_variables.aspx.designer.cs">
       <DependentUpon>server_variables.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Services\Bug\BugService.cs" />
     <Compile Include="Services\EncryptionService.cs" />
+    <Compile Include="Services\Project\ProjectService.cs" />
     <Compile Include="Services\SignInService.cs" />
     <Compile Include="Services\UserRegistrationResult.cs" />
     <Compile Include="Services\UserService.cs" />
