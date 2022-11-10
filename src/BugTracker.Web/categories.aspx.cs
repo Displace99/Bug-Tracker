@@ -17,14 +17,12 @@ namespace BugTracker.Web
 
 		void Page_Load(Object sender, EventArgs e)
 		{
-
 			Util.do_not_cache(Response);
 
 			security = new Security();
 			security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
-			titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-				+ "categories";
+			title.InnerText = String.Format("{0} - Categories", Util.get_setting("AppTitle", "BugTracker.NET"));
 
 			ds = _categoryService.GetCategoryList();
 
