@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Category;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,8 +11,9 @@ namespace BugTracker.Web
     public partial class categories : Page
     {
 		protected DataSet ds;
-
 		protected Security security;
+
+		private CategoryService _categoryService = new CategoryService();
 
 		void Page_Load(Object sender, EventArgs e)
 		{
@@ -24,14 +26,7 @@ namespace BugTracker.Web
 			titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
 				+ "categories";
 
-			ds = btnet.DbUtil.get_dataset(
-				@"select
-		ct_id [id],
-		ct_name [category],
-		ct_sort_seq [sort seq],
-		case when ct_default = 1 then 'Y' else 'N' end [default],
-		ct_id [hidden]
-		from categories order by ct_name");
+			ds = _categoryService.GetCategoryList();
 
 		}
 	}
