@@ -1,41 +1,10 @@
 <%@ Page language="C#" CodeBehind="categories.aspx.cs" Inherits="BugTracker.Web.categories" AutoEventWireup="True" %>
+<%@ Import Namespace="btnet" %>
 <!--
 Copyright 2002-2011 Corey Trager
 Distributed under the terms of the GNU General Public License
 -->
-<!-- #include file = "inc.aspx" -->
 
-<script language="C#" runat="server">
-
-
-DataSet ds;
-
-Security security;
-
-void Page_Load(Object sender, EventArgs e)
-{
-
-	Util.do_not_cache(Response);
-	
-	security = new Security();
-	security.check_security( HttpContext.Current, Security.MUST_BE_ADMIN);
-
-	titl.InnerText = Util.get_setting("AppTitle","BugTracker.NET") + " - "
-		+ "categories";
-		
-	ds = btnet.DbUtil.get_dataset(
-		@"select
-		ct_id [id],
-		ct_name [category],
-		ct_sort_seq [sort seq],
-		case when ct_default = 1 then 'Y' else 'N' end [default],
-		ct_id [hidden]
-		from categories order by ct_name");
-
-}
-
-
-</script>
 
 <html>
 <head>
