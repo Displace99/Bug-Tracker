@@ -11,9 +11,6 @@ namespace BugTracker.Web
 {
     public partial class edit_category : Page
     {
-		
-		String sql;
-
 		protected Security security;
 
 		private CategoryService _categoryService = new CategoryService();
