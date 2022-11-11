@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace BugTracker.Web.Services.Category
@@ -67,6 +68,33 @@ namespace BugTracker.Web.Services.Category
             cmd.Parameters.AddWithValue("@Id", category.Id);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        public void DeleteCategory(int Id)
+        {
+            string sql = "delete categories where ct_id = @Id";
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql;
+            cmd.Parameters.AddWithValue("@Id", Id);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public int GetBugCountByCategory(int categoryId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("declare @cnt int");
+            sql.AppendLine("select @cnt = count(1) from bugs where bg_category = @categoryId");
+            sql.AppendLine("select ct_name, @cnt [cnt] from categories where ct_id = @categoryId");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+            cmd.Parameters.AddWithValue("@categoryId", categoryId);
+
+            DataRow dr = DbUtil.get_datarow(cmd);
+
+            return (int)dr["cnt"];
         }
     }
 }

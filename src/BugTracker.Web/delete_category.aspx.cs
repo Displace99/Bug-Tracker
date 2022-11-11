@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Category;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,13 +10,11 @@ namespace BugTracker.Web
 {
     public partial class delete_category : Page
     {
-		String sql;
-
 		protected Security security;
+		private CategoryService _categoryService = new CategoryService();
 
 		void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-		///////////////////////////////////////////////////////////////////////
 		protected void Page_Load(Object sender, EventArgs e)
 		{
 
@@ -24,41 +23,40 @@ namespace BugTracker.Web
 			security = new Security();
 			security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
+			int categoryId = 0;
+			int.TryParse(Request["id"], out categoryId);
+
 			if (IsPostBack)
 			{
-				sql = @"delete categories where ct_id = $1";
-				sql = sql.Replace("$1", Util.sanitize_integer(row_id.Value));
-				btnet.DbUtil.execute_nonquery(sql);
+				_categoryService.DeleteCategory(categoryId);
 				Server.Transfer("categories.aspx");
 			}
 			else
 			{
 				titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
 					+ "delete category";
-
-				string id = Util.sanitize_integer(Request["id"]);
-
-				sql = @"declare @cnt int
-			select @cnt = count(1) from bugs where bg_category = $1
-			select ct_name, @cnt [cnt] from categories where ct_id = $1";
-				sql = sql.Replace("$1", id);
-
-				DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-				if ((int)dr["cnt"] > 0)
+				
+				if (categoryId == 0)
 				{
-					Response.Write("You can't delete category \""
-						+ Convert.ToString(dr["ct_name"])
-						+ "\" because some bugs still reference it.");
+					Response.Write("Category Id not found");
+					Response.End();
+				}
+
+				int bugCount = _categoryService.GetBugCountByCategory(categoryId);
+				var categoryDr = _categoryService.GetCategoryById(categoryId);
+				string categoryName = (string)categoryDr[0];
+
+				if (bugCount > 0)
+				{
+					Response.Write(string.Format("You can't delete category {0} because some bugs still reference it", categoryName));
 					Response.End();
 				}
 				else
 				{
-					confirm_href.InnerText = "confirm delete of \""
-						+ Convert.ToString(dr["ct_name"])
-						+ "\"";
-
-					row_id.Value = id;
+					Response.Write(string.Format("Confirm deletion of {0}", categoryName));
+					
+					//sets a hidden field with category Id
+					row_id.Value = categoryId.ToString();
 				}
 			}
 
