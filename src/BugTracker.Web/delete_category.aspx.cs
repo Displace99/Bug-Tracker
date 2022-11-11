@@ -33,8 +33,7 @@ namespace BugTracker.Web
 			}
 			else
 			{
-				titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-					+ "delete category";
+				title.InnerText = String.Format("{0} - Delete Category", Util.get_setting("AppTitle", "BugTracker.NET"));
 				
 				if (categoryId == 0)
 				{
