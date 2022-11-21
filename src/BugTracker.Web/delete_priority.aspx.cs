@@ -39,7 +39,7 @@ namespace BugTracker.Web
             else
             {
 
-                titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
+                title.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
                     + "delete priority";
 
                 int bugCount = _priorityService.GetBugCountByPriority(priorityId);
