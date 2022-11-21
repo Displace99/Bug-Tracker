@@ -1,4 +1,7 @@
 using btnet;
+using BugTracker.Web.Models.Category;
+using BugTracker.Web.Services.Category;
+using BugTracker.Web.Services.Priority;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,6 +15,8 @@ namespace BugTracker.Web
         protected string sql;
         protected Security security;
 
+        private PriorityService _priorityService = new PriorityService();
+
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
         void Page_Load(Object sender, EventArgs e)
@@ -22,12 +27,13 @@ namespace BugTracker.Web
             security = new Security();
             security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
+            int priorityId = 0;
+            int.TryParse(Request["id"], out priorityId);
+
             if (IsPostBack)
             {
-                // do delete here
-                sql = @"delete priorities where pr_id = $1";
-                sql = sql.Replace("$1", Util.sanitize_integer(row_id.Value));
-                btnet.DbUtil.execute_nonquery(sql);
+                _priorityService.DeletePriority(priorityId);
+                
                 Server.Transfer("priorities.aspx");
             }
             else
@@ -36,32 +42,20 @@ namespace BugTracker.Web
                 titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
                     + "delete priority";
 
-                string id = Util.sanitize_integer(Request["id"]);
+                int bugCount = _priorityService.GetBugCountByPriority(priorityId);
+                var priorityDr = _priorityService.GetPriorityById(priorityId);
+                string priorityName = (string)priorityDr[1];
 
-
-                sql = @"declare @cnt int
-			select @cnt = count(1) from bugs where bg_priority = $1
-			select pr_name, @cnt [cnt] from priorities where pr_id = $1";
-                sql = sql.Replace("$1", id);
-
-                DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-                if ((int)dr["cnt"] > 0)
+                if (bugCount > 0)
                 {
-                    Response.Write("You can't delete priority \""
-                        + Convert.ToString(dr["pr_name"])
-                        + "\" because some bugs still reference it.");
+                    Response.Write(String.Format("You can't delete priority {0} because some bugs still reference it.", priorityName));
                     Response.End();
                 }
                 else
                 {
+                    confirm_href.InnerText = String.Format("Confirm delete of {0}", priorityName);
 
-                    confirm_href.InnerText = "confirm delete of \""
-                        + Convert.ToString(dr["pr_name"])
-                        + "\"";
-
-                    row_id.Value = id;
-
+                    row_id.Value = priorityId.ToString();
                 }
 
             }
