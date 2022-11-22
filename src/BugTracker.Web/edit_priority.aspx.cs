@@ -26,8 +26,7 @@ namespace BugTracker.Web
             security = new Security();
             security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
-            title.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "edit priority";
+            title.InnerText = String.Format("{0} - Edit Priority", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             msg.InnerText = "";
 
