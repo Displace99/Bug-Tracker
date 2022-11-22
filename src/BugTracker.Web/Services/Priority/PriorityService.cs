@@ -1,11 +1,15 @@
 ﻿using btnet;
+using BugTracker.Web.Models.Priority;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.Web.UI.WebControls;
+using System.Xml.Linq;
 
 namespace BugTracker.Web.Services.Priority
 {
@@ -50,7 +54,7 @@ namespace BugTracker.Web.Services.Priority
         /// <returns></returns>
         public DataRow GetPriorityById(int priorityId)
         {
-            string sql = "SELECT pr_id, pr_name, pr_sort_seq, pr_background_color, pr_style, pr_default FROM priorities WHERE pr_id = @Id";
+            string sql = "SELECT pr_id, pr_name, pr_sort_seq, pr_background_color, isnull(pr_style,'') [pr_style], pr_default FROM priorities WHERE pr_id = @Id";
 
             SqlCommand cmd = new SqlCommand();
             cmd.CommandText = sql;
@@ -76,6 +80,44 @@ namespace BugTracker.Web.Services.Priority
             DataRow dr = DbUtil.get_datarow(cmd);
 
             return (int)dr["cnt"];
+        }
+
+        public void CreatePriority(PriorityVM model)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("INSERT INTO priorities ");
+            sql.AppendLine("(pr_name, pr_sort_seq, pr_background_color, pr_style, pr_default) ");
+            sql.AppendLine("values (@Name, @SortSeq, @Color, @Style, @IsDefault)");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+            cmd.Parameters.AddWithValue("@Name", model.Name);
+            cmd.Parameters.AddWithValue("@SortSeq", model.SortSequence);
+            cmd.Parameters.AddWithValue("@Color", model.BackgroundColor);
+            cmd.Parameters.AddWithValue("@Style", model.Style);
+            cmd.Parameters.AddWithValue("@IsDefault", model.IsDefault);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public void UpdatePriority(PriorityVM model)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("UPDATE priorities SET ");
+            sql.AppendLine("pr_name = @Name, pr_sort_seq = @SortSeq, pr_background_color = @Color, ");
+            sql.AppendLine("pr_style = @Style, pr_default = @IsDefault ");
+            sql.AppendLine("where pr_id = @Id");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+            cmd.Parameters.AddWithValue("@Id", model.PriorityId);
+            cmd.Parameters.AddWithValue("@Name", model.Name);
+            cmd.Parameters.AddWithValue("@SortSeq", model.SortSequence);
+            cmd.Parameters.AddWithValue("@Color", model.BackgroundColor);
+            cmd.Parameters.AddWithValue("@Style", model.Style);
+            cmd.Parameters.AddWithValue("@IsDefault", model.IsDefault);
+
+            DbUtil.execute_nonquery(cmd);
         }
     }
 }
