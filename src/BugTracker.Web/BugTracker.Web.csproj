@@ -1185,6 +1185,7 @@
       <DependentUpon>mlogin.aspx</DependentUpon>
     </Compile>
     <Compile Include="Models\Category\CategoryVM.cs" />
+    <Compile Include="Models\Priority\PriorityVM.cs" />
     <Compile Include="Models\ProjectBugVM.cs" />
     <Compile Include="Models\ProjectVM.cs" />
     <Compile Include="Models\RegisterVM.cs" />
