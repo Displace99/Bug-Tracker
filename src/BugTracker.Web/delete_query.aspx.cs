@@ -35,8 +35,7 @@ namespace BugTracker.Web
             }
             else
             {
-                titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                    + "delete query";
+                title.InnerText = string.Format("{0} - Delete Query", Util.get_setting("AppTitle", "BugTracker.NET"));
 
                 string id = Util.sanitize_integer(Request["id"]);
 
