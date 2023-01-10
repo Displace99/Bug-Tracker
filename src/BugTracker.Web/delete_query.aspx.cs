@@ -1,4 +1,6 @@
 using btnet;
+using BugTracker.Web.Services.Priority;
+using BugTracker.Web.Services.Query;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,41 +12,39 @@ namespace BugTracker.Web
     public partial class delete_query : Page
     {
         private string sql;
+        protected Security security;
 
-        public Security security;
+        private QueryService _queryService = new QueryService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-        ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
         {
 
             Util.do_not_cache(Response);
 
             security = new Security();
-
             security.check_security(HttpContext.Current, Security.ANY_USER_OK);
+
+            int queryId = 0;
+            int.TryParse(Request["id"], out queryId);
 
             if (IsPostBack)
             {
-                // do delete here
-                sql = @"delete queries where qu_id = $1";
-                sql = sql.Replace("$1", Util.sanitize_integer(row_id.Value));
-                btnet.DbUtil.execute_nonquery(sql);
+                //Delete query
+                _queryService.DeleteQuery(queryId);
+
                 Server.Transfer("queries.aspx");
             }
             else
             {
                 title.InnerText = string.Format("{0} - Delete Query", Util.get_setting("AppTitle", "BugTracker.NET"));
 
-                string id = Util.sanitize_integer(Request["id"]);
+                var queryDr = _queryService.GetQueryById(queryId);
+                int queryUserId = (int)queryDr["qu_user"];
+                string queryDescription = queryDr["qu_desc"].ToString();
 
-                sql = @"select qu_desc, isnull(qu_user,0) qu_user from queries where qu_id = $1";
-                sql = sql.Replace("$1", id);
-
-                DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-                if ((int)dr["qu_user"] != security.user.usid)
+                if (queryUserId != security.user.usid)
                 {
                     if (security.user.is_admin || security.user.can_edit_sql)
                     {
@@ -57,10 +57,9 @@ namespace BugTracker.Web
                     }
                 }
 
-                confirm_href.InnerText = "confirm delete of query: "
-                        + Convert.ToString(dr["qu_desc"]);
+                confirm_href.InnerText = string.Format("Confirm delete of query: {0}", queryDescription);
 
-                row_id.Value = id;
+                row_id.Value = queryId.ToString();
 
             }
         }
