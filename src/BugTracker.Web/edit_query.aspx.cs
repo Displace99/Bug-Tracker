@@ -211,34 +211,22 @@ namespace BugTracker.Web
                 }
             }
 
+            bool isQueryNameUnique = false;
+
             if (id == 0)
             {
-                // See if name is already used?
-                sql = "select count(1) from queries where qu_desc = N'$de'";
-                sql = sql.Replace("$de", desc.Value.Replace("'", "''"));
-                int query_count = (int)btnet.DbUtil.execute_scalar(sql);
-
-                if (query_count == 1)
-                {
-                    desc_err.InnerText = "A query with this name already exists.   Choose another name.";
-                    msg.InnerText = "Query was not created.";
-                    good = false;
-                }
+                isQueryNameUnique = _queryService.IsQueryUnique(desc.Value);
             }
             else
             {
-                // See if name is already used?
-                sql = "select count(1) from queries where qu_desc = N'$de' and qu_id <> $id";
-                sql = sql.Replace("$de", desc.Value.Replace("'", "''"));
-                sql = sql.Replace("$id", Convert.ToString(id));
-                int query_count = (int)btnet.DbUtil.execute_scalar(sql);
+                isQueryNameUnique = _queryService.IsQueryUnique(desc.Value, id);
+            }
 
-                if (query_count == 1)
-                {
-                    desc_err.InnerText = "A query with this name already exists.   Choose another name.";
-                    msg.InnerText = "Query was not created.";
-                    good = false;
-                }
+            if (!isQueryNameUnique)
+            {
+                desc_err.InnerText = "A query with this name already exists.   Choose another name.";
+                msg.InnerText = "Query was not created.";
+                good = false;
             }
 
             return good;

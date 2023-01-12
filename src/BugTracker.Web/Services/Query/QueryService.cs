@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace BugTracker.Web.Services.Query
@@ -39,6 +40,30 @@ namespace BugTracker.Web.Services.Query
             cmd.Parameters.AddWithValue("@queryId", queryId);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        public bool IsQueryUnique(string queryName, int? queryId = null)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append("SELECT COUNT(1) FROM queries WHERE qu_desc = @queryName");
+
+            if(queryId.HasValue)
+            {
+                sql.Append(" AND qu_id <> @Id");
+            }
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+            cmd.Parameters.AddWithValue("@queryName", queryName);
+
+            if (queryId.HasValue)
+            {
+                cmd.Parameters.AddWithValue("@Id", queryId);
+            }
+
+            var queryCount = (int)DbUtil.execute_scalar(cmd);
+
+            return queryCount == 0;
         }
     }
 }
