@@ -12,6 +12,61 @@ namespace BugTracker.Web.Services.Query
 {
     public class QueryService
     {
+        public DataSet GetAllUsersQueries(bool showAll, int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append("SELECT qu_desc [query],");
+            sql.AppendLine("case");
+            sql.AppendLine("when isnull(qu_user,0) = 0 and isnull(qu_org,0) is null then 'everybody'");
+            sql.AppendLine("when isnull(qu_user,0) <> 0 then 'user:' + us_username");
+            sql.AppendLine("when isnull(qu_org,0) <> 0 then 'org:' + og_name");
+            sql.AppendLine("else ' '");
+            sql.AppendLine("end [visibility],");
+            sql.AppendLine("'<a href=bugs.aspx?qu_id=' + convert(varchar,qu_id) + '>view list</a>' [view list],");
+            sql.AppendLine("'<a target=_blank href=print_bugs.aspx?qu_id=' + convert(varchar,qu_id) + '>print list</a>' [print list],");
+            sql.AppendLine("'<a target=_blank href=print_bugs.aspx?format=excel&qu_id=' + convert(varchar,qu_id) + '>export as excel</a>' [export as excel],");
+            sql.AppendLine("'<a target=_blank href=print_bugs2.aspx?qu_id=' + convert(varchar,qu_id) + '>print detail</a>' [print list<br>with detail],");
+            sql.AppendLine("'<a href=edit_query.aspx?id=' + convert(varchar,qu_id) + '>edit</a>' [edit],");
+            sql.AppendLine("'<a href=delete_query.aspx?id=' + convert(varchar,qu_id) + '>delete</a>' [delete]");
+            sql.AppendLine("FROM queries");
+            sql.AppendLine("LEFT OUTER JOIN users ON qu_user = us_id");
+            sql.AppendLine("LEFT OUTER JOIN orgs ON qu_org = og_id");
+            sql.AppendLine("WHERE 1 = @showAll /* all */");
+            sql.AppendLine("OR isnull(qu_user,0) = @userId");
+            sql.AppendLine("OR isnull(qu_user,0) = 0");
+            sql.AppendLine("ORDER BY qu_desc");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            cmd.Parameters.AddWithValue("@showAll", showAll);
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            return DbUtil.get_dataset(cmd);
+
+            //sql = @"select
+            //qu_desc [query],
+            //case
+            //	when isnull(qu_user,0) = 0 and isnull(qu_org,0) is null then 'everybody'
+            //	when isnull(qu_user,0) <> 0 then 'user:' + us_username
+            //	when isnull(qu_org,0) <> 0 then 'org:' + og_name
+            //	else ' '
+            //	end [visibility],
+            //'<a href=bugs.aspx?qu_id=' + convert(varchar,qu_id) + '>view list</a>' [view list],
+            //'<a target=_blank href=print_bugs.aspx?qu_id=' + convert(varchar,qu_id) + '>print list</a>' [print list],
+            //'<a target=_blank href=print_bugs.aspx?format=excel&qu_id=' + convert(varchar,qu_id) + '>export as excel</a>' [export as excel],
+            //'<a target=_blank href=print_bugs2.aspx?qu_id=' + convert(varchar,qu_id) + '>print detail</a>' [print list<br>with detail],
+            //'<a href=edit_query.aspx?id=' + convert(varchar,qu_id) + '>edit</a>' [edit],
+            //'<a href=delete_query.aspx?id=' + convert(varchar,qu_id) + '>delete</a>' [delete]
+            //from queries
+            //left outer join users on qu_user = us_id
+            //left outer join orgs on qu_org = og_id
+            //where 1 = $all /* all */
+            //or isnull(qu_user,0) = $us
+            //or isnull(qu_user,0) = 0
+            //order by qu_desc";
+        }
+
         /// <summary>
         /// Returns a Query for a specific Id
         /// </summary>
