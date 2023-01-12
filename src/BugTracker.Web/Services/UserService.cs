@@ -15,6 +15,17 @@ namespace BugTracker.Web.Services
     public class UserService
     {
         /// <summary>
+        /// Returns a list of all Users in the system
+        /// </summary>
+        /// <returns></returns>
+        public DataSet GetUserList()
+        {
+            string sql = "SELECT us_id, us_username FROM users ORDER BY us_username";
+
+            return DbUtil.get_dataset(sql);
+        }
+
+        /// <summary>
         /// Gets user by username
         /// </summary>
         /// <param name="userName">Username of person you are search for</param>

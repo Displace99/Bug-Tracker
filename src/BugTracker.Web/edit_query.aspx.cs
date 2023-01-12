@@ -1,4 +1,7 @@
 using btnet;
+using BugTracker.Web.Services;
+using BugTracker.Web.Services.Organization;
+using BugTracker.Web.Services.Query;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,6 +18,10 @@ namespace BugTracker.Web
         string sql;
 
         protected Security security;
+
+        private QueryService _queryService = new QueryService();
+        private OrganizationService _orgService = new OrganizationService();
+        private UserService _userService = new UserService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -50,26 +57,20 @@ namespace BugTracker.Web
                     // these guys can do everything
                     vis_everybody.Checked = true;
 
-                    sql = @"/* populate org/user dropdowns */
-select og_id, og_name from orgs order by og_name;
-select us_id, us_username from users order by us_username";
+                    DataSet orgListDS = _orgService.GetOrganizationList();
+                    DataSet userListDS = _userService.GetUserList();
 
-                    DataSet ds_orgs_and_users = btnet.DbUtil.get_dataset(sql);
-
-                    // forced project dropdown
-                    org.DataSource = ds_orgs_and_users.Tables[0].DefaultView;
+                    org.DataSource = orgListDS.Tables[0].DefaultView;
                     org.DataTextField = "og_name";
                     org.DataValueField = "og_id";
                     org.DataBind();
                     org.Items.Insert(0, new ListItem("[select org]", "0"));
 
-                    user.DataSource = ds_orgs_and_users.Tables[1].DefaultView;
+                    user.DataSource = userListDS.Tables[0].DefaultView;
                     user.DataTextField = "us_username";
                     user.DataValueField = "us_id";
                     user.DataBind();
                     user.Items.Insert(0, new ListItem("[select user]", "0"));
-
-
                 }
                 else
                 {
@@ -89,7 +90,6 @@ select us_id, us_username from users order by us_username";
                     vis_org.Visible = false;
                     vis_user.Visible = false;
                     visibility_label.Visible = false;
-
                 }
 
 
@@ -102,19 +102,10 @@ select us_id, us_username from users order by us_username";
                 }
                 else
                 {
-
-
                     sub.Value = "Update";
 
                     // Get this entry's data from the db and fill in the form
-
-                    sql = @"select
-				qu_desc, qu_sql, isnull(qu_user,0) [qu_user], isnull(qu_org,0) [qu_org]
-				from queries where qu_id = $1";
-
-
-                    sql = sql.Replace("$1", Convert.ToString(id));
-                    DataRow dr = btnet.DbUtil.get_datarow(sql);
+                    DataRow dr = _queryService.GetQueryById(id);
 
                     if ((int)dr["qu_user"] != security.user.usid)
                     {
@@ -174,10 +165,10 @@ select us_id, us_username from users order by us_username";
 
 
         ///////////////////////////////////////////////////////////////////////
-        Boolean validate()
+        bool validate()
         {
 
-            Boolean good = true;
+            bool good = true;
 
             if (desc.Value == "")
             {

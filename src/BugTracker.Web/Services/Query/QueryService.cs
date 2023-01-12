@@ -17,7 +17,7 @@ namespace BugTracker.Web.Services.Query
         /// <returns>DataRow of Query</returns>
         public DataRow GetQueryById(int Id)
         {
-            string sql = @"select qu_desc, isnull(qu_user,0) qu_user from queries where qu_id = @Id";
+            string sql = "SELECT qu_desc, qu_sql, isnull(qu_user,0) [qu_user], isnull(qu_org,0) [qu_org] FROM queries WHERE qu_id = @Id";
 
             SqlCommand cmd = new SqlCommand();
             cmd.CommandText = sql;
@@ -32,7 +32,7 @@ namespace BugTracker.Web.Services.Query
         /// <param name="queryId">Id of the query you want deleted</param>
         public void DeleteQuery(int queryId)
         {
-            string sql = "delete queries where qu_id = @queryId";
+            string sql = "DELETE queries WHERE qu_id = @queryId";
 
             SqlCommand cmd = new SqlCommand();
             cmd.CommandText = sql;
