@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Models.Query;
 using BugTracker.Web.Services;
 using BugTracker.Web.Services.Organization;
 using BugTracker.Web.Services.Query;
@@ -242,56 +243,46 @@ namespace BugTracker.Web
 
             if (good)
             {
-                if (id == 0)  // insert new
-                {
-                    sql = @"insert into queries
-				(qu_desc, qu_sql, qu_default, qu_user, qu_org)
-				values (N'$de', N'$sq', 0, $us, $rl)";
-                }
-                else // edit existing
-                {
+                QueryUpdate query = new QueryUpdate();
 
-                    sql = @"update queries set
-				qu_desc = N'$de',
-				qu_sql = N'$sq',
-				qu_user = $us,
-				qu_org = $rl
-				where qu_id = $id";
-
-                    sql = sql.Replace("$id", Convert.ToString(id));
-
-                }
-                sql = sql.Replace("$de", desc.Value.Replace("'", "''"));
-
-                sql = sql.Replace("$sq", sql_text.Value.Replace("'", "''"));
+                query.Id = id;
+                query.Title = desc.Value; ;
+                query.SqlText = sql_text.Value;
 
                 if (security.user.is_admin || security.user.can_edit_sql)
                 {
                     if (vis_everybody.Checked)
                     {
-                        sql = sql.Replace("$us", "0");
-                        sql = sql.Replace("$rl", "0");
+                        query.SelectedUserId = 0;
+                        query.SelectedOrgId = 0;
                     }
                     else if (vis_user.Checked)
                     {
-                        sql = sql.Replace("$us", Convert.ToString(user.SelectedItem.Value));
-                        sql = sql.Replace("$rl", "0");
+                        query.SelectedUserId = int.Parse(user.SelectedItem.Value);
+                        query.SelectedOrgId = 0;
                     }
                     else
                     {
-                        sql = sql.Replace("$rl", Convert.ToString(org.SelectedItem.Value));
-                        sql = sql.Replace("$us", "0");
+                        query.SelectedUserId = 0;
+                        query.SelectedOrgId = int.Parse(org.SelectedItem.Value);
                     }
                 }
                 else
                 {
-                    sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-                    sql = sql.Replace("$rl", "0");
+                    query.SelectedUserId = security.user.usid;
+                    query.SelectedOrgId = 0;
                 }
 
-                btnet.DbUtil.execute_nonquery(sql);
-                Server.Transfer("queries.aspx");
+                if(id == 0)
+                {
+                    _queryService.CreateQuery(query);
+                }
+                else
+                {
+                    _queryService.UpdateQuery(query);
+                }
 
+                Server.Transfer("queries.aspx");
             }
             else
             {

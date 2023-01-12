@@ -1,4 +1,5 @@
 ﻿using btnet;
+using BugTracker.Web.Models.Query;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -25,6 +26,45 @@ namespace BugTracker.Web.Services.Query
             cmd.Parameters.AddWithValue("@Id", Id);
 
             return DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
+        /// Creates new Query
+        /// </summary>
+        /// <param name="query">Update Query Model</param>
+        public void CreateQuery(QueryUpdate query)
+        {
+            string sql = "INSERT INTO queries (qu_desc, qu_sql, qu_default, qu_user, qu_org) VALUES (@description, @sqlText, 0, @selectedUser, @selectedOrg)";
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql;
+
+            cmd.Parameters.AddWithValue("@description", query.Title);
+            cmd.Parameters.AddWithValue("@sqlText", query.SqlText);
+            cmd.Parameters.AddWithValue("@selectedUser", query.SelectedUserId);
+            cmd.Parameters.AddWithValue("@selectedOrg", query.SelectedOrgId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        /// <summary>
+        /// Updates an existing query
+        /// </summary>
+        /// <param name="query">Update Query Model</param>
+        public void UpdateQuery(QueryUpdate query)
+        {
+            string sql = "UPDATE queries SET qu_desc = @description, qu_sql = @sqlText,	qu_user = @selectedUser, qu_org = @selectedOrg WHERE qu_id = @Id";
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql;
+
+            cmd.Parameters.AddWithValue("@description", query.Title);
+            cmd.Parameters.AddWithValue("@sqlText", query.SqlText);
+            cmd.Parameters.AddWithValue("@selectedUser", query.SelectedUserId);
+            cmd.Parameters.AddWithValue("@selectedOrg", query.SelectedOrgId);
+            cmd.Parameters.AddWithValue("@Id", query.Id);
+
+            DbUtil.execute_nonquery(cmd);
         }
 
         /// <summary>
