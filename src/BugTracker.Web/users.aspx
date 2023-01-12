@@ -5,33 +5,34 @@ Distributed under the terms of the GNU General Public License
 -->
 <!-- #include file = "inc.aspx" -->
 
-<html>
-<head>
-<title id="titl" runat="server">btnet users</title>
-<link rel="StyleSheet" href="btnet.css" type="text/css">
-<script type="text/javascript" language="JavaScript" src="sortable.js"></script>
+<!DOCTYPE html>
 
-<script>
+<html lang="en">
+	<head>
+		<title id="titl" runat="server">btnet users</title>
+		<link rel="StyleSheet" href="btnet.css" type="text/css">
+		<script type="text/javascript" language="JavaScript" src="sortable.js"></script>
 
-function filter_changed()
-{
-	el = document.getElementById("filter_users")
+		<script>
 
-	if (el.value != "")
-	{
-		el.style.background = "yellow"
-	}
-	else
-	{
-		el.style.background = "white"
-	}
+			function filter_changed()
+			{
+				el = document.getElementById("filter_users")
 
-}
+				if (el.value != "")
+				{
+					el.style.background = "yellow"
+				}
+				else
+				{
+					el.style.background = "white"
+				}
+			}
 
-</script>
+		</script>
 
 
-</head>
+	</head>
 
 <body onload="filter_changed()">
 <% security.write_menu(Response, "admin"); %>
