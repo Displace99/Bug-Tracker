@@ -26,6 +26,135 @@ namespace BugTracker.Web.Services
         }
 
         /// <summary>
+        /// Returns a DataSet of all users in the system. Used by Admin users only
+        /// </summary>
+        /// <param name="filterText">Text to filter by user name</param>
+        /// <param name="showInactiveUsers">Whether to show inactive users or not.</param>
+        /// <returns>DataSet of Users</returns>
+        public DataSet GetUserListForAdmins(string filterText, bool showInactiveUsers) 
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("SELECT DISTINCT pu_user");
+            sql.AppendLine("INTO #t FROM project_user_xref");
+            sql.AppendLine("WHERE pu_admin = 1;");
+            
+            sql.AppendLine("SELECT u.us_id [id],");
+            sql.AppendLine("'<a href=edit_user.aspx?id=' + convert(varchar,u.us_id) + '>edit</a>' [$no_sort_edit],");
+            sql.AppendLine("'<a href=edit_user.aspx?copy=y&id=' + convert(varchar,u.us_id) + '>copy</a>' [$no_sort_add<br>like<br>this],"); 
+            sql.AppendLine("'<a href=delete_user.aspx?id=' + convert(varchar,u.us_id) + '>delete</a>' [$no_sort_delete],");
+            sql.AppendLine("u.us_username [username],");
+            sql.AppendLine("isnull(u.us_firstname,'') + ' ' + isnull(u.us_lastname,'') [name],");
+            sql.AppendLine("'<a sort=''' + og_name + ''' href=edit_org.aspx?id=' + convert(varchar,og_id) + '>' + og_name + '</a>' [org],");
+            sql.AppendLine("isnull(u.us_email,'') [email],");
+            sql.AppendLine("CASE WHEN u.us_admin = 1 THEN 'Y' ELSE 'N' END [admin],");
+            sql.AppendLine("CASE WHEN pu_user is null THEN 'N' ELSE 'Y' END [project<br>admin],");
+            sql.AppendLine("CASE WHEN u.us_active = 1 THEN 'Y' ELSE 'N' END [active],");
+            sql.AppendLine("CASE WHEN og_external_user = 1 THEN 'Y' else 'N' END [external],");
+            sql.AppendLine("isnull(pj_name,'') [forced<br>project],");
+            sql.AppendLine("isnull(qu_desc,'') [default query],");
+            sql.AppendLine("CASE WHEN u.us_enable_notifications = 1 THEN 'Y' ELSE 'N' END [notif-<br>ications],");
+            sql.AppendLine("u.us_most_recent_login_datetime [most recent login],");
+            sql.AppendLine("u2.us_username [created<br>by]");
+            sql.AppendLine("FROM users u");
+            sql.AppendLine("INNER JOIN orgs ON u.us_org = og_id");
+            sql.AppendLine("LEFT OUTER JOIN queries ON u.us_default_query = qu_id");
+            sql.AppendLine("LEFT OUTER JOIN projects ON u.us_forced_project = pj_id");
+            sql.AppendLine("LEFT OUTER JOIN users u2 ON u.us_created_user = u2.us_id");
+            sql.AppendLine("LEFT OUTER JOIN #t ON u.us_id = pu_user");
+            sql.AppendLine("WHERE u.us_active = 1");
+
+            if (showInactiveUsers)
+            {
+                sql.AppendLine("OR u.us_active = 0");
+            }
+
+            if (!string.IsNullOrEmpty(filterText))
+            {
+                sql.AppendLine("AND u.us_username LIKE '@filterText%'");
+            }
+
+            sql.AppendLine("ORDER BY u.us_username;");
+            
+            sql.AppendLine("DROP TABLE #t");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            if (!string.IsNullOrEmpty(filterText))
+            {
+                cmd.Parameters.AddWithValue("@filterText", filterText);
+            }
+
+            return DbUtil.get_dataset(cmd);
+        }
+
+        /// <summary>
+        /// Returns a DataSet of all users in the system. Used by Non-Admin users only
+        /// </summary>
+        /// <param name="filterText">Text to filter by user name</param>
+        /// <param name="showInactiveUsers">Whether to show inactive users or not.</param>
+        /// <param name="userId">The UserId to filter results from</param>
+        /// <returns>DataSet of Users</returns>
+        public DataSet GetUserListForNonAdmins(string filterText, bool showInactiveUsers, int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("SELECT DISTINCT pu_user");
+            sql.AppendLine("INTO #t FROM project_user_xref");
+            sql.AppendLine("WHERE pu_admin = 1;");
+
+            sql.AppendLine("select u.us_id [id],");
+            sql.AppendLine("'<a href=edit_user.aspx?id=' + convert(varchar,u.us_id) + '>edit</a>' [$no_sort_edit],");
+            sql.AppendLine("'<a href=edit_user.aspx?copy=y&id=' + convert(varchar,u.us_id) + '>copy</a>' [$no_sort_add<br>like<br>this],");
+            sql.AppendLine("'<a href=delete_user.aspx?id=' + convert(varchar,u.us_id) + '>delete</a>' [$no_sort_delete],");
+
+            sql.AppendLine("u.us_username [username],");
+            sql.AppendLine("isnull(u.us_firstname,'') + ' ' + isnull(u.us_lastname,'') [name],");
+            sql.AppendLine("og_name [org],");
+            sql.AppendLine("isnull(u.us_email,'') [email],");
+            sql.AppendLine("case when u.us_admin = 1 then 'Y' else 'N' end [admin],");
+            sql.AppendLine("case when pu_user is null then 'N' else 'Y' end [project<br>admin],");
+            sql.AppendLine("case when u.us_active = 1 then 'Y' else 'N' end [active],");
+            sql.AppendLine("case when og_external_user = 1 then 'Y' else 'N' end [external],");
+            sql.AppendLine("isnull(pj_name,'') [forced<br>project],");
+            sql.AppendLine("isnull(qu_desc,'') [default query],");
+            sql.AppendLine("case when u.us_enable_notifications = 1 then 'Y' else 'N' end [notif-<br>ications],");
+            sql.AppendLine("u.us_most_recent_login_datetime [most recent login]");
+            sql.AppendLine("from users u");
+            sql.AppendLine("inner join orgs on us_org = og_id");
+            sql.AppendLine("left outer join queries on us_default_query = qu_id");
+            sql.AppendLine("left outer join projects on us_forced_project = pj_id ");
+            sql.AppendLine("left outer join #t on us_id = pu_user");
+            sql.AppendLine("where us_created_user = @Id");
+            sql.AppendLine("WHERE u.us_active = 1");
+
+            if (showInactiveUsers)
+            {
+                sql.AppendLine("OR u.us_active = 0");
+            }
+
+            if (!string.IsNullOrEmpty(filterText))
+            {
+                sql.AppendLine("AND u.us_username LIKE '@filterText%'");
+            }
+
+            sql.AppendLine("order by us_username;");
+
+            sql.AppendLine("drop table #t");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            if (!string.IsNullOrEmpty(filterText)) 
+            { 
+                cmd.Parameters.AddWithValue("@filterText", filterText);
+            }
+
+            cmd.Parameters.AddWithValue("@Id", userId);
+
+            return DbUtil.get_dataset(cmd);
+        }
+
+        /// <summary>
         /// Gets user by username
         /// </summary>
         /// <param name="userName">Username of person you are search for</param>
