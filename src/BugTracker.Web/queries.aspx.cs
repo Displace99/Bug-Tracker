@@ -25,8 +25,7 @@ namespace BugTracker.Web
 
 			security.check_security(HttpContext.Current, Security.ANY_USER_OK_EXCEPT_GUEST);
 
-			titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-				+ "queries";
+			title.InnerText = string.Format("{0} - Queries", Util.get_setting("AppTitle", "BugTracker.NET"));
 
 			int userId = security.user.usid;
 			bool showAll = show_all.Checked;
