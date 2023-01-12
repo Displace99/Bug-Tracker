@@ -51,11 +51,11 @@ namespace BugTracker.Web
 
             if (security.user.is_admin)
             {
-                ds = _userService.GetUserListForAdmins(filter_users.Value, hide_inactive_users.Checked);
+                ds = _userService.GetUserListForAdmins(filter_users.Value, !hide_inactive_users.Checked);
             }
             else
             {
-                ds = _userService.GetUserListForNonAdmins(filter_users.Value, hide_inactive_users.Checked, security.user.usid);
+                ds = _userService.GetUserListForNonAdmins(filter_users.Value, !hide_inactive_users.Checked, security.user.usid);
             }
 
             // cookies

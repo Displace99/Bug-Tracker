@@ -70,7 +70,7 @@ namespace BugTracker.Web.Services
 
             if (!string.IsNullOrEmpty(filterText))
             {
-                sql.AppendLine("AND u.us_username LIKE '@filterText%'");
+                sql.AppendLine("AND u.us_username LIKE @filterText");
             }
 
             sql.AppendLine("ORDER BY u.us_username;");
@@ -82,7 +82,7 @@ namespace BugTracker.Web.Services
 
             if (!string.IsNullOrEmpty(filterText))
             {
-                cmd.Parameters.AddWithValue("@filterText", filterText);
+                cmd.Parameters.AddWithValue("@filterText", filterText + "%");
             }
 
             return DbUtil.get_dataset(cmd);
@@ -134,7 +134,7 @@ namespace BugTracker.Web.Services
 
             if (!string.IsNullOrEmpty(filterText))
             {
-                sql.AppendLine("AND u.us_username LIKE '@filterText%'");
+                sql.AppendLine("AND u.us_username LIKE @filterText");
             }
 
             sql.AppendLine("order by us_username;");
@@ -146,7 +146,7 @@ namespace BugTracker.Web.Services
 
             if (!string.IsNullOrEmpty(filterText)) 
             { 
-                cmd.Parameters.AddWithValue("@filterText", filterText);
+                cmd.Parameters.AddWithValue("@filterText", filterText + "%");
             }
 
             cmd.Parameters.AddWithValue("@Id", userId);
