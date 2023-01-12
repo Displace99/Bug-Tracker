@@ -1188,6 +1188,7 @@
     <Compile Include="Models\Priority\PriorityVM.cs" />
     <Compile Include="Models\ProjectBugVM.cs" />
     <Compile Include="Models\ProjectVM.cs" />
+    <Compile Include="Models\Query\QueryUpdate.cs" />
     <Compile Include="Models\RegisterVM.cs" />
     <Compile Include="Models\Registration\RegisteredUser.cs" />
     <Compile Include="Models\User\PasswordResetUser.cs" />
@@ -1334,8 +1335,10 @@
     <Compile Include="Services\Bug\BugService.cs" />
     <Compile Include="Services\Category\CategoryService.cs" />
     <Compile Include="Services\EncryptionService.cs" />
+    <Compile Include="Services\Organization\OrganizationService.cs" />
     <Compile Include="Services\Priority\PriorityService.cs" />
     <Compile Include="Services\Project\ProjectService.cs" />
+    <Compile Include="Services\Query\QueryService.cs" />
     <Compile Include="Services\SignInService.cs" />
     <Compile Include="Services\UserRegistrationResult.cs" />
     <Compile Include="Services\UserService.cs" />
