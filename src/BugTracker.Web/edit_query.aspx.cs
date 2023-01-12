@@ -157,15 +157,13 @@ namespace BugTracker.Web
             }
             else
             {
-                on_update();
+                UpdateQuery();
             }
 
         }
 
-
-
-        ///////////////////////////////////////////////////////////////////////
-        bool validate()
+       
+        bool ValidateForm()
         {
 
             bool good = true;
@@ -246,11 +244,13 @@ namespace BugTracker.Web
             return good;
         }
 
-        ///////////////////////////////////////////////////////////////////////
-        void on_update()
+        /// <summary>
+        /// Saves Query to the Database. Updates existing query, otherwise creates a new one
+        /// </summary>
+        void UpdateQuery()
         {
 
-            Boolean good = validate();
+            bool good = ValidateForm();
 
             if (good)
             {
