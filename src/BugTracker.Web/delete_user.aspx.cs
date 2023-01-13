@@ -57,8 +57,7 @@ namespace BugTracker.Web
             }
             else
             {
-                titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                    + "delete user";
+                title.InnerText = string.Format("{0} - Delete User", Util.get_setting("AppTitle", "BugTracker.NET"));
 
                 int bugCount = _bugService.GetBugCountByUserId(userId);
                 var userDr = _userService.GetUserById(userId);
