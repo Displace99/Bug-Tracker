@@ -1,9 +1,11 @@
-﻿using BugTracker.Web.Models;
+﻿using btnet;
+using BugTracker.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace BugTracker.Web.Services.Bug
@@ -66,6 +68,26 @@ namespace BugTracker.Web.Services.Bug
             }
 
             return BugList;
+        }
+
+        public int GetBugCountByUserId(int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("declare @cnt int");
+            sql.AppendLine("select @cnt = count(1) from bugs where bg_reported_user = @Id or bg_assigned_to_user = @Id");
+            sql.AppendLine("if @cnt = 0");
+            sql.AppendLine("begin");
+            sql.AppendLine("select @cnt = count(1) from bug_posts where bp_user = @Id");
+            sql.AppendLine("end");
+            sql.AppendLine("select @cnt [cnt] from users where us_id = @Id");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@Id", userId);
+
+            DataRow dr = DbUtil.get_datarow(cmd);
+
+            return (int)dr["cnt"];
         }
     }
 }

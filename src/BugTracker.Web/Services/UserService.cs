@@ -15,7 +15,7 @@ namespace BugTracker.Web.Services
     public class UserService
     {
         /// <summary>
-        /// Returns a list of all Users in the system
+        /// Returns a list of all Users in the system. Used in dropdown lists
         /// </summary>
         /// <returns></returns>
         public DataSet GetUserList()
@@ -155,10 +155,27 @@ namespace BugTracker.Web.Services
         }
 
         /// <summary>
+        /// Gets a user by their Id
+        /// </summary>
+        /// <param name="id">Id of user</param>
+        /// <returns>DataRow</returns>
+        public DataRow GetUserById(int id) 
+        {
+            string sql = "SELECT us_username, us_created_user, us_admin FROM users WHERE us_id = @Id";
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql;
+
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            return DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
         /// Gets user by username
         /// </summary>
         /// <param name="userName">Username of person you are search for</param>
-        /// <returns></returns>
+        /// <returns>DataRow</returns>
         public DataRow GetUserByUserName(string userName)
         {
             string sql = "select us_id from users where us_username = @userName";
@@ -307,6 +324,31 @@ namespace BugTracker.Web.Services
             cmd.Parameters.AddWithValue("@linkId", linkId);
 
             return DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
+        /// Removes a user and all associated records.
+        /// This is permanent and will result in loss of data.
+        /// </summary>
+        /// <param name="userId"></param>
+        public void DeleteUser(int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("delete from emailed_links where el_username in (select us_username from users where us_id = @Id");
+            sql.AppendLine("delete users where us_id = @Id");
+            sql.AppendLine("delete project_user_xref where pu_user = @Id");
+            sql.AppendLine("delete bug_subscriptions where bs_user = @Id");
+            sql.AppendLine("delete bug_user where bu_user = @Id");
+            sql.AppendLine("delete queries where qu_user = @Id");
+            sql.AppendLine("delete queued_notifications where qn_user = @Id");
+            sql.AppendLine("delete dashboard_items where ds_user = @Id");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            cmd.Parameters.AddWithValue("@Id", userId);
+
+            DbUtil.execute_nonquery(cmd);
         }
 
     }
