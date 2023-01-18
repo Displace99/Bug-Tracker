@@ -99,14 +99,6 @@ namespace BugTracker.Web
 
                 }
 
-                //TODO: REMOVE TEMPORARY TABLES
-                //Table 0 - Temporary
-                sql = "select pj_id, pj_name from projects;";
-                //Table 1 - Temporary
-                sql += "select qu_id, qu_desc from queries;";
-                //Table 2 - Temporary
-                sql += "select og_id, og_name from orgs;";
-
                 var QueryList = _queryService.GetQueriesByUsersOrg(id);
 
                 DataSet OrgList = new DataSet();
@@ -124,48 +116,7 @@ namespace BugTracker.Web
                     }
                 }
 
-
-                // Table 3
-                if (id != 0)
-                {
-
-                    // get existing user values
-                    sql += @"
-			select
-				us_username,
-				isnull(us_firstname,'') [us_firstname],
-				isnull(us_lastname,'') [us_lastname],
-				isnull(us_bugs_per_page,10) [us_bugs_per_page],
-				us_use_fckeditor,
-				us_enable_bug_list_popups,
-				isnull(us_email,'') [us_email],
-				us_active,
-				us_admin,
-				us_enable_notifications,
-				us_send_notifications_to_self,
-                us_reported_notifications,
-                us_assigned_notifications,
-                us_subscribed_notifications,
-				us_auto_subscribe,
-				us_auto_subscribe_own_bugs,
-				us_auto_subscribe_reported_bugs,
-				us_default_query,
-				us_org,
-				isnull(us_signature,'') [us_signature],
-				isnull(us_forced_project,0) [us_forced_project],
-				us_created_user
-				from users
-				where us_id = $us";
-
-                }
-
-
-                sql = sql.Replace("$us", Convert.ToString(id));
-                sql = sql.Replace("$dpl", Util.get_setting("DefaultPermissionLevel", "2"));
-
-                DataSet ds = btnet.DbUtil.get_dataset(sql);
-
-                // query dropdown (used to be ds.Tables[1]) 
+                // query dropdown
                 query.DataSource = QueryList.Tables[0].DefaultView;
                 query.DataTextField = "qu_desc";
                 query.DataValueField = "qu_id";
@@ -182,7 +133,6 @@ namespace BugTracker.Web
                 if (security.user.is_admin
                 || security.user.other_orgs_permission_level == Security.PERMISSION_ALL)
                 {
-                    //used to be ds.Tables[2]
                     org.DataSource = OrgList.Tables[0].DefaultView;
                     org.DataTextField = "og_name";
                     org.DataValueField = "og_id";
@@ -218,16 +168,13 @@ namespace BugTracker.Web
                     bugs_per_page.Value = "10";
                     active.Checked = true;
                     enable_notifications.Checked = true;
-
                 }
                 else
                 {
-
-
                     sub.Value = "Update";
 
                     // get the values for this existing user
-                    DataRow dr = ds.Tables[3].Rows[0];
+                    DataRow dr = _userService.GetUserDetailsById(id);
 
                     // check if project admin is allowed to edit this user
                     if (!security.user.is_admin)
@@ -244,109 +191,7 @@ namespace BugTracker.Web
                         }
                     }
 
-
-                    // select values in dropdowns
-
-                    // select forced project
-                    int current_forced_project = (int)dr["us_forced_project"];
-                    foreach (ListItem li in forced_project.Items)
-                    {
-                        if (Convert.ToInt32(li.Value) == current_forced_project)
-                        {
-                            li.Selected = true;
-                            break;
-                        }
-                    }
-
-                    // Fill in this form
-                    if (copy)
-                    {
-                        username.Value = "Enter username here";
-                        firstname.Value = "";
-                        lastname.Value = "";
-                        email.Value = "";
-                        signature.InnerText = "";
-                    }
-                    else
-                    {
-                        username.Value = (string)dr["us_username"];
-                        firstname.Value = (string)dr["us_firstname"];
-                        lastname.Value = (string)dr["us_lastname"];
-                        email.Value = (string)dr["us_email"];
-                        signature.InnerText = (string)dr["us_signature"];
-                    }
-
-                    bugs_per_page.Value = Convert.ToString(dr["us_bugs_per_page"]);
-                    use_fckeditor.Checked = Convert.ToBoolean((int)dr["us_use_fckeditor"]);
-                    enable_popups.Checked = Convert.ToBoolean((int)dr["us_enable_bug_list_popups"]);
-                    active.Checked = Convert.ToBoolean((int)dr["us_active"]);
-                    admin.Checked = Convert.ToBoolean((int)dr["us_admin"]);
-                    enable_notifications.Checked = Convert.ToBoolean((int)dr["us_enable_notifications"]);
-                    send_to_self.Checked = Convert.ToBoolean((int)dr["us_send_notifications_to_self"]);
-                    reported_notifications.Items[(int)dr["us_reported_notifications"]].Selected = true;
-                    assigned_notifications.Items[(int)dr["us_assigned_notifications"]].Selected = true;
-                    subscribed_notifications.Items[(int)dr["us_subscribed_notifications"]].Selected = true;
-                    auto_subscribe.Checked = Convert.ToBoolean((int)dr["us_auto_subscribe"]);
-                    auto_subscribe_own.Checked = Convert.ToBoolean((int)dr["us_auto_subscribe_own_bugs"]);
-                    auto_subscribe_reported.Checked = Convert.ToBoolean((int)dr["us_auto_subscribe_reported_bugs"]);
-
-
-                    // org
-                    foreach (ListItem li in org.Items)
-                    {
-                        if (Convert.ToInt32(li.Value) == (int)dr["us_org"])
-                        {
-                            li.Selected = true;
-                            break;
-                        }
-                    }
-
-                    // query
-                    foreach (ListItem li in query.Items)
-                    {
-                        if (Convert.ToInt32(li.Value) == (int)dr["us_default_query"])
-                        {
-                            li.Selected = true;
-                            break;
-                        }
-                    }
-
-                    // select projects
-                    foreach (DataRow dr2 in ProjectList.Tables[0].Rows)
-                    {
-                        foreach (ListItem li in project_auto_subscribe.Items)
-                        {
-                            if (Convert.ToInt32(li.Value) == (int)dr2["pj_id"])
-                            {
-                                if ((int)dr2["pu_auto_subscribe"] == 1)
-                                {
-                                    li.Selected = true;
-                                }
-                                else
-                                {
-                                    li.Selected = false;
-                                }
-                            }
-                        }
-                    }
-
-                    foreach (DataRow dr3 in ProjectList.Tables[0].Rows)
-                    {
-                        foreach (ListItem li in project_admin.Items)
-                        {
-                            if (Convert.ToInt32(li.Value) == (int)dr3["pj_id"])
-                            {
-                                if ((int)dr3["pu_admin"] == 1)
-                                {
-                                    li.Selected = true;
-                                }
-                                else
-                                {
-                                    li.Selected = false;
-                                }
-                            }
-                        }
-                    }
+                    FillFormWithUserValues(dr, ProjectList);
 
                 } // add or edit
             } // if !postback
@@ -356,6 +201,112 @@ namespace BugTracker.Web
             }
         }
 
+        /// <summary>
+        /// Fills in Page with User Information
+        /// </summary>
+        /// <param name="userDr"></param>
+        /// <param name="projectList"></param>
+        protected void FillFormWithUserValues(DataRow userDr, DataSet projectList)
+        {
+            if (copy)
+            {
+                username.Value = "Enter username here";
+                firstname.Value = "";
+                lastname.Value = "";
+                email.Value = "";
+                signature.InnerText = "";
+            }
+            else
+            {
+                username.Value = (string)userDr["us_username"];
+                firstname.Value = (string)userDr["us_firstname"];
+                lastname.Value = (string)userDr["us_lastname"];
+                email.Value = (string)userDr["us_email"];
+                signature.InnerText = (string)userDr["us_signature"];
+            }
+
+            bugs_per_page.Value = Convert.ToString(userDr["us_bugs_per_page"]);
+            use_fckeditor.Checked = Convert.ToBoolean((int)userDr["us_use_fckeditor"]);
+            enable_popups.Checked = Convert.ToBoolean((int)userDr["us_enable_bug_list_popups"]);
+            active.Checked = Convert.ToBoolean((int)userDr["us_active"]);
+            admin.Checked = Convert.ToBoolean((int)userDr["us_admin"]);
+            enable_notifications.Checked = Convert.ToBoolean((int)userDr["us_enable_notifications"]);
+            send_to_self.Checked = Convert.ToBoolean((int)userDr["us_send_notifications_to_self"]);
+            reported_notifications.Items[(int)userDr["us_reported_notifications"]].Selected = true;
+            assigned_notifications.Items[(int)userDr["us_assigned_notifications"]].Selected = true;
+            subscribed_notifications.Items[(int)userDr["us_subscribed_notifications"]].Selected = true;
+            auto_subscribe.Checked = Convert.ToBoolean((int)userDr["us_auto_subscribe"]);
+            auto_subscribe_own.Checked = Convert.ToBoolean((int)userDr["us_auto_subscribe_own_bugs"]);
+            auto_subscribe_reported.Checked = Convert.ToBoolean((int)userDr["us_auto_subscribe_reported_bugs"]);
+
+            // select forced project
+            int current_forced_project = (int)userDr["us_forced_project"];
+            foreach (ListItem li in forced_project.Items)
+            {
+                if (Convert.ToInt32(li.Value) == current_forced_project)
+                {
+                    li.Selected = true;
+                    break;
+                }
+            }
+
+            // org
+            foreach (ListItem li in org.Items)
+            {
+                if (Convert.ToInt32(li.Value) == (int)userDr["us_org"])
+                {
+                    li.Selected = true;
+                    break;
+                }
+            }
+
+            // query
+            foreach (ListItem li in query.Items)
+            {
+                if (Convert.ToInt32(li.Value) == (int)userDr["us_default_query"])
+                {
+                    li.Selected = true;
+                    break;
+                }
+            }
+
+            // select projects
+            foreach (DataRow dr2 in projectList.Tables[0].Rows)
+            {
+                foreach (ListItem li in project_auto_subscribe.Items)
+                {
+                    if (Convert.ToInt32(li.Value) == (int)dr2["pj_id"])
+                    {
+                        if ((int)dr2["pu_auto_subscribe"] == 1)
+                        {
+                            li.Selected = true;
+                        }
+                        else
+                        {
+                            li.Selected = false;
+                        }
+                    }
+                }
+            }
+
+            foreach (DataRow dr3 in projectList.Tables[0].Rows)
+            {
+                foreach (ListItem li in project_admin.Items)
+                {
+                    if (Convert.ToInt32(li.Value) == (int)dr3["pj_id"])
+                    {
+                        if ((int)dr3["pu_admin"] == 1)
+                        {
+                            li.Selected = true;
+                        }
+                        else
+                        {
+                            li.Selected = false;
+                        }
+                    }
+                }
+            }
+        }
 
         ///////////////////////////////////////////////////////////////////////
         Boolean validate()

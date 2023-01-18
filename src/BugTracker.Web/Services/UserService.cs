@@ -203,6 +203,42 @@ namespace BugTracker.Web.Services
             return btnet.DbUtil.get_datarow(cmd);
         }
 
+        public DataRow GetUserDetailsById(int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("SELECT");
+            sql.AppendLine("us_username,");
+            sql.AppendLine("isnull(us_firstname, '')[us_firstname],");
+			sql.AppendLine("isnull(us_lastname, '')[us_lastname],");
+			sql.AppendLine("isnull(us_bugs_per_page, 10)[us_bugs_per_page],");
+			sql.AppendLine("us_use_fckeditor,");
+			sql.AppendLine("us_enable_bug_list_popups,");
+			sql.AppendLine("isnull(us_email, '')[us_email],");
+			sql.AppendLine("us_active,");
+			sql.AppendLine("us_admin,");
+			sql.AppendLine("us_enable_notifications,");
+			sql.AppendLine("us_send_notifications_to_self,");
+            sql.AppendLine("us_reported_notifications,");
+            sql.AppendLine("us_assigned_notifications,");
+            sql.AppendLine("us_subscribed_notifications,");
+			sql.AppendLine("us_auto_subscribe,");
+			sql.AppendLine("us_auto_subscribe_own_bugs,");
+			sql.AppendLine("us_auto_subscribe_reported_bugs,");
+			sql.AppendLine("us_default_query,");
+			sql.AppendLine("us_org,");
+			sql.AppendLine("isnull(us_signature, '')[us_signature],");
+			sql.AppendLine("isnull(us_forced_project, 0)[us_forced_project],");
+			sql.AppendLine("us_created_user");
+            sql.AppendLine("FROM users");
+            sql.AppendLine("WHERE us_id = @userId");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            return DbUtil.get_datarow(cmd);
+        }
+
         /// <summary>
         /// Checks to see if the current user is an admin in any project
         /// </summary>
