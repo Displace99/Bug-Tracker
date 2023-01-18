@@ -1,11 +1,13 @@
 using btnet;
 using BugTracker.Web.Services;
+using BugTracker.Web.Services.Organization;
 using BugTracker.Web.Services.Query;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.UI;
@@ -22,6 +24,7 @@ namespace BugTracker.Web
         public Security security;
         private UserService _userService = new UserService();
         private QueryService _queryService = new QueryService();
+        private OrganizationService _orgService = new OrganizationService();
         
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
@@ -110,47 +113,48 @@ namespace BugTracker.Web
                 sql = "select pj_id, pj_name from projects;";
                 //Table 1 - Temporary
                 sql += "select qu_id, qu_desc from queries;";
+                //Table 2 - Temporary
+                sql += "select og_id, og_name from orgs;";
 
                 // Table 1
                 //Queries by Org User
                 var QueryList = _queryService.GetQueriesByUsersOrg(id);
 
-   //             sql += @"/* populate query dropdown */
-		 //   declare @org int
-		 //   set @org = null
-		 //   select @org = us_org from users where us_id = $us
+                //             sql += @"/* populate query dropdown */
+                //   declare @org int
+                //   set @org = null
+                //   select @org = us_org from users where us_id = $us
 
-			//select qu_id, qu_desc
-			//from queries
-			//where (isnull(qu_user,0) = 0 and isnull(qu_org,0) = 0)
-			//or isnull(qu_user,0) = $us
-			//or isnull(qu_org,0) = isnull(@org,-1)
-			//order by qu_desc;";
+                //select qu_id, qu_desc
+                //from queries
+                //where (isnull(qu_user,0) = 0 and isnull(qu_org,0) = 0)
+                //or isnull(qu_user,0) = $us
+                //or isnull(qu_org,0) = isnull(@org,-1)
+                //order by qu_desc;";
 
+                DataSet OrgList = new DataSet();
                 // Table 2
                 if (security.user.is_admin)
                 {
                     //Get Orgs for Admins
-                    sql += @"/* populate org dropdown 1 */
-				select og_id, og_name
-				from orgs
-				order by og_name;";
+                    //                sql += @"/* populate org dropdown 1 */
+                    //select og_id, og_name
+                    //from orgs
+                    //order by og_name;";
+                    OrgList = _orgService.GetOrganizationList();
                 }
                 else
                 {
                     if (security.user.other_orgs_permission_level == Security.PERMISSION_ALL)
                     {
                         //Get Orgs for Non Admins
-                        sql += @"/* populate org dropdown 2 */
-					select og_id, og_name
-					from orgs
-					where og_non_admins_can_use = 1
-					order by og_name;";
-                    }
-                    else
-                    {
-                        sql += @"/* populate org dropdown 3 */
-					select 1; -- dummy";
+                        //                   sql += @"/* populate org dropdown 2 */
+                        //select og_id, og_name
+                        //from orgs
+                        //where og_non_admins_can_use = 1
+                        //order by og_name;";
+
+                        OrgList = _orgService.GetOrgListForNonAdmins();
                     }
                 }
 
@@ -212,7 +216,8 @@ namespace BugTracker.Web
                 if (security.user.is_admin
                 || security.user.other_orgs_permission_level == Security.PERMISSION_ALL)
                 {
-                    org.DataSource = ds.Tables[2].DefaultView;
+                    //used to be ds.Tables[2]
+                    org.DataSource = OrgList.Tables[0].DefaultView;
                     org.DataTextField = "og_name";
                     org.DataValueField = "og_id";
                     org.DataBind();
