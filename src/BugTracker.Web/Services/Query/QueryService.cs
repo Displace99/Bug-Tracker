@@ -80,6 +80,34 @@ namespace BugTracker.Web.Services.Query
         }
 
         /// <summary>
+        /// Gets a list of queries tied to a specific users organization
+        /// </summary>
+        /// <param name="userId">User ID to search</param>
+        /// <returns>DataSet of Queries</returns>
+        public DataSet GetQueriesByUsersOrg(int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+
+		    sql.AppendLine("DECLARE @org int");
+		    sql.AppendLine("SET @org = null");
+		    sql.AppendLine("SELECT @org = us_org FROM users WHERE us_id = @userId");
+			
+            sql.AppendLine("SELECT qu_id, qu_desc");
+			sql.AppendLine("FROM queries");
+			sql.AppendLine("WHERE (isnull(qu_user,0) = 0 AND isnull(qu_org,0) = 0)");
+			sql.AppendLine("OR isnull(qu_user,0) = @userId");
+			sql.AppendLine("OR isnull(qu_org,0) = isnull(@org,-1)");
+            sql.AppendLine("ORDER BY qu_desc;");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            return DbUtil.get_dataset(cmd);
+        }
+
+        /// <summary>
         /// Returns a Query for a specific Id
         /// </summary>
         /// <param name="Id"></param>

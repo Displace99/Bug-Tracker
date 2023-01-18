@@ -1,5 +1,6 @@
 using btnet;
 using BugTracker.Web.Services;
+using BugTracker.Web.Services.Query;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,11 +16,13 @@ namespace BugTracker.Web
     public partial class edit_user : Page
     {
         int id;
-        String sql;
+        string sql;
+        bool copy = false;
 
         public Security security;
         private UserService _userService = new UserService();
-        bool copy = false;
+        private QueryService _queryService = new QueryService();
+        
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -73,8 +76,8 @@ namespace BugTracker.Web
             string var = Request.QueryString["id"];
             if (var == null)
             {
+                //Set default settings when adding a new user
                 id = 0;
-                // MAW -- 2006/01/27 -- Set default settings when adding a new user
                 auto_subscribe_own.Checked = true;
                 auto_subscribe_reported.Checked = true;
                 enable_popups.Checked = true;
@@ -102,25 +105,32 @@ namespace BugTracker.Web
 
                 }
 
+                //TODO: REMOVE TEMPORARY TABLES
                 //Table 0 - Temporary
                 sql = "select pj_id, pj_name from projects;";
+                //Table 1 - Temporary
+                sql += "select qu_id, qu_desc from queries;";
 
                 // Table 1
-                sql += @"/* populate query dropdown */
-		    declare @org int
-		    set @org = null
-		    select @org = us_org from users where us_id = $us
+                //Queries by Org User
+                var QueryList = _queryService.GetQueriesByUsersOrg(id);
 
-			select qu_id, qu_desc
-			from queries
-			where (isnull(qu_user,0) = 0 and isnull(qu_org,0) = 0)
-			or isnull(qu_user,0) = $us
-			or isnull(qu_org,0) = isnull(@org,-1)
-			order by qu_desc;";
+   //             sql += @"/* populate query dropdown */
+		 //   declare @org int
+		 //   set @org = null
+		 //   select @org = us_org from users where us_id = $us
+
+			//select qu_id, qu_desc
+			//from queries
+			//where (isnull(qu_user,0) = 0 and isnull(qu_org,0) = 0)
+			//or isnull(qu_user,0) = $us
+			//or isnull(qu_org,0) = isnull(@org,-1)
+			//order by qu_desc;";
 
                 // Table 2
                 if (security.user.is_admin)
                 {
+                    //Get Orgs for Admins
                     sql += @"/* populate org dropdown 1 */
 				select og_id, og_name
 				from orgs
@@ -130,6 +140,7 @@ namespace BugTracker.Web
                 {
                     if (security.user.other_orgs_permission_level == Security.PERMISSION_ALL)
                     {
+                        //Get Orgs for Non Admins
                         sql += @"/* populate org dropdown 2 */
 					select og_id, og_name
 					from orgs
@@ -184,8 +195,8 @@ namespace BugTracker.Web
 
                 DataSet ds = btnet.DbUtil.get_dataset(sql);
 
-                // query dropdown
-                query.DataSource = ds.Tables[1].DefaultView;
+                // query dropdown (used to be ds.Tables[1]) 
+                query.DataSource = QueryList.Tables[0].DefaultView;
                 query.DataTextField = "qu_desc";
                 query.DataValueField = "qu_id";
                 query.DataBind();
