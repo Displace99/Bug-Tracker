@@ -450,12 +450,11 @@ namespace BugTracker.Web
 
             if (isValid)
             {
+                // See if the user already exists?
+                bool isUnquieName = _userService.IsUserNameUnique(username.Value, id);
 
                 if (id == 0 || copy)  // insert new
                 {
-                    // See if the user already exists?
-                    bool isUnquieName = _userService.IsUserNameUnique(username.Value);
-
                     if (isUnquieName)
                     {
                         NewUser user = new NewUser
@@ -510,13 +509,13 @@ namespace BugTracker.Web
                 {
 
                     // See if the user already exists?
-                    sql = @"select count(1)
-				from users where us_username = N'$1' and us_id <> $2";
-                    sql = sql.Replace("$1", username.Value.Replace("'", "''"));
-                    sql = sql.Replace("$2", Convert.ToString(id));
-                    int user_count = (int)btnet.DbUtil.execute_scalar(sql);
+    //                sql = @"select count(1)
+				//from users where us_username = N'$1' and us_id <> $2";
+    //                sql = sql.Replace("$1", username.Value.Replace("'", "''"));
+    //                sql = sql.Replace("$2", Convert.ToString(id));
+    //                int user_count = (int)btnet.DbUtil.execute_scalar(sql);
 
-                    if (user_count == 0)
+                    if (isUnquieName)
                     {
 
                         sql = @"

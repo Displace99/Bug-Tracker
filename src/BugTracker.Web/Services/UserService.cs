@@ -176,12 +176,26 @@ namespace BugTracker.Web.Services
         /// Checks to see if the username already exists in the system
         /// </summary>
         /// <param name="userName"></param>
+        /// /// <param name="userId"></param>
         /// <returns></returns>
-        public bool IsUserNameUnique(string userName)
+        public bool IsUserNameUnique(string userName, int userId)
         {
+            bool isUnique = false;
             var dr = GetUserByUserName(userName);
 
-            return dr == null;
+            if (dr == null)
+            {
+                isUnique = true;
+            }
+            else
+            {
+                if (Convert.ToInt32(dr["us_id"]) == userId)
+                {
+                    isUnique = true;
+                }
+            }
+
+            return isUnique;
         }
 
         /// <summary>
