@@ -47,14 +47,6 @@ namespace BugTracker.Web
 
             if (!isUserAdmin)
             {
-                // Check if the current user is an admin for any project
-                //sql = @"select pu_project
-			//from project_user_xref
-			//where pu_user = $us
-			//and pu_admin = 1";
-                //sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-                //DataSet ds_projects = btnet.DbUtil.get_dataset(sql);
-
                 if (_userService.IsUserProjectAdmin(currentUserId))
                 {
                     Response.Write("You not allowed to add users.");
@@ -66,7 +58,6 @@ namespace BugTracker.Web
                 project_admin_label.Visible = false;
                 project_admin.Visible = false;
                 project_admin_help.Visible = false;
-
             }
 
             if (Request["copy"] != null && Request["copy"] == "y")
@@ -116,31 +107,12 @@ namespace BugTracker.Web
                 //Table 2 - Temporary
                 sql += "select og_id, og_name from orgs;";
 
-                // Table 1
-                //Queries by Org User
                 var QueryList = _queryService.GetQueriesByUsersOrg(id);
 
-                //             sql += @"/* populate query dropdown */
-                //   declare @org int
-                //   set @org = null
-                //   select @org = us_org from users where us_id = $us
-
-                //select qu_id, qu_desc
-                //from queries
-                //where (isnull(qu_user,0) = 0 and isnull(qu_org,0) = 0)
-                //or isnull(qu_user,0) = $us
-                //or isnull(qu_org,0) = isnull(@org,-1)
-                //order by qu_desc;";
-
                 DataSet OrgList = new DataSet();
-                // Table 2
                 if (security.user.is_admin)
                 {
                     //Get Orgs for Admins
-                    //                sql += @"/* populate org dropdown 1 */
-                    //select og_id, og_name
-                    //from orgs
-                    //order by og_name;";
                     OrgList = _orgService.GetOrganizationList();
                 }
                 else
@@ -148,12 +120,6 @@ namespace BugTracker.Web
                     if (security.user.other_orgs_permission_level == Security.PERMISSION_ALL)
                     {
                         //Get Orgs for Non Admins
-                        //                   sql += @"/* populate org dropdown 2 */
-                        //select og_id, og_name
-                        //from orgs
-                        //where og_non_admins_can_use = 1
-                        //order by og_name;";
-
                         OrgList = _orgService.GetOrgListForNonAdmins();
                     }
                 }
