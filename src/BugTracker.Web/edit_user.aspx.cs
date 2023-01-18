@@ -308,8 +308,11 @@ namespace BugTracker.Web
             }
         }
 
-        ///////////////////////////////////////////////////////////////////////
-        Boolean validate()
+        /// <summary>
+        /// Validates Form values
+        /// </summary>
+        /// <returns></returns>
+        protected bool ValidateForm()
         {
 
             Boolean good = true;
@@ -441,9 +444,9 @@ namespace BugTracker.Web
         ///////////////////////////////////////////////////////////////////////
         void on_update()
         {
-            Boolean good = validate();
+            bool isValid = ValidateForm();
 
-            if (good)
+            if (isValid)
             {
 
                 if (id == 0 || copy)  // insert new
