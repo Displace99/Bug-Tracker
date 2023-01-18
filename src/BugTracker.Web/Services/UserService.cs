@@ -2,6 +2,7 @@
 using BugTracker.Web.Models;
 using BugTracker.Web.Models.Registration;
 using BugTracker.Web.Models.User;
+using Lucene.Net.Search;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -169,6 +170,18 @@ namespace BugTracker.Web.Services
             cmd.Parameters.AddWithValue("@Id", id);
 
             return DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
+        /// Checks to see if the username already exists in the system
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
+        public bool IsUserNameUnique(string userName)
+        {
+            var dr = GetUserByUserName(userName);
+
+            return dr == null;
         }
 
         /// <summary>
@@ -453,6 +466,56 @@ namespace BugTracker.Web.Services
             cmd.Parameters.AddWithValue("@Id", userId);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        public int AddNewUser(NewUser user)
+        {
+            StringBuilder createUserSql = new StringBuilder();
+            createUserSql.AppendLine("insert into users (us_username, us_firstname, us_lastname, ");
+            createUserSql.Append("us_bugs_per_page, us_use_fckeditor, us_enable_bug_list_popups, ");
+            createUserSql.Append("us_email, us_active, us_admin, us_enable_notifications, us_send_notifications_to_self, ");
+            createUserSql.Append("us_reported_notifications, us_assigned_notifications, ");
+            createUserSql.Append("us_subscribed_notifications, us_auto_subscribe, us_auto_subscribe_own_bugs, ");
+            createUserSql.Append("us_auto_subscribe_reported_bugs, us_default_query, us_org, us_signature, ");
+            createUserSql.Append("us_forced_project, us_created_user)");
+            createUserSql.AppendLine("values (@username, @firstName, @lastName, @bugsPerPage, @fckEditor, @popups, ");
+            createUserSql.Append("@email, @active, @isAdmin, @notifications, @selfNotifications, @reportedNotifications, ");
+            createUserSql.Append("@assignedNotifications, @subscribedNotifications, @autoSubscribe, @subscribeOwnBugs, ");
+            createUserSql.Append("@subscribeReportedBugs, @defaultQuery, @org, @signature, @forcedProject, @createdBy);");
+            createUserSql.AppendLine("select scope_identity()");
+
+            SqlCommand createUserCmd = new SqlCommand();
+            createUserCmd.CommandText = createUserSql.ToString();
+
+            createUserCmd.Parameters.AddWithValue("@username", user.UserName);
+            createUserCmd.Parameters.AddWithValue("@firstName", user.FirstName);
+            createUserCmd.Parameters.AddWithValue("@lastName", user.LastName);
+            createUserCmd.Parameters.AddWithValue("@bugsPerPage", user.BugsPerPage);
+            createUserCmd.Parameters.AddWithValue("@fckEditor", user.UseFckEditor);
+            createUserCmd.Parameters.AddWithValue("@popups", user.EnablePopups);
+            createUserCmd.Parameters.AddWithValue("@email", user.Email);
+            createUserCmd.Parameters.AddWithValue("@active", user.IsActive);
+            createUserCmd.Parameters.AddWithValue("@notifications", user.EnableNotifications);
+            createUserCmd.Parameters.AddWithValue("@selfNotifications", user.SendToSelf);
+            createUserCmd.Parameters.AddWithValue("@reportedNotifications", user.ReportedNotifications);
+            createUserCmd.Parameters.AddWithValue("@assignedNotifications", user.AssignedNotifications);
+            createUserCmd.Parameters.AddWithValue("@subscribedNotifications", user.SubscribedNotifications);
+            createUserCmd.Parameters.AddWithValue("@autoSubscribe", user.AutoSubscribe);
+            createUserCmd.Parameters.AddWithValue("@subscribeOwnBugs", user.AutoSubscribeOwn);
+            createUserCmd.Parameters.AddWithValue("@subscribeReportedBugs", user.AutoSubscribeReported);
+            createUserCmd.Parameters.AddWithValue("@defaultQuery", user.DefaultQueryId);
+            createUserCmd.Parameters.AddWithValue("@org", user.OrginizationId);
+            createUserCmd.Parameters.AddWithValue("@signature", user.Signature);
+            createUserCmd.Parameters.AddWithValue("@forcedProject", user.ForcedProjectId);
+            createUserCmd.Parameters.AddWithValue("@createdBy", user.CreatedById);
+            createUserCmd.Parameters.AddWithValue("@isAdmin", user.IsAdmin);
+
+            int userId = Convert.ToInt32(btnet.DbUtil.execute_scalar(createUserCmd));
+
+            // now encrypt the password and update the db
+            Util.UpdateUserPassword(userId, user.Password);
+
+            return userId;
         }
 
     }

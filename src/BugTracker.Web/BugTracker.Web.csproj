@@ -1191,6 +1191,7 @@
     <Compile Include="Models\Query\QueryUpdate.cs" />
     <Compile Include="Models\RegisterVM.cs" />
     <Compile Include="Models\Registration\RegisteredUser.cs" />
+    <Compile Include="Models\User\NewUser.cs" />
     <Compile Include="Models\User\PasswordResetUser.cs" />
     <Compile Include="notifications.aspx.cs">
       <DependentUpon>notifications.aspx</DependentUpon>

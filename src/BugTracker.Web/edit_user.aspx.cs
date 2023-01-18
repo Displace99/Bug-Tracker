@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Models.User;
 using BugTracker.Web.Services;
 using BugTracker.Web.Services.Organization;
 using BugTracker.Web.Services.Query;
@@ -390,7 +391,6 @@ namespace BugTracker.Web
             return good;
         }
 
-        ///////////////////////////////////////////////////////////////////////
         class Project
         {
             public int id = 0;
@@ -441,7 +441,9 @@ namespace BugTracker.Web
 
         }
 
-        ///////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Updates form. Used when adding a new user or editing an exiting user
+        /// </summary>
         void on_update()
         {
             bool isValid = ValidateForm();
@@ -452,72 +454,48 @@ namespace BugTracker.Web
                 if (id == 0 || copy)  // insert new
                 {
                     // See if the user already exists?
-                    sql = "select count(1) from users where us_username = N'$1'";
-                    sql = sql.Replace("$1", username.Value.Replace("'", "''"));
-                    int user_count = (int)btnet.DbUtil.execute_scalar(sql);
+                    bool isUnquieName = _userService.IsUserNameUnique(username.Value);
 
-                    if (user_count == 0)
+                    if (isUnquieName)
                     {
-
-                        StringBuilder createUserSql = new StringBuilder();
-                        createUserSql.AppendLine("insert into users (us_username, us_password, us_firstname, us_lastname, ");
-                        createUserSql.Append("us_bugs_per_page, us_use_fckeditor, us_enable_bug_list_popups, ");
-                        createUserSql.Append("us_email, us_active, us_admin, us_enable_notifications, us_send_notifications_to_self, ");
-                        createUserSql.Append("us_reported_notifications, us_assigned_notifications, ");
-                        createUserSql.Append("us_subscribed_notifications, us_auto_subscribe, us_auto_subscribe_own_bugs, ");
-                        createUserSql.Append("us_auto_subscribe_reported_bugs, us_default_query, us_org, us_signature, ");
-                        createUserSql.Append("us_forced_project, us_created_user)");
-                        createUserSql.AppendLine("values (@username, @password, @firstName, @lastName, @bugsPerPage, @fckEditor, @popups, ");
-                        createUserSql.Append("@email, @active, @isAdmin, @notifications, @selfNotifications, @reportedNotifications, ");
-                        createUserSql.Append("@assignedNotifications, @subscribedNotifications, @autoSubscribe, @subscribeOwnBugs, ");
-                        createUserSql.Append("@subscribeReportedBugs, @defaultQuery, @org, @signature, @forcedProject, @createdBy);");
-                        createUserSql.AppendLine("select scope_identity()");
-
-                        SqlCommand createUserCmd = new SqlCommand();
-                        createUserCmd.CommandText = createUserSql.ToString();
-
-                        createUserCmd.Parameters.AddWithValue("@username", username.Value);
-
-                        // This is old code to fill the password field with some junk, just temporarily. Password is updated in separate method
-                        //TODO: Fix this
-                        createUserCmd.Parameters.AddWithValue("@password", Convert.ToString(new Random().Next()));
-                        createUserCmd.Parameters.AddWithValue("@firstName", firstname.Value);
-                        createUserCmd.Parameters.AddWithValue("@lastName", lastname.Value);
-                        createUserCmd.Parameters.AddWithValue("@bugsPerPage", bugs_per_page.Value);
-                        createUserCmd.Parameters.AddWithValue("@fckEditor", use_fckeditor.Checked);
-                        createUserCmd.Parameters.AddWithValue("@popups", enable_popups.Checked);
-                        createUserCmd.Parameters.AddWithValue("@email", email.Value);
-                        createUserCmd.Parameters.AddWithValue("@active", active.Checked);
-                        createUserCmd.Parameters.AddWithValue("@notifications", enable_notifications.Checked);
-                        createUserCmd.Parameters.AddWithValue("@selfNotifications", send_to_self.Checked);
-                        createUserCmd.Parameters.AddWithValue("@reportedNotifications", reported_notifications.SelectedItem.Value);
-                        createUserCmd.Parameters.AddWithValue("@assignedNotifications", assigned_notifications.SelectedItem.Value);
-                        createUserCmd.Parameters.AddWithValue("@subscribedNotifications", subscribed_notifications.SelectedItem.Value);
-                        createUserCmd.Parameters.AddWithValue("@autoSubscribe", auto_subscribe.Checked);
-                        createUserCmd.Parameters.AddWithValue("@subscribeOwnBugs", auto_subscribe_own.Checked);
-                        createUserCmd.Parameters.AddWithValue("@subscribeReportedBugs", auto_subscribe_reported.Checked);
-                        createUserCmd.Parameters.AddWithValue("@defaultQuery", query.SelectedItem.Value);
-                        createUserCmd.Parameters.AddWithValue("@org", org.SelectedItem.Value);
-                        createUserCmd.Parameters.AddWithValue("@signature", signature.InnerText);
-                        createUserCmd.Parameters.AddWithValue("@forcedProject", forced_project.SelectedItem.Value);
-                        createUserCmd.Parameters.AddWithValue("@createdBy", security.user.usid);
+                        NewUser user = new NewUser
+                        {
+                            UserName = username.Value,
+                            Password = pw.Value,
+                            FirstName = firstname.Value,
+                            LastName = lastname.Value,
+                            BugsPerPage = Convert.ToInt32(bugs_per_page.Value),
+                            UseFckEditor = use_fckeditor.Checked,
+                            EnablePopups = enable_popups.Checked,
+                            Email = email.Value,
+                            IsActive = active.Checked,
+                            EnableNotifications = enable_notifications.Checked,
+                            SendToSelf = send_to_self.Checked,
+                            ReportedNotifications = Convert.ToInt32(reported_notifications.SelectedItem.Value),
+                            AssignedNotifications = Convert.ToInt32(assigned_notifications.SelectedItem.Value),
+                            SubscribedNotifications = Convert.ToInt32(subscribed_notifications.SelectedItem.Value),
+                            AutoSubscribe = auto_subscribe.Checked,
+                            AutoSubscribeOwn = auto_subscribe_own.Checked,
+                            AutoSubscribeReported = auto_subscribe_reported.Checked,
+                            DefaultQueryId = Convert.ToInt32(query.SelectedItem.Value),
+                            OrginizationId = Convert.ToInt32(org.SelectedItem.Value),
+                            Signature = signature.InnerText,
+                            ForcedProjectId = Convert.ToInt32(forced_project.SelectedItem.Value),
+                            CreatedById = security.user.usid
+                        };
 
                         // only admins can create admins.
                         if (security.user.is_admin)
                         {
-                            createUserCmd.Parameters.AddWithValue("@isAdmin", admin.Checked);
+                            user.IsAdmin = admin.Checked;
                         }
                         else
                         {
-                            createUserCmd.Parameters.AddWithValue("@isAdmin", 0);
+                            user.IsAdmin = false;
                         }
 
-                        // insert the user
-                        id = Convert.ToInt32(btnet.DbUtil.execute_scalar(createUserCmd));
-
-                        // now encrypt the password and update the db
-                        btnet.Util.UpdateUserPassword(id, pw.Value);
-
+                        id = _userService.AddNewUser(user);
+                        
                         update_project_user_xref();
 
                         Server.Transfer("users.aspx");
@@ -527,8 +505,6 @@ namespace BugTracker.Web
                         username_err.InnerText = "User already exists.   Choose another username.";
                         msg.InnerText = "User was not created.";
                     }
-
-
                 }
                 else // edit existing
                 {
