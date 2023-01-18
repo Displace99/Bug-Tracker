@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,14 +17,12 @@ namespace BugTracker.Web
         int id;
         String sql;
 
-
         public Security security;
+        private UserService _userService = new UserService();
         bool copy = false;
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-
-        ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
         {
 
@@ -31,21 +30,26 @@ namespace BugTracker.Web
 
             security = new Security();
             security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN_OR_PROJECT_ADMIN);
+            int currentUserId = security.user.usid;
+            bool isUserAdmin = security.user.is_admin;
+            int permissionLevel = Convert.ToInt32(Util.get_setting("DefaultPermissionLevel", "2"));
+            
+            DataSet ProjectList = new DataSet();
 
             titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
                 + "edit user";
 
-            if (!security.user.is_admin)
+            if (!isUserAdmin)
             {
                 // Check if the current user is an admin for any project
-                sql = @"select pu_project
-			from project_user_xref
-			where pu_user = $us
-			and pu_admin = 1";
-                sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-                DataSet ds_projects = btnet.DbUtil.get_dataset(sql);
+                //sql = @"select pu_project
+			//from project_user_xref
+			//where pu_user = $us
+			//and pu_admin = 1";
+                //sql = sql.Replace("$us", Convert.ToString(security.user.usid));
+                //DataSet ds_projects = btnet.DbUtil.get_dataset(sql);
 
-                if (ds_projects.Tables[0].Rows.Count == 0)
+                if (_userService.IsUserProjectAdmin(currentUserId))
                 {
                     Response.Write("You not allowed to add users.");
                     Response.End();
@@ -86,47 +90,20 @@ namespace BugTracker.Web
             if (!IsPostBack)
             {
 
-                if (!security.user.is_admin)
+                if (!isUserAdmin)
                 {
-
                     // logged in user is a project level admin
-
-                    // get values for permissions grid
-                    // Table 0
-                    sql = @"
-				select pj_id, pj_name,
-				isnull(a.pu_permission_level,$dpl) [pu_permission_level],
-				isnull(a.pu_auto_subscribe,0) [pu_auto_subscribe],
-				isnull(a.pu_admin,0) [pu_admin]
-				from projects
-				inner join project_user_xref project_admin on pj_id = project_admin.pu_project
-				and project_admin.pu_user = $this_usid
-				and project_admin.pu_admin = 1
-				left outer join project_user_xref a on pj_id = a.pu_project
-				and a.pu_user = $us
-				order by pj_name;";
-
-
-                    sql = sql.Replace("$this_usid", Convert.ToString(security.user.usid));
+                    ProjectList = _userService.GetProjectPermissionsForProjectAdmin(currentUserId, id, permissionLevel);
 
                 }
                 else // user is a real admin
                 {
-
-                    // Table 0
-
-                    // populate permissions grid
-                    sql = @"
-				select pj_id, pj_name,
-				isnull(pu_permission_level,$dpl) [pu_permission_level],
-				isnull(pu_auto_subscribe,0) [pu_auto_subscribe],
-				isnull(pu_admin,0) [pu_admin]
-				from projects
-				left outer join project_user_xref on pj_id = pu_project
-				and pu_user = $us
-				order by pj_name;";
+                    ProjectList = _userService.GetProjectPermissionsForSiteAdmin(id, permissionLevel);
 
                 }
+
+                //Table 0 - Temporary
+                sql = "select pj_id, pj_name from projects;";
 
                 // Table 1
                 sql += @"/* populate query dropdown */
@@ -214,7 +191,7 @@ namespace BugTracker.Web
                 query.DataBind();
 
                 // forced project dropdown
-                forced_project.DataSource = ds.Tables[0].DefaultView;
+                forced_project.DataSource = ProjectList.Tables[0].DefaultView;
                 forced_project.DataTextField = "pj_name";
                 forced_project.DataValueField = "pj_id";
                 forced_project.DataBind();
@@ -236,17 +213,17 @@ namespace BugTracker.Web
                 }
 
                 // populate permissions grid
-                MyDataGrid.DataSource = ds.Tables[0].DefaultView;
+                MyDataGrid.DataSource = ProjectList.Tables[0].DefaultView;
                 MyDataGrid.DataBind();
 
                 // subscribe by project dropdown
-                project_auto_subscribe.DataSource = ds.Tables[0].DefaultView;
+                project_auto_subscribe.DataSource = ProjectList.Tables[0].DefaultView;
                 project_auto_subscribe.DataTextField = "pj_name";
                 project_auto_subscribe.DataValueField = "pj_id";
                 project_auto_subscribe.DataBind();
 
                 // project admin dropdown
-                project_admin.DataSource = ds.Tables[0].DefaultView;
+                project_admin.DataSource = ProjectList.Tables[0].DefaultView;
                 project_admin.DataTextField = "pj_name";
                 project_admin.DataValueField = "pj_id";
                 project_admin.DataBind();
@@ -353,7 +330,7 @@ namespace BugTracker.Web
                     }
 
                     // select projects
-                    foreach (DataRow dr2 in ds.Tables[0].Rows)
+                    foreach (DataRow dr2 in ProjectList.Tables[0].Rows)
                     {
                         foreach (ListItem li in project_auto_subscribe.Items)
                         {
@@ -371,7 +348,7 @@ namespace BugTracker.Web
                         }
                     }
 
-                    foreach (DataRow dr3 in ds.Tables[0].Rows)
+                    foreach (DataRow dr3 in ProjectList.Tables[0].Rows)
                     {
                         foreach (ListItem li in project_admin.Items)
                         {

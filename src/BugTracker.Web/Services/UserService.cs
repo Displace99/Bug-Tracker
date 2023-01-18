@@ -125,7 +125,7 @@ namespace BugTracker.Web.Services
             sql.AppendLine("left outer join projects on us_forced_project = pj_id ");
             sql.AppendLine("left outer join #t on us_id = pu_user");
             sql.AppendLine("where us_created_user = @Id");
-            sql.AppendLine("WHERE u.us_active = 1");
+            sql.AppendLine("AND u.us_active = 1");
 
             if (showInactiveUsers)
             {
@@ -201,6 +201,74 @@ namespace BugTracker.Web.Services
             cmd.Parameters.AddWithValue("@email", email);
 
             return btnet.DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
+        /// Checks to see if the current user is an admin in any project
+        /// </summary>
+        /// <param name="userId">Id of the user to check</param>
+        /// <returns>True if they are an admin, otherwise false</returns>
+        public bool IsUserProjectAdmin(int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            
+            sql.AppendLine("select pu_project");
+			sql.AppendLine("from project_user_xref");
+			sql.AppendLine("where pu_user = @Id");
+            sql.AppendLine("and pu_admin = 1");
+            
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+            cmd.Parameters.AddWithValue("@Id", userId);
+            
+            var ds_projects = DbUtil.get_dataset(cmd);
+
+            return ds_projects.Tables[0].Rows.Count == 0;
+        }
+
+        public DataSet GetProjectPermissionsForProjectAdmin(int currentUserId, int editUserId, int permissionLevel)
+        {
+            StringBuilder sql = new StringBuilder();
+
+            sql.AppendLine("select pj_id, pj_name,");
+            sql.AppendLine("isnull(a.pu_permission_level,@permissionLevel) [pu_permission_level],");
+			sql.AppendLine("isnull(a.pu_auto_subscribe, 0)[pu_auto_subscribe],");
+			sql.AppendLine("isnull(a.pu_admin, 0)[pu_admin]");
+            sql.AppendLine("from projects");
+            sql.AppendLine("inner join project_user_xref project_admin on pj_id = project_admin.pu_project");
+            sql.AppendLine("and project_admin.pu_user = @currentUserId");
+            sql.AppendLine("and project_admin.pu_admin = 1");
+            sql.AppendLine("left outer join project_user_xref a on pj_id = a.pu_project");
+            sql.AppendLine("and a.pu_user = @editUserId");
+            sql.AppendLine("order by pj_name; ");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@permissionLevel", permissionLevel);
+            cmd.Parameters.AddWithValue("@currentUserId", currentUserId);
+            cmd.Parameters.AddWithValue("@editUserId", editUserId);
+
+            return DbUtil.get_dataset(cmd);
+        }
+
+        public DataSet GetProjectPermissionsForSiteAdmin(int editUserId, int permissionLevel)
+        {
+            StringBuilder sql = new StringBuilder();
+   
+            sql.AppendLine("SELECT pj_id, pj_name,");
+            sql.AppendLine("isnull(pu_permission_level,@permissionLevel) [pu_permission_level],");
+			sql.AppendLine("isnull(pu_auto_subscribe, 0)[pu_auto_subscribe],");
+			sql.AppendLine("isnull(pu_admin, 0)[pu_admin]");
+            sql.AppendLine("FROM projects");
+            sql.AppendLine("LEFT OUTER JOIN project_user_xref ON pj_id = pu_project");
+            sql.AppendLine("AND pu_user = @editUserId");
+            sql.AppendLine("ORDER BY pj_name;");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@permissionLevel", permissionLevel);
+            cmd.Parameters.AddWithValue("@editUserId", editUserId);
+
+            return DbUtil.get_dataset(cmd);
         }
 
         /// <summary>
