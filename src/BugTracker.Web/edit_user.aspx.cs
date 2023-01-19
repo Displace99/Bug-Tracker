@@ -26,13 +26,17 @@ namespace BugTracker.Web
         private UserService _userService = new UserService();
         private QueryService _queryService = new QueryService();
         private OrganizationService _orgService = new OrganizationService();
+
+        const string _newUserErrorMessage = "User was not created.";
+        const string _editUserErrorMessage = "User was not updated";
         
+        string errorMessage = string.Empty;
+
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
         void Page_Load(Object sender, EventArgs e)
         {
-
             Util.do_not_cache(Response);
 
             security = new Security();
@@ -85,9 +89,18 @@ namespace BugTracker.Web
                 id = Convert.ToInt32(var);
             }
 
+            //Sets error message depending of if this is a new user or updating an existing user
+            if (id == 0)
+            {
+                errorMessage = _newUserErrorMessage;
+            }
+            else
+            {
+                errorMessage = _editUserErrorMessage;
+            }
+
             if (!IsPostBack)
             {
-
                 if (!isUserAdmin)
                 {
                     // logged in user is a project level admin
@@ -316,7 +329,7 @@ namespace BugTracker.Web
         protected bool ValidateForm()
         {
 
-            Boolean good = true;
+            bool good = true;
             if (username.Value == "")
             {
                 good = false;
@@ -325,6 +338,15 @@ namespace BugTracker.Web
             else
             {
                 username_err.InnerText = "";
+            }
+
+            // See if the user already exists
+            bool isUnquieName = _userService.IsUserNameUnique(username.Value, id);
+
+            if (!isUnquieName)
+            {
+                good = false;
+                username_err.InnerText = "User already exists.   Choose another username.";
             }
 
             pw_err.InnerText = "";
@@ -400,47 +422,6 @@ namespace BugTracker.Web
             public bool maybe_insert = false;
         };
 
-
-        ///////////////////////////////////////////////////////////////////////
-        string replace_vars_in_sql_statement(string sql)
-        {
-            sql = sql.Replace("$un", username.Value.Replace("'", "''"));
-            sql = sql.Replace("$fn", firstname.Value.Replace("'", "''"));
-            sql = sql.Replace("$ln", lastname.Value.Replace("'", "''"));
-            sql = sql.Replace("$bp", bugs_per_page.Value.Replace("'", "''"));
-            sql = sql.Replace("$fk", Util.bool_to_string(use_fckeditor.Checked));
-            sql = sql.Replace("$pp", Util.bool_to_string(enable_popups.Checked));
-            sql = sql.Replace("$em", email.Value.Replace("'", "''"));
-            sql = sql.Replace("$ac", Util.bool_to_string(active.Checked));
-            sql = sql.Replace("$en", Util.bool_to_string(enable_notifications.Checked));
-            sql = sql.Replace("$ss", Util.bool_to_string(send_to_self.Checked));
-            sql = sql.Replace("$rn", reported_notifications.SelectedItem.Value);
-            sql = sql.Replace("$an", assigned_notifications.SelectedItem.Value);
-            sql = sql.Replace("$sn", subscribed_notifications.SelectedItem.Value);
-            sql = sql.Replace("$as", Util.bool_to_string(auto_subscribe.Checked));
-            sql = sql.Replace("$ao", Util.bool_to_string(auto_subscribe_own.Checked));
-            sql = sql.Replace("$ar", Util.bool_to_string(auto_subscribe_reported.Checked));
-            sql = sql.Replace("$dq", query.SelectedItem.Value);
-            sql = sql.Replace("$org", org.SelectedItem.Value);
-            sql = sql.Replace("$sg", signature.InnerText.Replace("'", "''"));
-            sql = sql.Replace("$fp", forced_project.SelectedItem.Value);
-            sql = sql.Replace("$id", Convert.ToString(id));
-
-
-            // only admins can create admins.
-            if (security.user.is_admin)
-            {
-                sql = sql.Replace("$ad", Util.bool_to_string(admin.Checked));
-            }
-            else
-            {
-                sql = sql.Replace("$ad", "0");
-            }
-
-            return sql;
-
-        }
-
         /// <summary>
         /// Updates form. Used when adding a new user or editing an exiting user
         /// </summary>
@@ -450,121 +431,64 @@ namespace BugTracker.Web
 
             if (isValid)
             {
-                // See if the user already exists?
-                bool isUnquieName = _userService.IsUserNameUnique(username.Value, id);
+                NewUser user = new NewUser
+                {
+                    Id = id,
+                    UserName = username.Value,
+                    Password = pw.Value,
+                    FirstName = firstname.Value,
+                    LastName = lastname.Value,
+                    BugsPerPage = Convert.ToInt32(bugs_per_page.Value),
+                    UseFckEditor = use_fckeditor.Checked,
+                    EnablePopups = enable_popups.Checked,
+                    Email = email.Value,
+                    IsActive = active.Checked,
+                    EnableNotifications = enable_notifications.Checked,
+                    SendToSelf = send_to_self.Checked,
+                    ReportedNotifications = Convert.ToInt32(reported_notifications.SelectedItem.Value),
+                    AssignedNotifications = Convert.ToInt32(assigned_notifications.SelectedItem.Value),
+                    SubscribedNotifications = Convert.ToInt32(subscribed_notifications.SelectedItem.Value),
+                    AutoSubscribe = auto_subscribe.Checked,
+                    AutoSubscribeOwn = auto_subscribe_own.Checked,
+                    AutoSubscribeReported = auto_subscribe_reported.Checked,
+                    DefaultQueryId = Convert.ToInt32(query.SelectedItem.Value),
+                    OrginizationId = Convert.ToInt32(org.SelectedItem.Value),
+                    Signature = signature.InnerText,
+                    ForcedProjectId = Convert.ToInt32(forced_project.SelectedItem.Value),
+                    CreatedById = security.user.usid
+                };
 
+                // only admins can create admins.
+                if (security.user.is_admin)
+                {
+                    user.IsAdmin = admin.Checked;
+                }
+                else
+                {
+                    user.IsAdmin = false;
+                }
+
+                //Add or update user
                 if (id == 0 || copy)  // insert new
                 {
-                    if (isUnquieName)
-                    {
-                        NewUser user = new NewUser
-                        {
-                            UserName = username.Value,
-                            Password = pw.Value,
-                            FirstName = firstname.Value,
-                            LastName = lastname.Value,
-                            BugsPerPage = Convert.ToInt32(bugs_per_page.Value),
-                            UseFckEditor = use_fckeditor.Checked,
-                            EnablePopups = enable_popups.Checked,
-                            Email = email.Value,
-                            IsActive = active.Checked,
-                            EnableNotifications = enable_notifications.Checked,
-                            SendToSelf = send_to_self.Checked,
-                            ReportedNotifications = Convert.ToInt32(reported_notifications.SelectedItem.Value),
-                            AssignedNotifications = Convert.ToInt32(assigned_notifications.SelectedItem.Value),
-                            SubscribedNotifications = Convert.ToInt32(subscribed_notifications.SelectedItem.Value),
-                            AutoSubscribe = auto_subscribe.Checked,
-                            AutoSubscribeOwn = auto_subscribe_own.Checked,
-                            AutoSubscribeReported = auto_subscribe_reported.Checked,
-                            DefaultQueryId = Convert.ToInt32(query.SelectedItem.Value),
-                            OrginizationId = Convert.ToInt32(org.SelectedItem.Value),
-                            Signature = signature.InnerText,
-                            ForcedProjectId = Convert.ToInt32(forced_project.SelectedItem.Value),
-                            CreatedById = security.user.usid
-                        };
-
-                        // only admins can create admins.
-                        if (security.user.is_admin)
-                        {
-                            user.IsAdmin = admin.Checked;
-                        }
-                        else
-                        {
-                            user.IsAdmin = false;
-                        }
-
-                        id = _userService.AddNewUser(user);
+                    id = _userService.AddNewUser(user);
                         
-                        update_project_user_xref();
+                    update_project_user_xref();
 
-                        Server.Transfer("users.aspx");
-                    }
-                    else
-                    {
-                        username_err.InnerText = "User already exists.   Choose another username.";
-                        msg.InnerText = "User was not created.";
-                    }
+                    Server.Transfer("users.aspx");  
                 }
                 else // edit existing
                 {
+                    _userService.UpdateUser(user);  
 
-                    if (isUnquieName)
-                    {
+                    update_project_user_xref();
 
-                       
-
-                        NewUser user = new NewUser
-                        {
-                            Id = id,
-                            UserName = username.Value,
-                            Password = pw.Value,
-                            FirstName = firstname.Value,
-                            LastName = lastname.Value,
-                            BugsPerPage = Convert.ToInt32(bugs_per_page.Value),
-                            UseFckEditor = use_fckeditor.Checked,
-                            EnablePopups = enable_popups.Checked,
-                            Email = email.Value,
-                            IsActive = active.Checked,
-                            EnableNotifications = enable_notifications.Checked,
-                            SendToSelf = send_to_self.Checked,
-                            ReportedNotifications = Convert.ToInt32(reported_notifications.SelectedItem.Value),
-                            AssignedNotifications = Convert.ToInt32(assigned_notifications.SelectedItem.Value),
-                            SubscribedNotifications = Convert.ToInt32(subscribed_notifications.SelectedItem.Value),
-                            AutoSubscribe = auto_subscribe.Checked,
-                            AutoSubscribeOwn = auto_subscribe_own.Checked,
-                            AutoSubscribeReported = auto_subscribe_reported.Checked,
-                            DefaultQueryId = Convert.ToInt32(query.SelectedItem.Value),
-                            OrginizationId = Convert.ToInt32(org.SelectedItem.Value),
-                            Signature = signature.InnerText,
-                            ForcedProjectId = Convert.ToInt32(forced_project.SelectedItem.Value),
-                            CreatedById = security.user.usid
-                        };
-
-                        _userService.UpdateUser(user);  
-
-                        update_project_user_xref();
-
-                        Server.Transfer("users.aspx");
-                    }
-                    else
-                    {
-                        username_err.InnerText = "Username already exists.   Choose another username.";
-                        msg.InnerText = "User was not updated.";
-                    }
-
+                    Server.Transfer("users.aspx");
                 }
             }
             else
             {
-                if (id == 0)  // insert new
-                {
-                    msg.InnerText = "User was not created.";
-                }
-                else // edit existing
-                {
-                    msg.InnerText = "User was not updated.";
-                }
-
+                msg.InnerText = errorMessage;
             }
 
         }
