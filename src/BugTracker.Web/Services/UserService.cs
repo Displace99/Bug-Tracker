@@ -10,6 +10,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Web;
+using static SupportClass;
 
 namespace BugTracker.Web.Services
 {
@@ -530,6 +531,68 @@ namespace BugTracker.Web.Services
             Util.UpdateUserPassword(userId, user.Password);
 
             return userId;
+        }
+
+        public void UpdateUser(NewUser user)
+        {
+            StringBuilder sql = new StringBuilder();
+
+            sql.AppendLine("UPDATE users SET");
+            sql.AppendLine("us_username = @userName,");
+            sql.AppendLine("us_firstname = @firstName,");
+            sql.AppendLine("us_lastname = @lastName,");
+            sql.AppendLine("us_bugs_per_page = @bugsPerPage,");
+            sql.AppendLine("us_use_fckeditor = @fckEditor,");
+            sql.AppendLine("us_enable_bug_list_popups = @popups,");
+            sql.AppendLine("us_email = @email,");
+            sql.AppendLine("us_active = @active,");
+            sql.AppendLine("us_admin = @isAdmin,");
+            sql.AppendLine("us_enable_notifications = @notifications,");
+            sql.AppendLine("us_send_notifications_to_self = @selfNotifications,");
+            sql.AppendLine("us_reported_notifications = @reportedNotifications,");
+            sql.AppendLine("us_assigned_notifications = @assignedNotifications,");
+            sql.AppendLine("us_subscribed_notifications = @subscribedNotifications,");
+            sql.AppendLine("us_auto_subscribe = @autoSubscribe,");
+            sql.AppendLine("us_auto_subscribe_own_bugs = @subscribeOwnBugs,");
+            sql.AppendLine("us_auto_subscribe_reported_bugs = @subscribeReportedBugs,");
+            sql.AppendLine("us_default_query = @defaultQuery,");
+            sql.AppendLine("us_org = @org,");
+            sql.AppendLine("us_signature = @signature,");
+            sql.AppendLine("us_forced_project = @forcedProject");
+            sql.AppendLine("WHERE us_id = @Id");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@username", user.UserName);
+            cmd.Parameters.AddWithValue("@firstName", user.FirstName);
+            cmd.Parameters.AddWithValue("@lastName", user.LastName);
+            cmd.Parameters.AddWithValue("@bugsPerPage", user.BugsPerPage);
+            cmd.Parameters.AddWithValue("@fckEditor", user.UseFckEditor);
+            cmd.Parameters.AddWithValue("@popups", user.EnablePopups);
+            cmd.Parameters.AddWithValue("@email", user.Email);
+            cmd.Parameters.AddWithValue("@active", user.IsActive);
+            cmd.Parameters.AddWithValue("@notifications", user.EnableNotifications);
+            cmd.Parameters.AddWithValue("@selfNotifications", user.SendToSelf);
+            cmd.Parameters.AddWithValue("@reportedNotifications", user.ReportedNotifications);
+            cmd.Parameters.AddWithValue("@assignedNotifications", user.AssignedNotifications);
+            cmd.Parameters.AddWithValue("@subscribedNotifications", user.SubscribedNotifications);
+            cmd.Parameters.AddWithValue("@autoSubscribe", user.AutoSubscribe);
+            cmd.Parameters.AddWithValue("@subscribeOwnBugs", user.AutoSubscribeOwn);
+            cmd.Parameters.AddWithValue("@subscribeReportedBugs", user.AutoSubscribeReported);
+            cmd.Parameters.AddWithValue("@defaultQuery", user.DefaultQueryId);
+            cmd.Parameters.AddWithValue("@org", user.OrginizationId);
+            cmd.Parameters.AddWithValue("@signature", user.Signature);
+            cmd.Parameters.AddWithValue("@forcedProject", user.ForcedProjectId);
+            cmd.Parameters.AddWithValue("@createdBy", user.CreatedById);
+            cmd.Parameters.AddWithValue("@isAdmin", user.IsAdmin);
+            cmd.Parameters.AddWithValue("@Id", user.Id);
+
+            DbUtil.execute_nonquery(cmd);
+
+            if (!string.IsNullOrEmpty(user.Password))
+            {
+                Util.UpdateUserPassword(user.Id, user.Password);
+            }
         }
 
     }

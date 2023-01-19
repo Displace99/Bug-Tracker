@@ -508,51 +508,39 @@ namespace BugTracker.Web
                 else // edit existing
                 {
 
-                    // See if the user already exists?
-    //                sql = @"select count(1)
-				//from users where us_username = N'$1' and us_id <> $2";
-    //                sql = sql.Replace("$1", username.Value.Replace("'", "''"));
-    //                sql = sql.Replace("$2", Convert.ToString(id));
-    //                int user_count = (int)btnet.DbUtil.execute_scalar(sql);
-
                     if (isUnquieName)
                     {
 
-                        sql = @"
-update users set
-us_username = N'$un',
-us_firstname = N'$fn',
-us_lastname = N'$ln',
-us_bugs_per_page = N'$bp',
-us_use_fckeditor = $fk,
-us_enable_bug_list_popups = $pp,
-us_email = N'$em',
-us_active = $ac,
-us_admin = $ad,
-us_enable_notifications = $en,
-us_send_notifications_to_self = $ss,
-us_reported_notifications = $rn,
-us_assigned_notifications = $an,
-us_subscribed_notifications = $sn,
-us_auto_subscribe = $as,
-us_auto_subscribe_own_bugs = $ao,
-us_auto_subscribe_reported_bugs = $ar,
-us_default_query = $dq,
-us_org = $org,
-us_signature = N'$sg',
-us_forced_project = $fp
-where us_id = $id";
+                       
 
-
-                        sql = replace_vars_in_sql_statement(sql);
-
-                        btnet.DbUtil.execute_nonquery(sql);
-
-                        // update the password
-                        if (pw.Value != "")
+                        NewUser user = new NewUser
                         {
-                            btnet.Util.UpdateUserPassword(id, pw.Value);
-                        }
+                            Id = id,
+                            UserName = username.Value,
+                            Password = pw.Value,
+                            FirstName = firstname.Value,
+                            LastName = lastname.Value,
+                            BugsPerPage = Convert.ToInt32(bugs_per_page.Value),
+                            UseFckEditor = use_fckeditor.Checked,
+                            EnablePopups = enable_popups.Checked,
+                            Email = email.Value,
+                            IsActive = active.Checked,
+                            EnableNotifications = enable_notifications.Checked,
+                            SendToSelf = send_to_self.Checked,
+                            ReportedNotifications = Convert.ToInt32(reported_notifications.SelectedItem.Value),
+                            AssignedNotifications = Convert.ToInt32(assigned_notifications.SelectedItem.Value),
+                            SubscribedNotifications = Convert.ToInt32(subscribed_notifications.SelectedItem.Value),
+                            AutoSubscribe = auto_subscribe.Checked,
+                            AutoSubscribeOwn = auto_subscribe_own.Checked,
+                            AutoSubscribeReported = auto_subscribe_reported.Checked,
+                            DefaultQueryId = Convert.ToInt32(query.SelectedItem.Value),
+                            OrginizationId = Convert.ToInt32(org.SelectedItem.Value),
+                            Signature = signature.InnerText,
+                            ForcedProjectId = Convert.ToInt32(forced_project.SelectedItem.Value),
+                            CreatedById = security.user.usid
+                        };
+
+                        _userService.UpdateUser(user);  
 
                         update_project_user_xref();
 
