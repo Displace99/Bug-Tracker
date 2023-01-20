@@ -582,14 +582,6 @@ namespace BugTracker.Web
             {
                 if (p.maybe_insert)
                 {
-                    if (projects != "")
-                    {
-                        projects += ",";
-                    }
-
-                    projects += Convert.ToString(p.id);
-                    
-                    //new code
                     projectIds.Add(p.id);
                 }
             }
@@ -598,7 +590,7 @@ namespace BugTracker.Web
 
             // Insert new recs - we will update them later
             // Downstream logic is now simpler in that it just deals with existing recs
-            if (projects != "")
+            if(projectIds.Count > 0) 
             {
                 _projectService.AddProjectSettings(projectIds, id);
             }
@@ -612,18 +604,13 @@ namespace BugTracker.Web
             {
                 if (p.auto_subscribe == 1)
                 {
-                    if (projects != "")
-                    {
-                        projects += ",";
-                    }
-
-                    projects += Convert.ToString(p.id);
                     projectIds.Add(p.id);
                 }
             }
             string auto_subscribe_projects = projects; // save for later
+            List<int> autoSubscribeProjects = projectIds;
 
-            if (projects != "")
+            if (projectIds.Count > 0)
             {
                 _projectService.UpdateAutoSubscribe(projectIds, id);
             }
@@ -636,18 +623,11 @@ namespace BugTracker.Web
                 {
                     if (p.admin == 1)
                     {
-                        if (projects != "")
-                        {
-                            projects += ",";
-                        }
-
-                        projects += Convert.ToString(p.id);
-
                         projectIds.Add(p.id);
                     }
                 }
 
-                if (projects != "")
+                if (projectIds.Count > 0)
                 {
                     _projectService.UpdateProjectAdmins(projectIds, id);
                 }
@@ -660,18 +640,11 @@ namespace BugTracker.Web
             {
                 if (p.permission_level == 0)
                 {
-                    if (projects != "")
-                    {
-                        projects += ",";
-                    }
-
-                    projects += Convert.ToString(p.id);
-
                     projectIds.Add(p.id);
                 }
 
             }
-            if (projects != "")
+            if (projectIds.Count > 0)
             {
                 _projectService.UpdateProjectPermissionLevels(projectIds, 0, id);
             }
@@ -683,18 +656,11 @@ namespace BugTracker.Web
             {
                 if (p.permission_level == 1)
                 {
-                    if (projects != "")
-                    {
-                        projects += ",";
-                    }
-
-                    projects += Convert.ToString(p.id);
-
                     projectIds.Add(p.id);
                 }
 
             }
-            if (projects != "")
+            if (projectIds.Count > 0)
             {
                 _projectService.UpdateProjectPermissionLevels(projectIds, 1, id);
 
@@ -708,17 +674,10 @@ namespace BugTracker.Web
             {
                 if (p.permission_level == 2)
                 {
-                    if (projects != "")
-                    {
-                        projects += ",";
-                    }
-
-                    projects += Convert.ToString(p.id);
-
                     projectIds.Add(p.id);
                 }
             }
-            if (projects != "")
+            if (projectIds.Count > 0)
             {
                 _projectService.UpdateProjectPermissionLevels(projectIds, 2, id);
             }
@@ -730,17 +689,10 @@ namespace BugTracker.Web
             {
                 if (p.permission_level == 3)
                 {
-                    if (projects != "")
-                    {
-                        projects += ",";
-                    }
-
-                    projects += Convert.ToString(p.id);
-
                     projectIds.Add(p.id);
                 }
             }
-            if (projects != "")
+            if (projectIds.Count > 0)
             {
                 _projectService.UpdateProjectPermissionLevels(projectIds, 3, id);
             }
