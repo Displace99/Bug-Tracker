@@ -1,6 +1,7 @@
 using btnet;
 using BugTracker.Web.Models.User;
 using BugTracker.Web.Services;
+using BugTracker.Web.Services.Bug;
 using BugTracker.Web.Services.Organization;
 using BugTracker.Web.Services.Project;
 using BugTracker.Web.Services.Query;
@@ -20,7 +21,6 @@ namespace BugTracker.Web
     public partial class edit_user : Page
     {
         int id;
-        string sql;
         bool copy = false;
 
         public Security security;
@@ -28,6 +28,7 @@ namespace BugTracker.Web
         private QueryService _queryService = new QueryService();
         private OrganizationService _orgService = new OrganizationService();
         private ProjectService _projectService = new ProjectService();
+        private BugSubscriptionService _subscriptionService = new BugSubscriptionService();
 
         const string _newUserErrorMessage = "User was not created.";
         const string _editUserErrorMessage = "User was not updated";
@@ -500,7 +501,6 @@ namespace BugTracker.Web
 
             System.Collections.Hashtable hash_projects = new System.Collections.Hashtable();
 
-
             foreach (ListItem li in project_auto_subscribe.Items)
             {
                 Project p = new Project();
@@ -577,7 +577,6 @@ namespace BugTracker.Web
             }
 
             List<int> projectIds = new List<int>();
-            string projects = "";
             foreach (Project p in hash_projects.Values)
             {
                 if (p.maybe_insert)
@@ -585,8 +584,6 @@ namespace BugTracker.Web
                     projectIds.Add(p.id);
                 }
             }
-
-            sql = "";
 
             // Insert new recs - we will update them later
             // Downstream logic is now simpler in that it just deals with existing recs
@@ -599,7 +596,6 @@ namespace BugTracker.Web
             _projectService.SetDefaultProjectSettings(id, default_permission_level);
 
             projectIds.Clear();
-            projects = "";
             foreach (Project p in hash_projects.Values)
             {
                 if (p.auto_subscribe == 1)
@@ -607,8 +603,8 @@ namespace BugTracker.Web
                     projectIds.Add(p.id);
                 }
             }
-            string auto_subscribe_projects = projects; // save for later
-            List<int> autoSubscribeProjects = projectIds;
+            // Save to possibly apply retroactively below
+            List<int> autoSubscribeProjects = projectIds; 
 
             if (projectIds.Count > 0)
             {
@@ -618,7 +614,6 @@ namespace BugTracker.Web
             if (security.user.is_admin)
             {
                 projectIds.Clear();
-                projects = "";
                 foreach (Project p in hash_projects.Values)
                 {
                     if (p.admin == 1)
@@ -635,7 +630,6 @@ namespace BugTracker.Web
 
             // update permission levels to 0
             projectIds.Clear();
-            projects = "";
             foreach (Project p in hash_projects.Values)
             {
                 if (p.permission_level == 0)
@@ -651,7 +645,6 @@ namespace BugTracker.Web
 
             // update permission levels to 1
             projectIds.Clear();
-            projects = "";
             foreach (Project p in hash_projects.Values)
             {
                 if (p.permission_level == 1)
@@ -666,10 +659,8 @@ namespace BugTracker.Web
 
             }
 
-
             // update permission levels to 2
             projectIds.Clear();
-            projects = "";
             foreach (Project p in hash_projects.Values)
             {
                 if (p.permission_level == 2)
@@ -684,7 +675,6 @@ namespace BugTracker.Web
 
             // update permission levels to 3
             projectIds.Clear();
-            projects = "";
             foreach (Project p in hash_projects.Values)
             {
                 if (p.permission_level == 3)
@@ -701,45 +691,29 @@ namespace BugTracker.Web
             // apply subscriptions retroactively
             if (retroactive.Checked)
             {
-                sql = @"
-			delete from bug_subscriptions where bs_user = $us;";
+                _subscriptionService.DeleteSubscriptionsForUser(id);
 
                 if (auto_subscribe.Checked)
                 {
-                    sql += @"
-			insert into bug_subscriptions (bs_bug, bs_user)
-				select bg_id, $us from bugs;";
+                    _subscriptionService.AddAutoSubscribeBugs(id);
                 }
                 else
                 {
                     if (auto_subscribe_reported.Checked)
                     {
-                        sql += @"
-					insert into bug_subscriptions (bs_bug, bs_user)
-					select bg_id, $us from bugs where bg_reported_user = $us
-					and bg_id not in (select bs_bug from bug_subscriptions where bs_user = $us);";
+                        _subscriptionService.AddAutoSubscribeReportedBugs(id);
                     }
 
                     if (auto_subscribe_own.Checked)
                     {
-                        sql += @"
-					insert into bug_subscriptions (bs_bug, bs_user)
-					select bg_id, $us from bugs where bg_assigned_to_user = $us
-					and bg_id not in (select bs_bug from bug_subscriptions where bs_user = $us);";
+                        _subscriptionService.AddAutoSubscribeOwnBugs(id);
                     }
 
-                    if (auto_subscribe_projects != "")
+                    if (autoSubscribeProjects.Count > 0)
                     {
-                        sql += @"
-					insert into bug_subscriptions (bs_bug, bs_user)
-					select bg_id, $us from bugs where bg_project in ($projects)
-					and bg_id not in (select bs_bug from bug_subscriptions where bs_user = $us);";
-                        sql = sql.Replace("$projects", auto_subscribe_projects);
+                        _subscriptionService.AddAutoSubscribeProjects(id, autoSubscribeProjects);
                     }
                 }
-                sql = sql.Replace("$us", Convert.ToString(id));
-                sql = sql.Replace("$dpl", Convert.ToString(default_permission_level));
-                btnet.DbUtil.execute_nonquery(sql);
             }
         }
     }
