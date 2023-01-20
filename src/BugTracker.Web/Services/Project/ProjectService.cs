@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace BugTracker.Web.Services.Project
@@ -73,5 +74,113 @@ namespace BugTracker.Web.Services.Project
             
             return DbUtil.get_dataset(sql);
         }
+
+        #region ProjectUserSettings
+
+        public void AddProjectSettings(List<int> projectIds, int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+
+			sql.AppendLine("INSERT INTO project_user_xref (pu_project, pu_user, pu_auto_subscribe)");
+			sql.AppendLine("SELECT pj_id, @userId, 0");
+			sql.AppendLine("FROM projects");
+			sql.AppendLine(string.Format("WHERE pj_id in ({0})", string.Join(",", projectIds.Select(n => "@prm"+n).ToArray())));
+            sql.AppendLine("AND pj_id NOT IN (SELECT pu_project FROM project_user_xref WHERE pu_user = @userId);");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            foreach(int n in projectIds)
+            {
+                cmd.Parameters.AddWithValue("@prm"+n, n);
+            }
+            
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public void SetDefaultProjectSettings(int userId, int permissionLevel)
+        {
+            StringBuilder sql = new StringBuilder();
+            
+		    sql.AppendLine("update project_user_xref");
+		    sql.AppendLine("set pu_auto_subscribe = 0,");
+		    sql.AppendLine("pu_admin = 0,");
+		    sql.AppendLine("pu_permission_level = @permissionLevel");
+		    sql.AppendLine("where pu_user = @userId;");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+            cmd.Parameters.AddWithValue("@permissionLevel", permissionLevel);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public void UpdateAutoSubscribe(List<int> projectIds, int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            
+			sql.AppendLine("UPDATE project_user_xref");
+			sql.AppendLine("SET pu_auto_subscribe = 1");
+			sql.AppendLine("WHERE pu_user = @userId");
+            sql.AppendLine(string.Format("AND pu_project IN ({0});", string.Join(",", projectIds.Select(n => "@prm"+n).ToArray())));
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            foreach (int n in projectIds)
+            {
+                cmd.Parameters.AddWithValue("@prm"+n, n);
+            }
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public void UpdateProjectAdmins(List<int> projectIds, int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            
+			sql.AppendLine("UPDATE project_user_xref");
+			sql.AppendLine("SET pu_admin = 1");
+			sql.AppendLine("WHERE pu_user = @userId");
+            sql.AppendLine(string.Format("AND pu_project IN ({0});", string.Join(",", projectIds.Select(n => "@prm"+n).ToArray())));
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            foreach (int n in projectIds)
+            {
+                cmd.Parameters.AddWithValue("@prm"+n, n);
+            }
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public void UpdateProjectPermissionLevels(List<int> projectIds, int permissionLevel, int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+            
+			sql.AppendLine("UPDATE project_user_xref");
+			sql.AppendLine("SET pu_permission_level = @permissionLevel");
+			sql.AppendLine("WHERE pu_user = @userId");
+            sql.AppendLine(string.Format("AND pu_project IN ({0});", string.Join(",", projectIds.Select(n => "@prm"+n).ToArray())));
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            foreach (int n in projectIds)
+            {
+                cmd.Parameters.AddWithValue("@prm"+n, n);
+            }
+
+            cmd.Parameters.AddWithValue("@permissionLevel", permissionLevel);
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        #endregion
     }
 }

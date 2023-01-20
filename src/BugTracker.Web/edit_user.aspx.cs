@@ -2,6 +2,7 @@ using btnet;
 using BugTracker.Web.Models.User;
 using BugTracker.Web.Services;
 using BugTracker.Web.Services.Organization;
+using BugTracker.Web.Services.Project;
 using BugTracker.Web.Services.Query;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace BugTracker.Web
         private UserService _userService = new UserService();
         private QueryService _queryService = new QueryService();
         private OrganizationService _orgService = new OrganizationService();
+        private ProjectService _projectService = new ProjectService();
 
         const string _newUserErrorMessage = "User was not created.";
         const string _editUserErrorMessage = "User was not updated";
@@ -574,6 +576,7 @@ namespace BugTracker.Web
                 }
             }
 
+            List<int> projectIds = new List<int>();
             string projects = "";
             foreach (Project p in hash_projects.Values)
             {
@@ -585,6 +588,9 @@ namespace BugTracker.Web
                     }
 
                     projects += Convert.ToString(p.id);
+                    
+                    //new code
+                    projectIds.Add(p.id);
                 }
             }
 
@@ -594,23 +600,13 @@ namespace BugTracker.Web
             // Downstream logic is now simpler in that it just deals with existing recs
             if (projects != "")
             {
-                sql += @"
-			insert into project_user_xref (pu_project, pu_user, pu_auto_subscribe)
-			select pj_id, $us, 0
-			from projects
-			where pj_id in ($projects)
-			and pj_id not in (select pu_project from project_user_xref where pu_user = $us);";
-                sql = sql.Replace("$projects", projects);
+                _projectService.AddProjectSettings(projectIds, id);
             }
 
             // First turn everything off, then turn selected ones on.
-            sql += @"
-		update project_user_xref
-		set pu_auto_subscribe = 0,
-		pu_admin = 0,
-		pu_permission_level = $dpl
-		where pu_user = $us;";
+            _projectService.SetDefaultProjectSettings(id, default_permission_level);
 
+            projectIds.Clear();
             projects = "";
             foreach (Project p in hash_projects.Values)
             {
@@ -622,22 +618,19 @@ namespace BugTracker.Web
                     }
 
                     projects += Convert.ToString(p.id);
+                    projectIds.Add(p.id);
                 }
             }
             string auto_subscribe_projects = projects; // save for later
 
             if (projects != "")
             {
-                sql += @"
-			update project_user_xref
-			set pu_auto_subscribe = 1
-			where pu_user = $us
-			and pu_project in ($projects);";
-                sql = sql.Replace("$projects", projects);
+                _projectService.UpdateAutoSubscribe(projectIds, id);
             }
 
             if (security.user.is_admin)
             {
+                projectIds.Clear();
                 projects = "";
                 foreach (Project p in hash_projects.Values)
                 {
@@ -649,22 +642,19 @@ namespace BugTracker.Web
                         }
 
                         projects += Convert.ToString(p.id);
+
+                        projectIds.Add(p.id);
                     }
                 }
 
                 if (projects != "")
                 {
-                    sql += @"
-				update project_user_xref
-				set pu_admin = 1
-				where pu_user = $us
-				and pu_project in ($projects);";
-
-                    sql = sql.Replace("$projects", projects);
+                    _projectService.UpdateProjectAdmins(projectIds, id);
                 }
             }
 
             // update permission levels to 0
+            projectIds.Clear();
             projects = "";
             foreach (Project p in hash_projects.Values)
             {
@@ -676,21 +666,18 @@ namespace BugTracker.Web
                     }
 
                     projects += Convert.ToString(p.id);
+
+                    projectIds.Add(p.id);
                 }
 
             }
             if (projects != "")
             {
-                sql += @"
-			update project_user_xref
-			set pu_permission_level = 0
-			where pu_user = $us
-			and pu_project in ($projects);";
-
-                sql = sql.Replace("$projects", projects);
+                _projectService.UpdateProjectPermissionLevels(projectIds, 0, id);
             }
 
             // update permission levels to 1
+            projectIds.Clear();
             projects = "";
             foreach (Project p in hash_projects.Values)
             {
@@ -702,22 +689,20 @@ namespace BugTracker.Web
                     }
 
                     projects += Convert.ToString(p.id);
+
+                    projectIds.Add(p.id);
                 }
 
             }
             if (projects != "")
             {
-                sql += @"
-			update project_user_xref
-			set pu_permission_level = 1
-			where pu_user = $us
-			and pu_project in ($projects);";
+                _projectService.UpdateProjectPermissionLevels(projectIds, 1, id);
 
-                sql = sql.Replace("$projects", projects);
             }
 
 
             // update permission levels to 2
+            projectIds.Clear();
             projects = "";
             foreach (Project p in hash_projects.Values)
             {
@@ -729,20 +714,17 @@ namespace BugTracker.Web
                     }
 
                     projects += Convert.ToString(p.id);
+
+                    projectIds.Add(p.id);
                 }
             }
             if (projects != "")
             {
-                sql += @"
-			update project_user_xref
-			set pu_permission_level = 2
-			where pu_user = $us
-			and pu_project in ($projects);";
-
-                sql = sql.Replace("$projects", projects);
+                _projectService.UpdateProjectPermissionLevels(projectIds, 2, id);
             }
 
             // update permission levels to 3
+            projectIds.Clear();
             projects = "";
             foreach (Project p in hash_projects.Values)
             {
@@ -754,17 +736,13 @@ namespace BugTracker.Web
                     }
 
                     projects += Convert.ToString(p.id);
+
+                    projectIds.Add(p.id);
                 }
             }
             if (projects != "")
             {
-                sql += @"
-			update project_user_xref
-			set pu_permission_level = 3
-			where pu_user = $us
-			and pu_project in ($projects);";
-
-                sql = sql.Replace("$projects", projects);
+                _projectService.UpdateProjectPermissionLevels(projectIds, 3, id);
             }
 
 
@@ -807,12 +785,10 @@ namespace BugTracker.Web
                         sql = sql.Replace("$projects", auto_subscribe_projects);
                     }
                 }
+                sql = sql.Replace("$us", Convert.ToString(id));
+                sql = sql.Replace("$dpl", Convert.ToString(default_permission_level));
+                btnet.DbUtil.execute_nonquery(sql);
             }
-
-            sql = sql.Replace("$us", Convert.ToString(id));
-            sql = sql.Replace("$dpl", Convert.ToString(default_permission_level));
-            btnet.DbUtil.execute_nonquery(sql);
-
         }
     }
 }
