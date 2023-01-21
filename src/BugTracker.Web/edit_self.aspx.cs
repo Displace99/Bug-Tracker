@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Query;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,16 +12,14 @@ namespace BugTracker.Web
 {
     public partial class edit_self : Page
     {
-        int id;
+        private int id;
         String sql;
 
-
         protected Security security;
+        private QueryService _queryService = new QueryService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-
-        ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
         {
 
@@ -40,19 +39,21 @@ namespace BugTracker.Web
             {
 
 
-                sql = @"declare @org int
-			select @org = us_org from users where us_id = $us
+   //             sql = @"declare @org int
+			//select @org = us_org from users where us_id = $us
 
-			select qu_id, qu_desc
-			from queries
-			where (isnull(qu_user,0) = 0 and isnull(qu_org,0) = 0)
-			or isnull(qu_user,0) = $us
-			or isnull(qu_org,0) = @org
-			order by qu_desc";
+			//select qu_id, qu_desc
+			//from queries
+			//where (isnull(qu_user,0) = 0 and isnull(qu_org,0) = 0)
+			//or isnull(qu_user,0) = $us
+			//or isnull(qu_org,0) = @org
+			//order by qu_desc";
 
-                sql = sql.Replace("$us", Convert.ToString(security.user.usid));
+   //             sql = sql.Replace("$us", Convert.ToString(security.user.usid));
+                var queryList = _queryService.GetQueriesByUserForSelf(id);
 
-                query.DataSource = btnet.DbUtil.get_dataview(sql);
+                //query.DataSource = btnet.DbUtil.get_dataview(sql);
+                query.DataSource = queryList;
                 query.DataTextField = "qu_desc";
                 query.DataValueField = "qu_id";
                 query.DataBind();
