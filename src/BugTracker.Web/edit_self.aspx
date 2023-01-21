@@ -5,7 +5,7 @@ Distributed under the terms of the GNU General Public License
 -->
 <!-- #include file = "inc.aspx" -->
 
-<script language="C#" runat="server">
+<%--<script language="C#" runat="server">
 
 int id;
 String sql;
@@ -358,7 +358,7 @@ void on_update ()
 
 }
 
-</script>
+</script>--%>
 
 <html>
 <head>
