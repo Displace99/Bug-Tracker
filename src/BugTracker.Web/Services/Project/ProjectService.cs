@@ -51,6 +51,24 @@ namespace BugTracker.Web.Services.Project
             return projectList;
         }
 
+        public DataView GetProjectListForSelf(int userId, int defaultPermissionLevel)
+        {
+            StringBuilder sql = new StringBuilder();
+
+            sql.AppendLine("select pj_id, pj_name, isnull(pu_auto_subscribe,0) [pu_auto_subscribe]");
+			sql.AppendLine("from projects");
+			sql.AppendLine("left outer join project_user_xref on pj_id = pu_project and @userId = pu_user");
+			sql.AppendLine("where isnull(pu_permission_level,@defaultPermission) <> 0");
+            sql.AppendLine("order by pj_name");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+            cmd.Parameters.AddWithValue("@defaultPermission", defaultPermissionLevel);
+
+            return DbUtil.get_dataview(cmd);
+        }
+
         public DataSet GetAllProjectList()
         {
             string sql =

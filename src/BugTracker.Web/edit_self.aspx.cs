@@ -1,4 +1,6 @@
 using btnet;
+using BugTracker.Web.Services;
+using BugTracker.Web.Services.Project;
 using BugTracker.Web.Services.Query;
 using System;
 using System.Collections.Generic;
@@ -15,8 +17,12 @@ namespace BugTracker.Web
         private int id;
         String sql;
 
+        //We always default to 2
+        int defaultPermissionLevel = 2;
         protected Security security;
         private QueryService _queryService = new QueryService();
+        private ProjectService _projectService = new ProjectService();
+        private UserService _userService = new UserService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -34,41 +40,19 @@ namespace BugTracker.Web
             msg.InnerText = "";
 
             id = security.user.usid;
+            defaultPermissionLevel = Convert.ToInt32(Util.get_setting("DefaultPermissionLevel", "2"));
 
             if (!IsPostBack)
             {
-
-
-   //             sql = @"declare @org int
-			//select @org = us_org from users where us_id = $us
-
-			//select qu_id, qu_desc
-			//from queries
-			//where (isnull(qu_user,0) = 0 and isnull(qu_org,0) = 0)
-			//or isnull(qu_user,0) = $us
-			//or isnull(qu_org,0) = @org
-			//order by qu_desc";
-
-   //             sql = sql.Replace("$us", Convert.ToString(security.user.usid));
                 var queryList = _queryService.GetQueriesByUserForSelf(id);
 
-                //query.DataSource = btnet.DbUtil.get_dataview(sql);
                 query.DataSource = queryList;
                 query.DataTextField = "qu_desc";
                 query.DataValueField = "qu_id";
                 query.DataBind();
 
 
-                sql = @"select pj_id, pj_name, isnull(pu_auto_subscribe,0) [pu_auto_subscribe]
-			from projects
-			left outer join project_user_xref on pj_id = pu_project and $us = pu_user
-			where isnull(pu_permission_level,$dpl) <> 0
-			order by pj_name";
-
-                sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-                sql = sql.Replace("$dpl", Util.get_setting("DefaultPermissionLevel", "2"));
-
-                DataView projects_dv = btnet.DbUtil.get_dataview(sql);
+                DataView projects_dv = _projectService.GetProjectListForSelf(id, defaultPermissionLevel);
 
                 project_auto_subscribe.DataSource = projects_dv;
                 project_auto_subscribe.DataTextField = "pj_name";
@@ -77,36 +61,10 @@ namespace BugTracker.Web
 
 
                 // Get this entry's data from the db and fill in the form
-                // MAW -- 2006/01/27 -- Converted to use new notification columns
+                DataRow dr = _userService.GetUserDetailsById(id);
 
-                sql = @"select
-			us_username [username],
-			isnull(us_firstname,'') [firstname],
-			isnull(us_lastname,'') [lastname],
-			isnull(us_bugs_per_page,10) [us_bugs_per_page],
-			us_use_fckeditor,
-			us_enable_bug_list_popups,
-			isnull(us_email,'') [email],
-			us_enable_notifications,
-			us_send_notifications_to_self,
-            us_reported_notifications,
-            us_assigned_notifications,
-            us_subscribed_notifications,
-			us_auto_subscribe,
-			us_auto_subscribe_own_bugs,
-			us_auto_subscribe_reported_bugs,
-			us_default_query,
-			isnull(us_signature,'') [signature]
-			from users
-			where us_id = $id";
-
-                sql = sql.Replace("$id", Convert.ToString(id));
-
-                DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-                // Fill in this form
-                firstname.Value = (string)dr["firstname"];
-                lastname.Value = (string)dr["lastname"];
+                firstname.Value = (string)dr["us_firstname"];
+                lastname.Value = (string)dr["us_lastname"];
                 bugs_per_page.Value = Convert.ToString(dr["us_bugs_per_page"]);
 
                 if (Util.get_setting("DisableFCKEditor", "0") == "1")
@@ -117,7 +75,7 @@ namespace BugTracker.Web
 
                 use_fckeditor.Checked = Convert.ToBoolean((int)dr["us_use_fckeditor"]);
                 enable_popups.Checked = Convert.ToBoolean((int)dr["us_enable_bug_list_popups"]);
-                email.Value = (string)dr["email"];
+                email.Value = (string)dr["us_email"];
                 enable_notifications.Checked = Convert.ToBoolean((int)dr["us_enable_notifications"]);
                 reported_notifications.Items[(int)dr["us_reported_notifications"]].Selected = true;
                 assigned_notifications.Items[(int)dr["us_assigned_notifications"]].Selected = true;
@@ -126,7 +84,7 @@ namespace BugTracker.Web
                 auto_subscribe.Checked = Convert.ToBoolean((int)dr["us_auto_subscribe"]);
                 auto_subscribe_own.Checked = Convert.ToBoolean((int)dr["us_auto_subscribe_own_bugs"]);
                 auto_subscribe_reported.Checked = Convert.ToBoolean((int)dr["us_auto_subscribe_reported_bugs"]);
-                signature.InnerText = (string)dr["signature"];
+                signature.InnerText = (string)dr["us_signature"];
 
                 foreach (ListItem li in query.Items)
                 {
@@ -136,7 +94,6 @@ namespace BugTracker.Web
                         break;
                     }
                 }
-
 
                 // select projects
                 foreach (DataRowView drv in projects_dv)
@@ -156,8 +113,6 @@ namespace BugTracker.Web
                         }
                     }
                 }
-
-
             }
             else
             {
