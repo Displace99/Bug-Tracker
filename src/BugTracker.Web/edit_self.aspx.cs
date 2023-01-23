@@ -1,6 +1,7 @@
 using btnet;
 using BugTracker.Web.Models.User;
 using BugTracker.Web.Services;
+using BugTracker.Web.Services.Bug;
 using BugTracker.Web.Services.Project;
 using BugTracker.Web.Services.Query;
 using System;
@@ -24,6 +25,7 @@ namespace BugTracker.Web
         private QueryService _queryService = new QueryService();
         private ProjectService _projectService = new ProjectService();
         private UserService _userService = new UserService();
+        private BugSubscriptionService _subscriptionService = new BugSubscriptionService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -221,75 +223,49 @@ namespace BugTracker.Web
                 btnet.DbUtil.execute_nonquery(sql);
 
                 // Second see what to turn back on
-                string projects = "";
+                List<int> projectIds = new List<int>();
+               
                 foreach (ListItem li in project_auto_subscribe.Items)
                 {
                     if (li.Selected)
                     {
-                        if (projects != "")
-                        {
-                            projects += ",";
-                        }
-                        projects += Convert.ToInt32(li.Value);
+                        projectIds.Add(Convert.ToInt32(li.Value));
                     }
                 }
 
                 // If we need to turn anything back on
-                if (projects != "")
+                if (projectIds.Count > 0)
                 {
-
-                    sql = @"update project_user_xref
-				set pu_auto_subscribe = 1 where pu_user = $id and pu_project in ($projects)
-
-			insert into project_user_xref (pu_project, pu_user, pu_auto_subscribe)
-				select pj_id, $id, 1
-				from projects
-				where pj_id in ($projects)
-				and pj_id not in (select pu_project from project_user_xref where pu_user = $id)";
-
-                    sql = sql.Replace("$id", Convert.ToString(id));
-                    sql = sql.Replace("$projects", projects);
-                    btnet.DbUtil.execute_nonquery(sql);
+                    _projectService.UpdateAutoSubscribe(projectIds, id);
+                    _projectService.AddProjectSettings(projectIds, id, true);
                 }
-
 
                 // apply subscriptions retroactively
                 if (retroactive.Checked)
                 {
-                    sql = @"delete from bug_subscriptions where bs_user = $id;";
+                    _subscriptionService.DeleteSubscriptionsForUser(id);
+                 
                     if (auto_subscribe.Checked)
                     {
-                        sql += @"insert into bug_subscriptions (bs_bug, bs_user)
-					select bg_id, $id from bugs;";
+                        _subscriptionService.AddAutoSubscribeBugs(id);
                     }
                     else
                     {
                         if (auto_subscribe_reported.Checked)
                         {
-                            sql += @"insert into bug_subscriptions (bs_bug, bs_user)
-						select bg_id, $id from bugs where bg_reported_user = $id
-						and bg_id not in (select bs_bug from bug_subscriptions where bs_user = $id);";
+                            _subscriptionService.AddAutoSubscribeReportedBugs(id);
                         }
 
                         if (auto_subscribe_own.Checked)
                         {
-                            sql += @"insert into bug_subscriptions (bs_bug, bs_user)
-						select bg_id, $id from bugs where bg_assigned_to_user = $id
-						and bg_id not in (select bs_bug from bug_subscriptions where bs_user = $id);";
+                            _subscriptionService.AddAutoSubscribeOwnBugs(id);
                         }
 
-                        if (projects != "")
+                        if (projectIds.Count > 0)
                         {
-                            sql += @"insert into bug_subscriptions (bs_bug, bs_user)
-						select bg_id, $id from bugs where bg_project in ($projects)
-						and bg_id not in (select bs_bug from bug_subscriptions where bs_user = $id);";
+                            _subscriptionService.AddAutoSubscribeProjects(id, projectIds);
                         }
                     }
-
-                    sql = sql.Replace("$id", Convert.ToString(id));
-                    sql = sql.Replace("$projects", projects);
-                    btnet.DbUtil.execute_nonquery(sql);
-
                 }
 
                 msg.InnerText = "Your settings have been updated.";

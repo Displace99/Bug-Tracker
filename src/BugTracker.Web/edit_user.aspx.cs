@@ -589,7 +589,7 @@ namespace BugTracker.Web
             // Downstream logic is now simpler in that it just deals with existing recs
             if(projectIds.Count > 0) 
             {
-                _projectService.AddProjectSettings(projectIds, id);
+                _projectService.AddProjectSettings(projectIds, id, false);
             }
 
             // First turn everything off, then turn selected ones on.

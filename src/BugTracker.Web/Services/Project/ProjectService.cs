@@ -95,12 +95,12 @@ namespace BugTracker.Web.Services.Project
 
         #region ProjectUserSettings
 
-        public void AddProjectSettings(List<int> projectIds, int userId)
+        public void AddProjectSettings(List<int> projectIds, int userId, bool autoSubscribe)
         {
             StringBuilder sql = new StringBuilder();
 
 			sql.AppendLine("INSERT INTO project_user_xref (pu_project, pu_user, pu_auto_subscribe)");
-			sql.AppendLine("SELECT pj_id, @userId, 0");
+			sql.AppendLine("SELECT pj_id, @userId, @autoSubscribe");
 			sql.AppendLine("FROM projects");
 			sql.AppendLine(string.Format("WHERE pj_id in ({0})", string.Join(",", projectIds.Select(n => "@prm"+n).ToArray())));
             sql.AppendLine("AND pj_id NOT IN (SELECT pu_project FROM project_user_xref WHERE pu_user = @userId);");
@@ -111,7 +111,8 @@ namespace BugTracker.Web.Services.Project
             {
                 cmd.Parameters.AddWithValue("@prm"+n, n);
             }
-            
+
+            cmd.Parameters.AddWithValue("@autoSubscribe", autoSubscribe);
             cmd.Parameters.AddWithValue("@userId", userId);
 
             DbUtil.execute_nonquery(cmd);
@@ -133,6 +134,11 @@ namespace BugTracker.Web.Services.Project
             cmd.Parameters.AddWithValue("@permissionLevel", permissionLevel);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        public void SetDefaultProjectSettingsForSelf(int userId)
+        {
+
         }
 
         public void UpdateAutoSubscribe(List<int> projectIds, int userId)
