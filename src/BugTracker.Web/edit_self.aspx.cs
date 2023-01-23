@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Models.User;
 using BugTracker.Web.Services;
 using BugTracker.Web.Services.Project;
 using BugTracker.Web.Services.Query;
@@ -116,17 +117,19 @@ namespace BugTracker.Web
             }
             else
             {
-                on_update();
+                UpdateUser();
             }
         }
 
 
-
-        ///////////////////////////////////////////////////////////////////////
-        Boolean validate()
+        /// <summary>
+        /// Validates Form values
+        /// </summary>
+        /// <returns></returns>
+        protected bool ValidateForm()
         {
 
-            Boolean good = true;
+            bool good = true;
 
             pw_err.InnerText = "";
 
@@ -174,60 +177,40 @@ namespace BugTracker.Web
             return good;
         }
 
-        ///////////////////////////////////////////////////////////////////////
-        void on_update()
+        /// <summary>
+        /// Updates the user
+        /// </summary>
+        protected void UpdateUser()
         {
+            bool isValid = ValidateForm();
 
-            Boolean good = validate();
-
-            if (good)
+            if (isValid)
             {
 
-                sql = @"update users set
-			us_firstname = N'$fn',
-			us_lastname = N'$ln',
-			us_bugs_per_page = N'$bp',
-			us_use_fckeditor = $fk,
-			us_enable_bug_list_popups = $pp,
-			us_email = N'$em',
-			us_enable_notifications = $en,
-			us_send_notifications_to_self = $ss,
-            us_reported_notifications = $rn,
-            us_assigned_notifications = $an,
-            us_subscribed_notifications = $sn,
-			us_auto_subscribe = $as,
-			us_auto_subscribe_own_bugs = $ao,
-			us_auto_subscribe_reported_bugs = $ar,
-			us_default_query = $dq,
-			us_signature = N'$sg'
-			where us_id = $id";
-
-                sql = sql.Replace("$fn", firstname.Value.Replace("'", "''"));
-                sql = sql.Replace("$ln", lastname.Value.Replace("'", "''"));
-                sql = sql.Replace("$bp", bugs_per_page.Value.Replace("'", "''"));
-                sql = sql.Replace("$fk", Util.bool_to_string(use_fckeditor.Checked));
-                sql = sql.Replace("$pp", Util.bool_to_string(enable_popups.Checked));
-                sql = sql.Replace("$em", email.Value.Replace("'", "''"));
-                sql = sql.Replace("$en", Util.bool_to_string(enable_notifications.Checked));
-                sql = sql.Replace("$ss", Util.bool_to_string(send_to_self.Checked));
-                sql = sql.Replace("$rn", reported_notifications.SelectedItem.Value);
-                sql = sql.Replace("$an", assigned_notifications.SelectedItem.Value);
-                sql = sql.Replace("$sn", subscribed_notifications.SelectedItem.Value);
-                sql = sql.Replace("$as", Util.bool_to_string(auto_subscribe.Checked));
-                sql = sql.Replace("$ao", Util.bool_to_string(auto_subscribe_own.Checked));
-                sql = sql.Replace("$ar", Util.bool_to_string(auto_subscribe_reported.Checked));
-                sql = sql.Replace("$dq", query.SelectedItem.Value);
-                sql = sql.Replace("$sg", signature.InnerText.Replace("'", "''"));
-                sql = sql.Replace("$id", Convert.ToString(id));
-
-                // update user
-                btnet.DbUtil.execute_nonquery(sql);
-
-                // update the password
-                if (pw.Value != "")
+                NewUser user = new NewUser
                 {
-                    btnet.Util.UpdateUserPassword(id, pw.Value);
-                }
+                    Id = id,
+                    Password = pw.Value,
+                    FirstName = firstname.Value,
+                    LastName = lastname.Value,
+                    BugsPerPage = Convert.ToInt32(bugs_per_page.Value),
+                    UseFckEditor = use_fckeditor.Checked,
+                    EnablePopups = enable_popups.Checked,
+                    Email = email.Value,
+                    EnableNotifications = enable_notifications.Checked,
+                    SendToSelf = send_to_self.Checked,
+                    ReportedNotifications = Convert.ToInt32(reported_notifications.SelectedItem.Value),
+                    AssignedNotifications = Convert.ToInt32(assigned_notifications.SelectedItem.Value),
+                    SubscribedNotifications = Convert.ToInt32(subscribed_notifications.SelectedItem.Value),
+                    AutoSubscribe = auto_subscribe.Checked,
+                    AutoSubscribeOwn = auto_subscribe_own.Checked,
+                    AutoSubscribeReported = auto_subscribe_reported.Checked,
+                    DefaultQueryId = Convert.ToInt32(query.SelectedItem.Value),
+                    Signature = signature.InnerText,
+
+                };
+
+                _userService.UpdateSelf(user);
 
                 // Now update project_user_xref
 
