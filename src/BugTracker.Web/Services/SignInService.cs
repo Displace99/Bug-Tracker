@@ -169,5 +169,57 @@ namespace BugTracker.Web.Services
                 DeleteRegisteredUser(linkId);
             }
         }
+
+        public PasswordResetResult SendForgotPasswordLink(int userId)
+        {
+            string guid = Guid.NewGuid().ToString();
+            var result = new PasswordResetResult();
+
+            DataRow dr = AddPasswordResetLink(userId, guid);
+
+            string emailResult = Email.send_email(
+                (string)dr["us_email"],
+                Util.get_setting("NotificationEmailFrom", ""),
+                "", // cc
+                "reset password",
+
+                "Click to <a href='"
+                    + Util.get_setting("AbsoluteUrlPrefix", "")
+                    + "change_password.aspx?id="
+                    + guid
+                    + "'>reset password</a> for user \""
+                    + (string)dr["us_username"]
+                    + "\".",
+
+                BtnetMailFormat.Html);
+
+            if (!string.IsNullOrEmpty(emailResult))
+            {
+                result.AddError(emailResult);
+            }
+            
+            return result;
+        }
+
+        private DataRow AddPasswordResetLink(int userId, string guid)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("declare @username nvarchar(255)");
+            sql.AppendLine("declare @email nvarchar(255)");
+            
+            sql.AppendLine("select @username = us_username, @email = us_email from users where us_id = @userId");
+            
+            sql.AppendLine("insert into emailed_links"); 
+            sql.AppendLine("(el_id, el_date, el_email, el_action, el_user_id)"); 
+            sql.AppendLine("values (@guid, getdate(), @email, N'forgot', @userId)");
+            
+            sql.AppendLine("select @username us_username, @email us_email");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+            cmd.Parameters.AddWithValue("@guid", guid);
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            return DbUtil.get_datarow(cmd);
+        }
     }
 }

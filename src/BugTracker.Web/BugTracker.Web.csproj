@@ -1338,6 +1338,7 @@
     <Compile Include="Services\Category\CategoryService.cs" />
     <Compile Include="Services\EncryptionService.cs" />
     <Compile Include="Services\Organization\OrganizationService.cs" />
+    <Compile Include="Services\PasswordResetResult.cs" />
     <Compile Include="Services\Priority\PriorityService.cs" />
     <Compile Include="Services\Project\ProjectService.cs" />
     <Compile Include="Services\Query\QueryService.cs" />

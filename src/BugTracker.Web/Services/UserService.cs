@@ -212,7 +212,7 @@ namespace BugTracker.Web.Services
             cmd.CommandText = sql;
             cmd.Parameters.AddWithValue("@userName", userName);
 
-            return btnet.DbUtil.get_datarow(cmd);
+            return DbUtil.get_datarow(cmd);
         }
 
         /// <summary>
@@ -228,7 +228,19 @@ namespace BugTracker.Web.Services
             cmd.CommandText = sql;
             cmd.Parameters.AddWithValue("@email", email);
 
-            return btnet.DbUtil.get_datarow(cmd);
+            return DbUtil.get_datarow(cmd);
+        }
+
+        public DataRow GetUserByUserNameAndEmail(string userName, string email)
+        {
+            string sql = "select us_id from users where us_username = @userName and us_email = @email";
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql;
+            cmd.Parameters.AddWithValue("@userName", userName);
+            cmd.Parameters.AddWithValue("@email", email);
+
+            return DbUtil.get_datarow(cmd);
         }
 
         public DataRow GetUserDetailsById(int userId)
@@ -348,7 +360,7 @@ namespace BugTracker.Web.Services
             cmd.CommandText = sql;
             cmd.Parameters.AddWithValue("@username", userName);
 
-            return btnet.DbUtil.get_datarow(cmd);
+            return DbUtil.get_datarow(cmd);
         }
 
         /// <summary>
@@ -364,7 +376,7 @@ namespace BugTracker.Web.Services
             cmd.CommandText = sql;
             cmd.Parameters.AddWithValue("@email", email);
 
-            return btnet.DbUtil.get_datarow(cmd);
+            return DbUtil.get_datarow(cmd);
         }
 
         /// <summary>
@@ -525,7 +537,7 @@ namespace BugTracker.Web.Services
             createUserCmd.Parameters.AddWithValue("@createdBy", user.CreatedById);
             createUserCmd.Parameters.AddWithValue("@isAdmin", user.IsAdmin);
 
-            int userId = Convert.ToInt32(btnet.DbUtil.execute_scalar(createUserCmd));
+            int userId = Convert.ToInt32(DbUtil.execute_scalar(createUserCmd));
 
             // now encrypt the password and update the db
             Util.UpdateUserPassword(userId, user.Password);
