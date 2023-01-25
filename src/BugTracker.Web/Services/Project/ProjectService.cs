@@ -136,11 +136,6 @@ namespace BugTracker.Web.Services.Project
             DbUtil.execute_nonquery(cmd);
         }
 
-        public void SetDefaultProjectSettingsForSelf(int userId)
-        {
-
-        }
-
         public void UpdateAutoSubscribe(List<int> projectIds, int userId)
         {
             StringBuilder sql = new StringBuilder();
