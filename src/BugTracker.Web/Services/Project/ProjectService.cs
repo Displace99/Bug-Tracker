@@ -93,6 +93,37 @@ namespace BugTracker.Web.Services.Project
             return DbUtil.get_dataset(sql);
         }
 
+        public DataRow GetProjectDetails(int projectId)
+        {
+            string sql = "select pj_name from projects where pj_id = @projectId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+
+            cmd.Parameters.AddWithValue("@projectId", projectId);
+
+            return DbUtil.get_datarow(cmd);
+        }
+
+        public DataSet GetProjectSettings(int projectId)
+        {
+            int defaultPermissionLevel = Convert.ToInt32(Util.get_setting("DefaultPermissionLevel", "2"));
+            StringBuilder sql = new StringBuilder();
+
+            sql.AppendLine("Select us_username, us_id, isnull(pu_permission_level,@permissionLevel) [pu_permission_level]");
+            sql.AppendLine("from users");
+            sql.AppendLine("left outer");
+            sql.AppendLine("join project_user_xref on pu_user = us_id");
+            sql.AppendLine("and pu_project = @projectId");
+            sql.AppendLine("order by us_username;");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@permissionLevel", defaultPermissionLevel);
+            cmd.Parameters.AddWithValue("@projectId", projectId);
+
+            return DbUtil.get_dataset(cmd);
+        }
+
         #region ProjectUserSettings
 
         public void AddProjectSettings(List<int> projectIds, int userId, bool autoSubscribe)

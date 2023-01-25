@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Project;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,6 +15,8 @@ namespace BugTracker.Web
         String sql;
 
         protected Security security;
+
+        private ProjectService _projectService = new ProjectService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -33,8 +36,12 @@ namespace BugTracker.Web
 
             if (!IsPostBack)
             {
-
+                int projectId = 0;
                 string project_id_string = Util.sanitize_integer(Request["id"]);
+                if (!string.IsNullOrEmpty(project_id_string))
+                {
+                    projectId = Convert.ToInt32(project_id_string);
+                }
 
                 if (Request["projects"] != null)
                 {
@@ -47,24 +54,12 @@ namespace BugTracker.Web
                     back_href.HRef = "edit_project.aspx?id=" + project_id_string;
                 }
 
-
-                sql = @"Select us_username, us_id, isnull(pu_permission_level,$dpl) [pu_permission_level]
-			from users
-			left outer join project_user_xref on pu_user = us_id
-			and pu_project = $pj
-			order by us_username;
-			select pj_name from projects where pj_id = $pj;";
-
-                sql = sql.Replace("$pj", project_id_string);
-                sql = sql.Replace("$dpl", Util.get_setting("DefaultPermissionLevel", "2"));
-
-                DataSet ds = btnet.DbUtil.get_dataset(sql);
+                DataSet ds = _projectService.GetProjectSettings(projectId);
 
                 MyDataGrid.DataSource = ds.Tables[0].DefaultView;
                 MyDataGrid.DataBind();
 
-                titl.InnerText = "Permissions for " + (string)ds.Tables[1].Rows[0][0];
-
+                titl.InnerText = "Project Permissions";
             }
             else
             {
