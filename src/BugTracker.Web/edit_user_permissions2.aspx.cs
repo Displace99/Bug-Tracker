@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Models.Project;
 using BugTracker.Web.Services.Project;
 using System;
 using System.Collections.Generic;
@@ -12,16 +13,12 @@ namespace BugTracker.Web
 {
     public partial class edit_user_permissions2 : Page
     {
-        String sql;
-
         protected Security security;
 
         private ProjectService _projectService = new ProjectService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-
-        ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
         {
 
@@ -63,34 +60,21 @@ namespace BugTracker.Web
             }
             else
             {
-                on_update();
+                UpdatePermissions();
             }
-
         }
 
 
-
-        ///////////////////////////////////////////////////////////////////////
-        void on_update()
+        void UpdatePermissions()
         {
-
             // now update all the recs
-            string sql_batch = "";
             RadioButton rb;
             string permission_level;
+            int projectId = Convert.ToInt32(Request["id"]);
+            List<ProjectUserPermissions> projectPermissionList = new List<ProjectUserPermissions>();
 
             foreach (DataGridItem dgi in MyDataGrid.Items)
             {
-                sql = @" if exists (select * from project_user_xref where pu_user = $us and pu_project = $pj)
-		            update project_user_xref set pu_permission_level = $pu
-		            where pu_user = $us and pu_project = $pj
-		         else
-		            insert into project_user_xref (pu_user, pu_project, pu_permission_level)
-		            values ($us, $pj, $pu); ";
-
-                sql = sql.Replace("$pj", Util.sanitize_integer(Request["id"]));
-                sql = sql.Replace("$us", Convert.ToString(dgi.Cells[1].Text));
-
                 rb = (RadioButton)dgi.FindControl("none");
                 if (rb.Checked)
                 {
@@ -116,20 +100,16 @@ namespace BugTracker.Web
                         }
                     }
                 }
+                
+                int userId = Convert.ToInt32(dgi.Cells[1].Text);
+                int permissionLevel = Convert.ToInt32(permission_level);
 
-
-
-                sql = sql.Replace("$pu", permission_level);
-
-
-                // add to the batch
-                sql_batch += sql;
-
+                projectPermissionList.Add(new ProjectUserPermissions {  UserId = userId, PermissionLevel = permissionLevel, ProjectId = projectId });
             }
 
-            btnet.DbUtil.execute_nonquery(sql_batch);
-            msg.InnerText = "Permissions have been updated.";
+            _projectService.UpdateProjectPermissionLevelsByProject(projectId, projectPermissionList);
 
+            msg.InnerText = "Permissions have been updated.";
         }
     }
 }

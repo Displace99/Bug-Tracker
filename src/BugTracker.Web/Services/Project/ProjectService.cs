@@ -1,5 +1,6 @@
 ﻿using btnet;
 using BugTracker.Web.Models;
+using BugTracker.Web.Models.Project;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -229,6 +230,34 @@ namespace BugTracker.Web.Services.Project
             cmd.Parameters.AddWithValue("@userId", userId);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        /// <summary>
+        /// Takes a list of users and updates their permissions for a specific project
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="projectPermissions"></param>
+        public void UpdateProjectPermissionLevelsByProject(int projectId, List<ProjectUserPermissions> projectPermissions)
+        {
+            foreach (var user in projectPermissions)
+            {
+                StringBuilder sql = new StringBuilder();
+
+                sql.AppendLine("if exists (select * from project_user_xref where pu_user = @userId and pu_project = @projectId)");
+                sql.AppendLine("update project_user_xref set pu_permission_level = @permissionLevel");
+                sql.AppendLine("where pu_user = @userId and pu_project = @projectId");
+                sql.AppendLine("else");
+                sql.AppendLine("insert into project_user_xref (pu_user, pu_project, pu_permission_level)");
+                sql.AppendLine("values (@userId, @projectId, @permissionLevel);");
+
+                SqlCommand cmd = new SqlCommand(sql.ToString());
+
+                cmd.Parameters.AddWithValue("@userId", user.UserId);
+                cmd.Parameters.AddWithValue("@projectId", projectId);
+                cmd.Parameters.AddWithValue("@permissionLevel", user.PermissionLevel);
+
+                DbUtil.execute_nonquery(cmd);
+            }
         }
 
         #endregion

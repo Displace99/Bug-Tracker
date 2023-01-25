@@ -1188,6 +1188,7 @@
     <Compile Include="Models\Priority\PriorityVM.cs" />
     <Compile Include="Models\ProjectBugVM.cs" />
     <Compile Include="Models\ProjectVM.cs" />
+    <Compile Include="Models\Project\ProjectUserPermissions.cs" />
     <Compile Include="Models\Query\QueryUpdate.cs" />
     <Compile Include="Models\RegisterVM.cs" />
     <Compile Include="Models\Registration\RegisteredUser.cs" />
