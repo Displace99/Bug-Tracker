@@ -5,7 +5,8 @@ Distributed under the terms of the GNU General Public License
 -->
 <!-- #include file = "inc.aspx" -->
 
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <title id="titl" runat="server">btnet forgot password</title>
 <link rel="StyleSheet" href="btnet.css" type="text/css">
