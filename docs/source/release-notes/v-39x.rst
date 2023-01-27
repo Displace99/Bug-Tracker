@@ -34,3 +34,8 @@ This release focuses on the continued effort to move logic into the code behind 
  * tasks_all.aspx
 
 * Moved images into separate image folder
+
+**Fixed**
+* Fixed the follwoing issues found from Sonar Cloud. 
+    * 50 bugs
+    * 43 code smell
