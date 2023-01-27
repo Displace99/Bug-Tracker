@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Web;
 
@@ -77,6 +78,63 @@ namespace BugTracker.Web.Services.Query
             cmd.Parameters.AddWithValue("@userId", userId);
 
             return DbUtil.get_dataset(cmd);
+        }
+
+        /// <summary>
+        /// Gets a list of queries tied to a specific users organization
+        /// </summary>
+        /// <param name="userId">User ID to search</param>
+        /// <returns>DataSet of Queries</returns>
+        public DataSet GetQueriesByUsersOrg(int userId)
+        {
+            StringBuilder sql = new StringBuilder();
+
+		    sql.AppendLine("DECLARE @org int");
+		    sql.AppendLine("SET @org = null");
+		    sql.AppendLine("SELECT @org = us_org FROM users WHERE us_id = @userId");
+			
+            sql.AppendLine("SELECT qu_id, qu_desc");
+			sql.AppendLine("FROM queries");
+			sql.AppendLine("WHERE (isnull(qu_user,0) = 0 AND isnull(qu_org,0) = 0)");
+			sql.AppendLine("OR isnull(qu_user,0) = @userId");
+			sql.AppendLine("OR isnull(qu_org,0) = isnull(@org,-1)");
+            sql.AppendLine("ORDER BY qu_desc;");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            return DbUtil.get_dataset(cmd);
+        }
+
+        /// <summary>
+        /// Gets a list of queries tied to a specific users organization
+        /// </summary>
+        /// <param name="userId">User ID to search</param>
+        /// <returns>DataView</returns>
+        public DataView GetQueriesByUserForSelf(int userId)
+        {
+            //This is very similar to the GetQeriesByUsersOrg (above). 
+            //See if we can combine these somehow.
+            StringBuilder sql = new StringBuilder();
+
+            sql.AppendLine("DECLARE @org INT");
+			sql.AppendLine("SELECT @org = us_org FROM users WHERE us_id = @userId");
+			
+            sql.AppendLine("SELECT qu_id, qu_desc");
+			sql.AppendLine("FROM queries");
+			sql.AppendLine("WHERE (isnull(qu_user,0) = 0 AND isnull(qu_org,0) = 0)");
+			sql.AppendLine("OR isnull(qu_user,0) = @userId");
+			sql.AppendLine("OR isnull(qu_org,0) = @org");
+            sql.AppendLine("ORDER BY qu_desc");
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = sql.ToString();
+
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            return DbUtil.get_dataview(cmd);
         }
 
         /// <summary>
