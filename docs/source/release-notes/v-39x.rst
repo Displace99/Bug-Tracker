@@ -1,0 +1,41 @@
+==============
+Version 3.9.0
+==============
+Release Date: January, 27, 2023
+
+This release focuses on the continued effort to move logic into the code behind files, as well as moving the SQL logic out of the code behind files and into separate services. This will allow us to centralize all of the database logic, preventing some duplication, and preparing us to use more modern architecture standards.
+
+**New**
+
+* Created the following services:
+ * Project Service
+ * Bug Service 
+ * Bug Subscription Service
+ * Organization service
+ * Query Service
+ * Priority Service
+ * Category Service
+ * User Service
+ * SignIn Service
+ * Encryption Service
+
+
+**Updated**
+
+* Moved the SQL queries in the following pages to the new services:
+ * Pages related to Log in, register and password resets
+ * Project list and detail pages
+ * Pages related to managing users, including editing your own user information
+ * Pages related to managing priorities
+ * Pages related to managing queries
+ * Pages related to managing categories
+ * generate_btnetsc_reg.aspx
+ * lucene_syntax.aspx
+ * tasks_all.aspx
+
+* Moved images into separate image folder
+
+**Fixed**
+* Fixed the follwoing issues found from Sonar Cloud. 
+    * 50 bugs
+    * 43 code smell
