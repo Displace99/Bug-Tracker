@@ -14,7 +14,7 @@ namespace BugTracker.Web.Services.Organization
         /// Returns a list of all Organizations in the system
         /// </summary>
         /// <returns></returns>
-        public DataSet GetOrganizationList()
+        public DataSet GetOrganizationDropDownList()
         {
             string sql = "SELECT og_id, og_name FROM orgs ORDER BY og_name;";
 

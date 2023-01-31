@@ -122,7 +122,7 @@ namespace BugTracker.Web
                 if (security.user.is_admin)
                 {
                     //Get Orgs for Admins
-                    OrgList = _orgService.GetOrganizationList();
+                    OrgList = _orgService.GetOrganizationDropDownList();
                 }
                 else
                 {
