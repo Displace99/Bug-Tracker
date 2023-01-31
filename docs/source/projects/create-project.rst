@@ -54,6 +54,8 @@ Receiving bugs via email
 ------------------------
 It is possible to receive bugs from emails. To set this up you will need to select the checkbox and enter the username and password in the appropriate boxes.
 
+For more information on how to set up email see :doc:`/source/receiving-bugs-by-email` 
+
 Adding Custom Fields
 ====================
 Each project can have up to 3 custom fields that are specific to that project. 
