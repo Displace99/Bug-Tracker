@@ -30,7 +30,7 @@ Setting Default Behavior
 ========================
 There are a few ways to set default behavior. 
 
-.. image:: media/main-project.settings.png
+.. image:: media/main-project-settings.png
 
 Setting the default project
 ---------------------------
@@ -60,7 +60,7 @@ Adding Custom Fields
 ====================
 Each project can have up to 3 custom fields that are specific to that project. 
 
-.. image:: medai/custom-fields-project.png
+.. image:: media/custom-fields-project.png
 
 .. note::
     Unlike the general custom fields, these custom fields here are specific to this project, and can only be drop down boxes. 
