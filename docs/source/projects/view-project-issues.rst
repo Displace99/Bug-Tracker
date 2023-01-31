@@ -1,7 +1,6 @@
-==============
-About Projects
-==============
-A project is a place for users and organizations to track the progress of bugs and other issues. Projects usually represent a large amount of work aimed at achieving a specific outcome.
+######################
+Viewing Project Issues
+######################
 
 How to view projects
 ====================
@@ -26,4 +25,3 @@ Once you have the query created you can click the Bugs link on the main menu. Th
 .. image:: media/project-bug-query-list.png
 
 For more information on how to create queries see :doc:`Bug Queries <../bug-queries>`.
-
