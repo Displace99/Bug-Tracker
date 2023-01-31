@@ -11,4 +11,5 @@ Related Articles
 ================
 .. toctree::
 
-    about-projects.rst
+    create-project.rst
+    view-project-issues.rst
