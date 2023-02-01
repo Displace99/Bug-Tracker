@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Organization;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,6 +17,8 @@ namespace BugTracker.Web
         protected Security security;
         protected Dictionary<string, int> dict_custom_field_permission_level = new Dictionary<string, int>();
         protected DataSet ds_custom;
+
+        private OrganizationService _orgService = new OrganizationService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -44,6 +47,7 @@ namespace BugTracker.Web
                 id = Convert.ToInt32(var);
             }
 
+            //Get list of custom fields
             ds_custom = Util.get_custom_columns();
 
             if (!IsPostBack)
@@ -52,6 +56,7 @@ namespace BugTracker.Web
                 // add or edit?
                 if (id == 0)
                 {
+                    //Assign default values
                     sub.Value = "Create";
                     og_active.Checked = true;
                     //other_orgs_permission_level.SelectedIndex = 2;
@@ -68,23 +73,19 @@ namespace BugTracker.Web
                     assigned_to_field.SelectedValue = "2";
                     udf_field.SelectedValue = "2";
 
+                    //Loop through custom fields and assign default permission levels
                     foreach (DataRow dr_custom in ds_custom.Tables[0].Rows)
                     {
                         string bg_name = (string)dr_custom["name"];
                         dict_custom_field_permission_level[bg_name] = 2;
                     }
-
-
                 }
                 else
                 {
                     sub.Value = "Update";
 
                     // Get this entry's data from the db and fill in the form
-
-                    sql = @"select *,isnull(og_domain,'') og_domain2 from orgs where og_id = $og_id";
-                    sql = sql.Replace("$og_id", Convert.ToString(id));
-                    DataRow dr = btnet.DbUtil.get_datarow(sql);
+                    DataRow dr = _orgService.GetOrgDetailsById(id);
 
                     // Fill in this form
                     og_name.Value = (string)dr["og_name"];

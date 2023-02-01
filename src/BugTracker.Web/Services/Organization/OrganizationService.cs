@@ -34,6 +34,16 @@ namespace BugTracker.Web.Services.Organization
 			return dr["og_name"].ToString();
         }
 
+		public DataRow GetOrgDetailsById(int orgId)
+		{
+            string sql = @"select *,isnull(og_domain,'') og_domain2 from orgs where og_id = @orgId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@orgId", orgId);
+
+            return DbUtil.get_datarow(cmd);
+        }
+
         public DataSet GetOrgListForNonAdmins()
         {
             StringBuilder sql = new StringBuilder();
