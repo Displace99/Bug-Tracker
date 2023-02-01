@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -19,6 +20,18 @@ namespace BugTracker.Web.Services.Organization
             string sql = "SELECT og_id, og_name FROM orgs ORDER BY og_name;";
 
             return DbUtil.get_dataset(sql);
+        }
+
+		public string GetOrgNameById(int orgId)
+		{
+			string sql = "SELECT og_name FROM orgs WHERE og_id = @orgId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@orgId", orgId);
+
+			DataRow dr = DbUtil.get_datarow(cmd);
+
+			return dr["og_name"].ToString();
         }
 
         public DataSet GetOrgListForNonAdmins()
@@ -69,6 +82,36 @@ namespace BugTracker.Web.Services.Organization
 			from orgs order by og_name";
 
 			return DbUtil.get_dataset(sql);
+        }
+
+		/// <summary>
+		/// Deletes an organization from the database. THIS IS PERMANENT!
+		/// </summary>
+		/// <param name="orgId"></param>
+		public void DeleteOrganization(int orgId)
+		{
+            string sql = @"delete orgs where og_id = @orgId";
+
+			SqlCommand cmd = new SqlCommand(sql);
+			cmd.Parameters.AddWithValue("@orgId", orgId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+		public bool DoesOrgHaveRelatedEntities(int orgId)
+		{
+            string sql = @"declare @cnt int
+			select @cnt = count(1) from users where us_org = @orgId;
+			select @cnt = @cnt + count(1) from queries where qu_org = @orgId;
+			select @cnt = @cnt + count(1) from bugs where bg_org = @orgId;
+			select og_name, @cnt [cnt] from orgs where og_id = @orgId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@orgId", orgId);
+
+            DataRow dr = DbUtil.get_datarow(cmd);
+
+			return (int)dr["cnt"] > 0;
         }
     }
 }
