@@ -13,7 +13,6 @@ namespace BugTracker.Web
         int id;
         String sql;
 
-
         protected Security security;
         protected Dictionary<string, int> dict_custom_field_permission_level = new Dictionary<string, int>();
         protected DataSet ds_custom;
@@ -22,8 +21,6 @@ namespace BugTracker.Web
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-
-        ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
         {
 
@@ -144,13 +141,11 @@ namespace BugTracker.Web
                     dict_custom_field_permission_level[bg_name] = Convert.ToInt32(Request[bg_name]);
                 }
 
-                on_update();
+                UpdateOrg();
             }
         }
 
-
-        ///////////////////////////////////////////////////////////////////////
-        Boolean validate()
+        bool ValidateForm()
         {
 
             Boolean good = true;
@@ -168,13 +163,12 @@ namespace BugTracker.Web
             return good;
         }
 
-        ///////////////////////////////////////////////////////////////////////
-        void on_update()
+        void UpdateOrg()
         {
 
-            Boolean good = validate();
+            bool isValid = ValidateForm();
 
-            if (good)
+            if (isValid)
             {
                 if (id == 0)  // insert new
                 {
