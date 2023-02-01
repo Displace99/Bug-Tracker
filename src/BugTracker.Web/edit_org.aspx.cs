@@ -19,26 +19,6 @@ namespace BugTracker.Web
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-//        protected string radio_template = @"
-//<tr>
-//	<td>""$name$"" field permission
-//	<td colspan=2>
-//		<table id='$name$_field' border='0'>
-//		<tr>
-//		<td>
-//			<span ID='$name$0'><input id='$name$_field_0' type='radio' name='$name$' value='0' $checked0$/><label for='$name$_field_0'>none</label></span>
-//		</td>
-
-//		<td>
-//			<span ID='$name$1'><input id='$name$_field_1' type='radio' name='$name$' value='1' $checked1$/><label for='$name$_field_1'>view only</label></span>
-//		</td>
-//		<td>
-//			<span ID='$name$2'><input id='$name$_field_2' type='radio' name='$name$' value='2' $checked2$ /><label for='$name$_field_2'>edit</label></span>
-//		</td>
-//		</tr>
-//		</table>
-//<tr>";
-
 
         ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
