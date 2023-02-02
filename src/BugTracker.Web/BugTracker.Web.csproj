@@ -1186,7 +1186,7 @@
     </Compile>
     <Compile Include="Models\Category\CategoryVM.cs" />
     <Compile Include="Models\Organization\CustomFieldPermissions.cs" />
-    <Compile Include="Models\Organization\Organization.cs" />
+    <Compile Include="Models\Organization\Org.cs" />
     <Compile Include="Models\Priority\PriorityVM.cs" />
     <Compile Include="Models\ProjectBugVM.cs" />
     <Compile Include="Models\ProjectVM.cs" />

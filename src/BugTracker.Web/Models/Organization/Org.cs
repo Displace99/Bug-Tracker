@@ -5,7 +5,7 @@ using System.Web;
 
 namespace BugTracker.Web.Models.Organization
 {
-    public class Organization
+    public class Org
     {
         public int Id { get; set; }
         public string Name { get; set; }
