@@ -193,10 +193,7 @@ namespace BugTracker.Web.Services.Organization
 			cmd.Parameters.AddWithValue("@flp_assigned_to", org.AssignedToFieldPermission);
 			cmd.Parameters.AddWithValue("@flp_udf", org.UserDefinedFieldPermission);
 
-			//DbUtil.execute_nonquery(cmd);
 			org.Id = Convert.ToInt32(DbUtil.execute_scalar(cmd));
-
-			//var returnValue = DbUtil.execute_scalar(cmd);
 
 			//Updates any custom fields
 			UpdateCustomFields(org);
