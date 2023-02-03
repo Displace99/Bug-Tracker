@@ -1,19 +1,12 @@
 using btnet;
-using BugTracker.Web.Models.Category;
-using BugTracker.Web.Services.Category;
 using BugTracker.Web.Services.Status;
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
 namespace BugTracker.Web
 {
     public partial class delete_status : Page
     {
-        String sql;
-
         protected Security security;
 
         private StatusService _statusService = new StatusService();
