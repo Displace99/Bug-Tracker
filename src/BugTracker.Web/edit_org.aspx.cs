@@ -12,7 +12,6 @@ namespace BugTracker.Web
     public partial class edit_org : Page
     {
         int id;
-        String sql;
 
         protected Security security;
         protected Dictionary<string, int> dict_custom_field_permission_level = new Dictionary<string, int>();
