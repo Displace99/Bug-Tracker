@@ -197,18 +197,16 @@ namespace btnet
 		}
 
 
-		///////////////////////////////////////////////////////////////////////
+		/// <summary>
+		/// Checks to see if the string is an int. 
+		/// Used when converting variables from the Request object
+		/// </summary>
+		/// <param name="maybe_int">the string you want to check</param>
+		/// <returns>true if an int, otherwise false</returns>
 		public static bool is_int(string maybe_int)
 		{
-			try
-			{
-				int i = Int32.Parse(maybe_int);
-				return true;
-			}
-			catch (Exception)
-			{
-				return false;
-			}
+			int i;
+			return Int32.TryParse(maybe_int, out i);
 		}
 
 		///////////////////////////////////////////////////////////////////////
@@ -240,22 +238,6 @@ namespace btnet
 
 			return "";
 
-		}
-
-		///////////////////////////////////////////////////////////////////////
-		public static bool is_datetime(string maybe_datetime)
-		{
-			DateTime d;
-
-			try
-			{
-				d = DateTime.Parse(maybe_datetime,get_culture_info());
-				return true;
-			}
-			catch (Exception)
-			{
-				return false;
-			}
 		}
 
 		///////////////////////////////////////////////////////////////////////
@@ -548,29 +530,6 @@ namespace btnet
             }
 
 		}
-
-
-		///////////////////////////////////////////////////////////////////////
-		//public static string encrypt_string_using_MD5(string s)
-		//{
-
-		//	byte[] byte_array = System.Text.Encoding.Default.GetBytes(s);
-
-		//	System.Security.Cryptography.HashAlgorithm alg =
-		//		System.Security.Cryptography.HashAlgorithm.Create("MD5");
-
-		//	byte[] byte_array2 = alg.ComputeHash(byte_array);
-
-		//	System.Text.StringBuilder sb
-		//		= new System.Text.StringBuilder(byte_array2.Length);
-
-		//	foreach(byte b in byte_array2)
-		//	{
-		//		sb.AppendFormat("{0:X2}", b);
-		//	}
-
-		//	return sb.ToString();
-		//}
 
         /// <summary>
 		/// Updates the users password using the User ID
@@ -1285,62 +1244,6 @@ order by sc.id, isnull(ccm_sort_seq,sc.colorder)");
 			sql = sql.Replace("$us", Convert.ToString(us_id));
 			DbUtil.execute_nonquery(sql);
 		}
-
-        /////////////////////////////////////////////////////////////////////////
-        //public static void print_as_excel(HttpResponse Response, DataView dv)
-        //{ 
-        //    Response.AddHeader("content-disposition", "attachment;filename=bugs.xls");
-        //    Response.Write("<html><head><meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/></head><body>");
-        //    Response.Write("<table border=1>");
-        //    int startCol = 0;
-        //    int col;
-            
-        //    // column names first_column = true;
-        //    for (col = startCol; col < dv.Table.Columns.Count;col++)
-        //    { 
-        //        if (dv.Table.Columns[col].ColumnName == "$FLAG")
-        //            continue;
-        //        if (dv.Table.Columns[col].ColumnName == "$SEEN")
-        //            continue;
-        //        Response.Write("<td>");
-        //        Response.Write(dv.Table.Columns[col].ColumnName.Replace("<br>"," "));
-        //        Response.Write("</td>");
-
-        //    } // bug rows 
-
-        //    foreach (DataRowView drv in dv)
-        //    {
-        //        Response.Write("<tr>");
-
-
-        //        for (col = startCol; col < dv.Table.Columns.Count; col++)
-        //        {
-        //            if (dv.Table.Columns[col].ColumnName == "$FLAG")
-        //                continue;
-        //            if (dv.Table.Columns[col].ColumnName == "$SEEN")
-        //                continue;
-
-        //            Response.Write("<td>");
-
-        //            if (drv[col].ToString().IndexOf("\r\n") >= 0)
-        //            {
-        //                Response.Write("\"" + drv[col].ToString().Replace("\"", "\"\"").Replace("\r\n", "\n") + "\"");
-        //            }
-        //            else
-        //            {
-        //                Response.Write(drv[col].ToString().Replace("\n", ""));
-        //            }
-
-        //            Response.Write("</td>");
-        //        }
-        //        Response.Write("</tr>");
-
-        //    } 
-
-        //    Response.Write("</table>");
- 
-        //} 
-
 
         ///////////////////////////////////////////////////////////////////////
 		public static void print_as_excel(HttpResponse Response, DataView dv)

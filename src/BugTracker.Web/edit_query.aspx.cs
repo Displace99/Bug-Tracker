@@ -58,7 +58,7 @@ namespace BugTracker.Web
                     // these guys can do everything
                     vis_everybody.Checked = true;
 
-                    DataSet orgListDS = _orgService.GetOrganizationList();
+                    DataSet orgListDS = _orgService.GetOrganizationDropDownList();
                     DataSet userListDS = _userService.GetUserList();
 
                     org.DataSource = orgListDS.Tables[0].DefaultView;

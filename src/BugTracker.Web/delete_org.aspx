@@ -5,7 +5,7 @@ Distributed under the terms of the GNU General Public License
 -->
 <!-- #include file = "inc.aspx" -->
 
-<script language="C#" runat="server">
+<%--<script language="C#" runat="server">
 
 String sql;
 
@@ -69,7 +69,7 @@ void Page_Load(Object sender, EventArgs e)
 }
 
 
-</script>
+</script>--%>
 
 <html>
 <head>
