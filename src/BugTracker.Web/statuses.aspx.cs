@@ -22,9 +22,7 @@ namespace BugTracker.Web
             security = new Security();
             security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
-
-            titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "statuses";
+            title.InnerText = string.Format("{0} - Statuses", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             ds = _statusService.GetStatusList();
         }
