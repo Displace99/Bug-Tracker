@@ -1,20 +1,15 @@
 ﻿using btnet;
 using BugTracker.Web.Models.Organization;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
-using System.Xml.Linq;
-using static SupportClass;
 
 
 namespace BugTracker.Web.Services.Organization
 {
-    public class OrganizationService
+	public class OrganizationService
     {
         /// <summary>
         /// Returns a list of all Organizations in the system
