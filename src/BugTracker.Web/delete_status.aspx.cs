@@ -38,8 +38,7 @@ namespace BugTracker.Web
             }
             else
             {
-                titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "delete status";
+                title.InnerText = string.Format("{0} - Delete Status", Util.get_setting("AppTitle", "BugTracker.NET"));
 
                 int bugCount = _statusService.GetBugCountByStatus(id);
                 var statusDr = _statusService.GetStatusById(id);
