@@ -1346,6 +1346,7 @@
     <Compile Include="Services\Project\ProjectService.cs" />
     <Compile Include="Services\Query\QueryService.cs" />
     <Compile Include="Services\SignInService.cs" />
+    <Compile Include="Services\Status\StatusService.cs" />
     <Compile Include="Services\UserRegistrationResult.cs" />
     <Compile Include="Services\UserService.cs" />
     <Compile Include="statuses.aspx.cs">
