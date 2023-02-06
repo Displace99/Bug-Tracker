@@ -1,4 +1,6 @@
 using btnet;
+using BugTracker.Web.Models.Status;
+using BugTracker.Web.Services.Status;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,15 +11,14 @@ namespace BugTracker.Web
 {
     public partial class edit_status : Page
     {
-        int id;
+        int id = 0;
         String sql;
 
         protected Security security;
+        private StatusService _statusService = new StatusService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-
-        ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
         {
 
@@ -31,19 +32,10 @@ namespace BugTracker.Web
 
             msg.InnerText = "";
 
-            string var = Request.QueryString["id"];
-            if (var == null)
-            {
-                id = 0;
-            }
-            else
-            {
-                id = Convert.ToInt32(var);
-            }
+            Int32.TryParse(Request.QueryString["id"], out id);
 
             if (!IsPostBack)
             {
-
                 // add or edit?
                 if (id == 0)
                 {
@@ -54,10 +46,7 @@ namespace BugTracker.Web
                     sub.Value = "Update";
 
                     // Get this entry's data from the db and fill in the form
-
-                    sql = @"select st_name, st_sort_seq, isnull(st_style,'') [st_style], st_default from statuses where st_id = $1";
-                    sql = sql.Replace("$1", Convert.ToString(id));
-                    DataRow dr = btnet.DbUtil.get_datarow(sql);
+                    DataRow dr = _statusService.GetStatusById(id);
 
                     // Fill in this form
                     name.Value = (string)dr["st_name"];
@@ -70,11 +59,8 @@ namespace BugTracker.Web
             {
                 on_update();
             }
-
         }
 
-
-        ///////////////////////////////////////////////////////////////////////
         Boolean validate()
         {
 
@@ -121,30 +107,25 @@ namespace BugTracker.Web
 
             if (good)
             {
+                StatusVM status = new StatusVM
+                {
+                    Id = id,
+                    Name = name.Value,
+                    SortSequence = Convert.ToInt32(sort_seq.Value),
+                    Style = style.Value,
+                    IsDefault = default_selection.Checked
+                };
+
                 if (id == 0)  // insert new
                 {
-                    sql = "insert into statuses (st_name, st_sort_seq, st_style, st_default) values (N'$na', $ss, N'$st', $df)";
+                    _statusService.CreateStatus(status);
                 }
                 else // edit existing
                 {
-
-                    sql = @"update statuses set
-				st_name = N'$na',
-				st_sort_seq = $ss,
-				st_style = N'$st',
-				st_default = $df
-				where st_id = $id";
-
-                    sql = sql.Replace("$id", Convert.ToString(id));
-
+                    _statusService.UpdateStatus(status);
                 }
-                sql = sql.Replace("$na", name.Value.Replace("'", "''"));
-                sql = sql.Replace("$ss", sort_seq.Value);
-                sql = sql.Replace("$st", style.Value.Replace("'", "''"));
-                sql = sql.Replace("$df", Util.bool_to_string(default_selection.Checked));
-                btnet.DbUtil.execute_nonquery(sql);
+                
                 Server.Transfer("statuses.aspx");
-
             }
             else
             {

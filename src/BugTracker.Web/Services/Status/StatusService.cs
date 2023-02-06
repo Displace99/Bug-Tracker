@@ -1,4 +1,5 @@
 ﻿using btnet;
+using BugTracker.Web.Models.Status;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -22,9 +23,14 @@ namespace BugTracker.Web.Services.Status
             return DbUtil.get_dataset(sql);
         }
 
+        /// <summary>
+        /// Returns status details by status id
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         public DataRow GetStatusById(int Id)
         {
-            string sql = @"select st_name, st_sort_seq, st_style, st_default from statuses where st_id = @Id";
+            string sql = @"select st_name, st_sort_seq, isnull(st_style,'') [st_style], st_default from statuses where st_id = @Id";
 
             SqlCommand cmd = new SqlCommand();
             cmd.CommandText = sql;
@@ -33,6 +39,48 @@ namespace BugTracker.Web.Services.Status
             return DbUtil.get_datarow(cmd);
         }
 
+        /// <summary>
+        /// Creates a new status in the database
+        /// </summary>
+        /// <param name="status"></param>
+        public void CreateStatus(StatusVM status)
+        {
+            string sql = "insert into statuses (st_name, st_sort_seq, st_style, st_default) values (@name, @sortSeq, @style, @isDefault)";
+
+            SqlCommand cmd = new SqlCommand(sql);
+
+            cmd.Parameters.AddWithValue("@name", status.Name);
+            cmd.Parameters.AddWithValue("@sortSeq", status.SortSequence);
+            cmd.Parameters.AddWithValue("@style", status.Style);
+            cmd.Parameters.AddWithValue("@isDefault", status.IsDefault);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public void UpdateStatus(StatusVM status)
+        {
+            string sql = @"update statuses set
+				st_name = @name,
+				st_sort_seq = @sortSeq,
+				st_style = @style,
+				st_default = @isDefault
+				where st_id = @Id";
+
+            SqlCommand cmd = new SqlCommand(sql);
+
+            cmd.Parameters.AddWithValue("@Id", status.Id);
+            cmd.Parameters.AddWithValue("@name", status.Name);
+            cmd.Parameters.AddWithValue("@sortSeq", status.SortSequence);
+            cmd.Parameters.AddWithValue("@style", status.Style);
+            cmd.Parameters.AddWithValue("@isDefault", status.IsDefault);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        /// <summary>
+        /// Deletes status from database
+        /// </summary>
+        /// <param name="Id"></param>
         public void DeleteStatus(int Id)
         {
             string sql = @"delete statuses where st_id = @statusId";
