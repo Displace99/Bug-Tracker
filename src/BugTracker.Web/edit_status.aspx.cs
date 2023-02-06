@@ -57,14 +57,13 @@ namespace BugTracker.Web
             }
             else
             {
-                on_update();
+                UpdateStatus();
             }
         }
 
-        Boolean validate()
+        bool ValidateForm()
         {
-
-            Boolean good = true;
+            bool good = true;
             if (name.Value == "")
             {
                 good = false;
@@ -95,17 +94,14 @@ namespace BugTracker.Web
                 sort_seq_err.InnerText = "";
             }
 
-
             return good;
         }
 
-        ///////////////////////////////////////////////////////////////////////
-        void on_update()
+        void UpdateStatus()
         {
+            bool isValid = ValidateForm();
 
-            Boolean good = validate();
-
-            if (good)
+            if (isValid)
             {
                 StatusVM status = new StatusVM
                 {
@@ -139,7 +135,6 @@ namespace BugTracker.Web
                 }
 
             }
-
         }
     }
 }
