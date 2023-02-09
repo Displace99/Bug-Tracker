@@ -12,7 +12,6 @@ namespace BugTracker.Web
     public partial class edit_status : Page
     {
         int id = 0;
-        String sql;
 
         protected Security security;
         private StatusService _statusService = new StatusService();
