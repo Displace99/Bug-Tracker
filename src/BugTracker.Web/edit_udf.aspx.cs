@@ -12,9 +12,6 @@ namespace BugTracker.Web
     public partial class edit_udf : Page
     {
         int id = 0;
-        String sql;
-
-        protected Security security;
 
         private UserDefinedFieldService _udfsService = new UserDefinedFieldService();
 
@@ -25,11 +22,10 @@ namespace BugTracker.Web
 
             Util.do_not_cache(Response);
 
-            security = new Security();
-            security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.pageLink = "admin";
 
-            titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "edit user defined attribute value";
+            Page.Title = string.Format("{0} - Edit User Defined Attribute Value", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             msg.InnerText = "";
 
