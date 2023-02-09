@@ -19,7 +19,7 @@ namespace BugTracker.Web
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            BugTracker masterPage = Page.Master as BugTracker;
+            LoggedIn masterPage = Page.Master as LoggedIn;
             masterPage.security = new btnet.Security();
             masterPage.security.check_security(HttpContext.Current, btnet.Security.ANY_USER_OK);
             masterPage.pageLink = "projects";
