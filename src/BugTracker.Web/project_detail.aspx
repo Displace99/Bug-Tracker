@@ -1,4 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/LoggedIn.Master" AutoEventWireup="true" CodeBehind="project_detail.aspx.cs" Inherits="BugTracker.Web.project_detail" %>
+<%@ MasterType TypeName="BugTracker.Web.LoggedIn" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="headerScripts" runat="server">
     <script type="text/javascript" language="JavaScript" src="sortable.js"></script>

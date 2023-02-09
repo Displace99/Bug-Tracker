@@ -20,11 +20,8 @@ namespace BugTracker.Web
         {
             Util.do_not_cache(Response);
 
-            //Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
-            //Master.pageLink = "admin";
-            LoggedIn masterPage = Page.Master as LoggedIn;
-            masterPage.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
-            masterPage.pageLink = "admin";
+            Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.pageLink = "admin";
 
             Page.Title = string.Format("{0} - User Defined Attribute Values", Util.get_setting("AppTitle", "BugTracker.NET"));
 

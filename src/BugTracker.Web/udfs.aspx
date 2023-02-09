@@ -1,4 +1,5 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/LoggedIn.Master" CodeBehind="udfs.aspx.cs" Inherits="BugTracker.Web.udfs" AutoEventWireup="True" %>
+<%@ MasterType TypeName="BugTracker.Web.LoggedIn" %>
 
 <%@ Import Namespace="btnet" %>
 

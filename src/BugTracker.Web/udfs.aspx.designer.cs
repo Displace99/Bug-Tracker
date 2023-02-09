@@ -13,5 +13,19 @@ namespace BugTracker.Web
 
     public partial class udfs
     {
+
+        /// <summary>
+        /// Master property.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated property.
+        /// </remarks>
+        public new BugTracker.Web.LoggedIn Master
+        {
+            get
+            {
+                return ((BugTracker.Web.LoggedIn)(base.Master));
+            }
+        }
     }
 }
