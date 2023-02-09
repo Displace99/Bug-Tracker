@@ -17,7 +17,6 @@ Distributed under the terms of the GNU General Public License
 		<p></p>
 		<%
 
-
 		if (ds.Tables[0].Rows.Count > 0)
 		{
 			SortableHtmlTable.create_from_dataset(

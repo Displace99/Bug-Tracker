@@ -34,7 +34,7 @@ namespace BugTracker.Web
             }
             else
             {
-                //Page.Title = string.Format("{0} - Delete User Defined Attribute Value", Util.get_setting("AppTitle", "BugTracker.NET"));
+                Page.Title = string.Format("{0} - Delete User Defined Attribute Value", Util.get_setting("AppTitle", "BugTracker.NET"));
 
                 var fieldDR = _udfsService.GetFieldDetails(id);
                 string fieldName = fieldDR.IsNull("udf_name") ? string.Empty : fieldDR["udf_name"].ToString();
