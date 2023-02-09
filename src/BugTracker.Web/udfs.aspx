@@ -1,20 +1,16 @@
-<%@ Page language="C#" CodeBehind="udfs.aspx.cs" Inherits="BugTracker.Web.udfs" AutoEventWireup="True" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/BugTracker.Master" CodeBehind="udfs.aspx.cs" Inherits="BugTracker.Web.udfs" AutoEventWireup="True" %>
+
+<%@ Import Namespace="btnet" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="headerScripts" runat="server">
 <!--
 Copyright 2002-2011 Corey Trager
 Distributed under the terms of the GNU General Public License
 -->
-<%@ Import Namespace="btnet" %>
+    <script type="text/javascript" language="JavaScript" src="sortable.js"></script>
+</asp:Content>
 
-<html>
-<head>
-<title id="title" runat="server">btnet user defined attributes</title>
-<link rel="StyleSheet" href="btnet.css" type="text/css">
-<script type="text/javascript" language="JavaScript" src="sortable.js"></script>
-</head>
-
-<body>
-	<% security.write_menu(Response, "admin"); %>
-
+<asp:Content ID="Content2" ContentPlaceHolderID="body" runat="server">
 	<div class=align>
 		<a href=edit_udf.aspx>add new user defined attribute value</a>
 		<p></p>
@@ -33,7 +29,7 @@ Distributed under the terms of the GNU General Public License
 		}
 		%>
 	</div>
-	<% Response.Write(Application["custom_footer"]); %>
+</asp:Content>
 
-</body>
-</html>
+<asp:Content ID="Content3" ContentPlaceHolderID="footerScripts" runat="server">
+</asp:Content>

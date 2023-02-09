@@ -18,12 +18,12 @@ namespace BugTracker.Web
         void Page_Load(Object sender, EventArgs e)
         {
             Util.do_not_cache(Response);
+            
+            BugTracker masterPage = Page.Master as BugTracker;
+            masterPage.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            masterPage.pageLink = "admin";
 
-            security = new Security();
-            security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
-
-            title.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "user defined attribute values";
+            Page.Title = string.Format("{0} - User Defined Attribute Values", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             ds = _udfService.GetFieldList();
         }
