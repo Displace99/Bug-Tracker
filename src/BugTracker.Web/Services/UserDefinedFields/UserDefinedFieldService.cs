@@ -50,7 +50,7 @@ namespace BugTracker.Web.Services.UserDefinedFields
 
             SqlCommand cmd = new SqlCommand(sql);
             cmd.Parameters.AddWithValue("@name", field.Name);
-            cmd.Parameters.AddWithValue("@sortSeqence", field.SortSequence);
+            cmd.Parameters.AddWithValue("@sortSequence", field.SortSequence);
             cmd.Parameters.AddWithValue("@isDefault", field.IsDefault);
 
             DbUtil.execute_nonquery(cmd);
@@ -71,7 +71,7 @@ namespace BugTracker.Web.Services.UserDefinedFields
             SqlCommand cmd = new SqlCommand(sql);
             cmd.Parameters.AddWithValue("@id", field.Id);
             cmd.Parameters.AddWithValue("@name", field.Name);
-            cmd.Parameters.AddWithValue("@sortSeqence", field.SortSequence);
+            cmd.Parameters.AddWithValue("@sortSequence", field.SortSequence);
             cmd.Parameters.AddWithValue("@isDefault", field.IsDefault);
 
             DbUtil.execute_nonquery(cmd);
