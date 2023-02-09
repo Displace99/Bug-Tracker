@@ -696,13 +696,6 @@
     <Compile Include="bugs.aspx.designer.cs">
       <DependentUpon>bugs.aspx</DependentUpon>
     </Compile>
-    <Compile Include="BugTracker.Master.cs">
-      <DependentUpon>BugTracker.Master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="BugTracker.Master.designer.cs">
-      <DependentUpon>BugTracker.Master</DependentUpon>
-    </Compile>
     <Compile Include="categories.aspx.cs">
       <DependentUpon>categories.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1127,6 +1120,13 @@
     </Compile>
     <Compile Include="insert_bug.aspx.designer.cs">
       <DependentUpon>insert_bug.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LoggedIn.Master.cs">
+      <DependentUpon>LoggedIn.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LoggedIn.Master.designer.cs">
+      <DependentUpon>LoggedIn.Master</DependentUpon>
     </Compile>
     <Compile Include="loginnt.aspx.cs">
       <DependentUpon>loginnt.aspx</DependentUpon>
@@ -1556,7 +1556,7 @@
     <Content Include="ckeditor\.htaccess" />
     <Content Include="ckeditor\ckeditor.pack" />
     <Content Include="edit_area\edit_area_full.gz" />
-    <Content Include="BugTracker.Master" />
+    <Content Include="LoggedIn.Master" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

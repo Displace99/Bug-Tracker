@@ -11,7 +11,7 @@ namespace BugTracker.Web
 {
 
 
-    public partial class BugTracker
+    public partial class LoggedIn
     {
 
         /// <summary>

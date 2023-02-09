@@ -8,7 +8,7 @@ using System.Web.UI.WebControls;
 
 namespace BugTracker.Web
 {
-    public partial class BugTracker : System.Web.UI.MasterPage
+    public partial class LoggedIn : System.Web.UI.MasterPage
     {
         public Security security = new btnet.Security();
         public string pageLink;
