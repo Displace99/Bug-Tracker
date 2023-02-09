@@ -22,5 +22,19 @@ namespace BugTracker.Web
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblBugLabel;
+
+        /// <summary>
+        /// Master property.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated property.
+        /// </remarks>
+        public new BugTracker.Web.LoggedIn Master
+        {
+            get
+            {
+                return ((BugTracker.Web.LoggedIn)(base.Master));
+            }
+        }
     }
 }

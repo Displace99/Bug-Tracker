@@ -696,13 +696,6 @@
     <Compile Include="bugs.aspx.designer.cs">
       <DependentUpon>bugs.aspx</DependentUpon>
     </Compile>
-    <Compile Include="BugTracker.Master.cs">
-      <DependentUpon>BugTracker.Master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="BugTracker.Master.designer.cs">
-      <DependentUpon>BugTracker.Master</DependentUpon>
-    </Compile>
     <Compile Include="categories.aspx.cs">
       <DependentUpon>categories.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1128,6 +1121,13 @@
     <Compile Include="insert_bug.aspx.designer.cs">
       <DependentUpon>insert_bug.aspx</DependentUpon>
     </Compile>
+    <Compile Include="LoggedIn.Master.cs">
+      <DependentUpon>LoggedIn.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LoggedIn.Master.designer.cs">
+      <DependentUpon>LoggedIn.Master</DependentUpon>
+    </Compile>
     <Compile Include="loginnt.aspx.cs">
       <DependentUpon>loginnt.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1194,6 +1194,8 @@
     <Compile Include="Models\Query\QueryUpdate.cs" />
     <Compile Include="Models\RegisterVM.cs" />
     <Compile Include="Models\Registration\RegisteredUser.cs" />
+    <Compile Include="Models\Status\StatusVM.cs" />
+    <Compile Include="Models\UDF\UserDefinedField.cs" />
     <Compile Include="Models\User\NewUser.cs" />
     <Compile Include="Models\User\PasswordResetUser.cs" />
     <Compile Include="notifications.aspx.cs">
@@ -1346,6 +1348,8 @@
     <Compile Include="Services\Project\ProjectService.cs" />
     <Compile Include="Services\Query\QueryService.cs" />
     <Compile Include="Services\SignInService.cs" />
+    <Compile Include="Services\Status\StatusService.cs" />
+    <Compile Include="Services\UserDefinedFields\UserDefinedFieldService.cs" />
     <Compile Include="Services\UserRegistrationResult.cs" />
     <Compile Include="Services\UserService.cs" />
     <Compile Include="statuses.aspx.cs">
@@ -1553,7 +1557,7 @@
     <Content Include="ckeditor\.htaccess" />
     <Content Include="ckeditor\ckeditor.pack" />
     <Content Include="edit_area\edit_area_full.gz" />
-    <Content Include="BugTracker.Master" />
+    <Content Include="LoggedIn.Master" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
