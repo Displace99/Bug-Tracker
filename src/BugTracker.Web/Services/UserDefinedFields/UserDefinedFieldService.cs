@@ -1,4 +1,5 @@
 ﻿using btnet;
+using BugTracker.Web.Models.UDF;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -37,6 +38,43 @@ namespace BugTracker.Web.Services.UserDefinedFields
             cmd.Parameters.AddWithValue("@fieldId", id);
 
             return DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
+        /// Creates a new field value for the User Defined Field
+        /// </summary>
+        /// <param name="field"></param>
+        public void CreateField(UserDefinedField field)
+        {
+            string sql = "insert into user_defined_attribute (udf_name, udf_sort_seq, udf_default) values (@name, @sortSequence, @isDefault)";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@name", field.Name);
+            cmd.Parameters.AddWithValue("@sortSeqence", field.SortSequence);
+            cmd.Parameters.AddWithValue("@isDefault", field.IsDefault);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        /// <summary>
+        /// Updates an existing field value
+        /// </summary>
+        /// <param name="field"></param>
+        public void UpdateField(UserDefinedField field)
+        {
+            string sql = @"update user_defined_attribute set
+				udf_name = @name,
+				udf_sort_seq = @sortSequence,
+				udf_default = @isDefault
+				where udf_id = @id";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@id", field.Id);
+            cmd.Parameters.AddWithValue("@name", field.Name);
+            cmd.Parameters.AddWithValue("@sortSeqence", field.SortSequence);
+            cmd.Parameters.AddWithValue("@isDefault", field.IsDefault);
+
+            DbUtil.execute_nonquery(cmd);
         }
 
         /// <summary>

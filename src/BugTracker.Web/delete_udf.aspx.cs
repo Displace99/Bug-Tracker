@@ -10,7 +10,7 @@ namespace BugTracker.Web
 {
     public partial class delete_udf : Page
     {
-        protected Security security;
+        //protected Security security;
         private UserDefinedFieldService _udfsService = new UserDefinedFieldService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
@@ -20,8 +20,8 @@ namespace BugTracker.Web
 
             Util.do_not_cache(Response);
 
-            security = new Security();
-            security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            //security = new Security();
+            Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
             int id = 0;
             Int32.TryParse(Request["id"], out id);

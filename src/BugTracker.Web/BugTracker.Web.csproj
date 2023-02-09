@@ -1195,6 +1195,7 @@
     <Compile Include="Models\RegisterVM.cs" />
     <Compile Include="Models\Registration\RegisteredUser.cs" />
     <Compile Include="Models\Status\StatusVM.cs" />
+    <Compile Include="Models\UDF\UserDefinedField.cs" />
     <Compile Include="Models\User\NewUser.cs" />
     <Compile Include="Models\User\PasswordResetUser.cs" />
     <Compile Include="notifications.aspx.cs">

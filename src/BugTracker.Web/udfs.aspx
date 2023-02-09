@@ -21,7 +21,6 @@ Distributed under the terms of the GNU General Public License
 		{
 			SortableHtmlTable.create_from_dataset(
 				Response, ds, "edit_udf.aspx?id=", "delete_udf.aspx?id=");
-
 		}
 		else
 		{
