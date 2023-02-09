@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.UserDefinedFields;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,13 +10,11 @@ namespace BugTracker.Web
 {
     public partial class delete_udf : Page
     {
-        String sql;
-
         protected Security security;
+        private UserDefinedFieldService _udfsService = new UserDefinedFieldService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
-        ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
         {
 
@@ -24,46 +23,36 @@ namespace BugTracker.Web
             security = new Security();
             security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
 
+            int id = 0;
+            Int32.TryParse(Request["id"], out id);
+
             if (IsPostBack)
             {
-                // do delete here
-                sql = @"delete user_defined_attribute where udf_id = $1";
-                sql = sql.Replace("$1", Util.sanitize_integer(row_id.Value));
-                btnet.DbUtil.execute_nonquery(sql);
+                //Delete field
+                _udfsService.DeleteField(id);
                 Server.Transfer("udfs.aspx");
             }
             else
             {
-                titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                    + "delete user defined attribute value";
+                //Page.Title = string.Format("{0} - Delete User Defined Attribute Value", Util.get_setting("AppTitle", "BugTracker.NET"));
 
-                string id = Util.sanitize_integer(Request["id"]);
+                var fieldDR = _udfsService.GetFieldDetails(id);
+                string fieldName = fieldDR.IsNull("udf_name") ? string.Empty : fieldDR["udf_name"].ToString();
 
-                sql = @"declare @cnt int
-			select @cnt = count(1) from bugs where bg_user_defined_attribute = $1
-			select udf_name, @cnt [cnt] from user_defined_attribute where udf_id = $1";
-                sql = sql.Replace("$1", id);
+                bool hasRelatedEntities = _udfsService.DoesFieldHaveRelatedEntities(id);
 
-                DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-                if ((int)dr["cnt"] > 0)
+                if (hasRelatedEntities)
                 {
-                    Response.Write("You can't delete value \""
-                        + Convert.ToString(dr["udf_name"])
-                        + "\" because some bugs still reference it.");
+                    Response.Write(string.Format("You can't delete value {0} because some bugs still reference it.", fieldName));
                     Response.End();
                 }
                 else
                 {
-                    confirm_href.InnerText = "confirm delete of \""
-                        + Convert.ToString(dr["udf_name"])
-                        + "\"";
+                    confirm_href.InnerText = string.Format("Confirm delete of {0}", fieldName);
 
-                    row_id.Value = id;
+                    row_id.Value = id.ToString();
                 }
-
             }
-
         }
     }
 }
