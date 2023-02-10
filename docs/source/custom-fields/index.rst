@@ -19,7 +19,6 @@ Custom fields, can range from a simple text box, to a drop down box, and can be 
 
 If you need to add something specific to a project, you can use project specific dropdowns. Each project can have a maximum of 3 custom drop down boxes. 
 
-**Related Articles**
 
 .. toctree::
 
