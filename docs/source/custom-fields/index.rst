@@ -22,3 +22,4 @@ If you need to add something specific to a project, you can use project specific
 .. toctree::
 
     user-defined-attribute.rst
+    project-dropdown.rst
