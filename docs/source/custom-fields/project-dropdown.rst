@@ -18,12 +18,12 @@ Below are three screenshots showing the "add a bug" page. The first shows the de
 
 **Default. Before customization:**
 
-.. image:: source/images/bug_tracker_default.gif
+.. image:: media/bug_tracker_default.gif
 
 **More complex: After some custom fields have been added:**
 
-.. image:: source/images/bug_tracker_custom.gif
+.. image:: media/bug_tracker_custom.gif
 
 **Very simple! After built-in-fields have been hidden:**
 
-.. image:: source/images/bug_tracker_barebones.gif
+.. image:: media/bug_tracker_barebones.gif
