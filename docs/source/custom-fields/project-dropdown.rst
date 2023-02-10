@@ -6,7 +6,7 @@ You can add custom dropdowns to individual projects when you edit a project. The
 
 **Custom fields for a specific project:**
 
-.. image:: source/images/project_custom_fields.gif
+.. image:: media/project_custom_fields.gif
 
 BugTracker.NET is already very simple, but, if instead of adding more fields, you want to have FEWER fields to show, there are two ways to hide fields.
 
