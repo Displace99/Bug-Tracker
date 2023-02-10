@@ -30,7 +30,7 @@ The ``UserDefinedBugAttributeName`` variable determines the field name of the dr
 
 In the screen shot below, we have changed the ``UserDefinedBugAttrbuteName`` to "Severity" and added "High", "Medium", and "Low" to the attribute values. Now we have a Severity dropdown box that shows up on every bug, across all projects.
 
-.. image:: media/user-defined-attribute-example.png
+.. image:: media/user-defined-dropdown-example.png
 
 Edit User Defined Attribute
 ---------------------------

@@ -19,10 +19,10 @@ Project Specific Dropdowns
 --------------------------
 If you need to add something specific to a project, you can use project specific dropdowns. Each project can have a maximum of 3 custom drop down boxes. 
 
-Related Articles
-----------------
+**Related Articles**
 .. toctree::
+    :maxdepth: 1
 
     user-defined-attribute.rst
-    custom-fields.rst
+    custom-field.rst
     project-dropdown.rst
