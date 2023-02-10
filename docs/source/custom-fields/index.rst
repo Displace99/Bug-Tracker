@@ -21,7 +21,6 @@ If you need to add something specific to a project, you can use project specific
 
 **Related Articles**
 .. toctree::
-    :maxdepth: 1
 
     user-defined-attribute.rst
     custom-field.rst
