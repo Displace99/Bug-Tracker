@@ -1,11 +1,26 @@
-===============
+###############
 Custom Fields
-===============
-You can enter bugs immediately after setup, but you probably want to make some configuration changes first.
+###############
+Right after setting up BugTracker.Net, you can start entering bugs. The Bug Detail page has a handful of default fields that can get you started. However, if you need to add additional fields, like **Due Date** or **Version Fixed**, you can do so in a variety of ways.
+
+User Defined Attribute
+----------------------
+A User Defined Attribute is a special drop down box that applies to all projects. 
+
+.. note::
+
+    Unlike other custom fields, there can be only User Defined Attribute in the entire system.
+
+Custom Fields
+--------------
+Custom fields, can range from a simple text box, to a drop down box, and can be restricted to specific data types. Like the User Defined Attribute, fustom fields will apply to all projects. You can add as many custom fields as you want. 
+
+Project Specific Dropdowns
+--------------------------
+If you need to add something specific to a project, you can use project specific dropdowns. Each project can have a maximum of 3 custom drop down boxes. 
 
 Log in as "admin" and click on the "admin" link along the top. You should now be viewing a page with links to "users", "projects", "categories", "priorities", and "statuses". Add/delete/change the values according to your needs.
 
-When you first install BugTracker.NET, there are only these half-dozen or so fields on the "edit_bug.aspx" page. Many people add more, for example "Version Fixed", "Due Date", etc. There are three ways to add custom fields:
 
 1. "user defined attribute" - This is the simplest way to add one custom field. You can use the simple "user defined attribute" dropdown that applies to all projects. Edit these lines in Web.config to use and name this additional dropdown:
 
