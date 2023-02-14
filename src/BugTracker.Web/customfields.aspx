@@ -3,32 +3,7 @@
 Copyright 2002-2011 Corey Trager
 Distributed under the terms of the GNU General Public License
 -->
-<!-- #include file = "inc.aspx" -->
-
-<script language="C#" runat="server">
-
-
-DataSet ds;
-
-Security security;
-
-void Page_Load(Object sender, EventArgs e)
-{
-
-	Util.do_not_cache(Response);
-	
-	security = new Security();
-	security.check_security( HttpContext.Current, Security.MUST_BE_ADMIN);
-
-	titl.InnerText = Util.get_setting("AppTitle","BugTracker.NET") + " - "
-		+ "custom fields";
-
-	ds = Util.get_custom_columns();
-
-}
-
-
-</script>
+<%@ Import Namespace="btnet" %>
 
 <html>
 <head>
@@ -43,14 +18,13 @@ void Page_Load(Object sender, EventArgs e)
 
 <div class=align>
 <a href=add_customfield.aspx>add new custom field</a>
-</p>
+<p></p>
 <%
 
 if (ds.Tables[0].Rows.Count > 0)
 {
 	SortableHtmlTable.create_from_dataset(
 		Response, ds, "edit_customfield.aspx?id=", "delete_customfield.aspx?id=");
-
 }
 else
 {
