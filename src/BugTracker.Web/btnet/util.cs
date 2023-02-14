@@ -980,10 +980,9 @@ drop table #temp2";
 		}
 
         
-        ///////////////////////////////////////////////////////////////////////
+        [Obsolete("This method will soon be deprecated. Use the method in CustomFieldService class.")]
         public static DataSet get_custom_columns()
         {
-
 			DataSet ds = (DataSet) context.Application["custom_columns_dataset"];
             
             if (ds != null)
