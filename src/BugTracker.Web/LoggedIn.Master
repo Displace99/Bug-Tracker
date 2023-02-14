@@ -1,4 +1,5 @@
 ﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="LoggedIn.master.cs" Inherits="BugTracker.Web.LoggedIn" %>
+<%@ Register Src="~/Controls/MainMenu.ascx" TagPrefix="uc1" TagName="MainMenu" %>
 
 <!DOCTYPE html>
 
@@ -10,10 +11,11 @@
     <asp:ContentPlaceHolder ID="headerScripts" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
-    <% security.write_menu(Response, pageLink); %>
+    <uc1:MainMenu runat="server" ID="MainMenu" />
     <asp:ContentPlaceHolder ID="body" runat="server"></asp:ContentPlaceHolder> 
     
 </body>
     <asp:contentplaceholder runat="server" id="footerScripts"></asp:contentplaceholder>
+    <script src="jquery/jquery-1.9.0.min.js"></script>
     <% Response.Write(Application["custom_footer"]); %>
 </html>
