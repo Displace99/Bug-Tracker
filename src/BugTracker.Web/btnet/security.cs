@@ -30,6 +30,7 @@ namespace btnet
         public string auth_method = "";
         public HttpContext context = null;
 
+		//This is obsolete and has been replaced by the Main Menu user control
         static string goto_form = @"
 <td nowrap valign=middle>
     <form style='margin: 0px; padding: 0px;' action=edit_bug.aspx method=get>
@@ -232,7 +233,8 @@ and us_active = 1";
 			Response.Cookies["user"].Expires = dt.Add(ts);
 		}
 
-        ///////////////////////////////////////////////////////////////////////
+		//Used to write individual menu items to the main menu. This has since been replaced with the Main Menu user control
+		[Obsolete("This method will soon be deprecated. Use the Main Menu user control instead")]
         public void write_menu_item(HttpResponse Response,
             string this_link, string menu_item, string href)
         {
@@ -249,7 +251,8 @@ and us_active = 1";
         }
 
 
-        ///////////////////////////////////////////////////////////////////////
+        //Used to write the main menu to the page. This has since been replaced with the Main Menu user control
+        [Obsolete("This method will soon be deprecated. Use the Main Menu user control instead")]
         public void write_menu(HttpResponse Response, string this_link)
         {
 
