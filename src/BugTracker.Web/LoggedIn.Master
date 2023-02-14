@@ -11,7 +11,6 @@
     <asp:ContentPlaceHolder ID="headerScripts" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
-    <%--<% security.write_menu(Response, pageLink); %>--%>
     <uc1:MainMenu runat="server" ID="MainMenu" />
     <asp:ContentPlaceHolder ID="body" runat="server"></asp:ContentPlaceHolder> 
     
