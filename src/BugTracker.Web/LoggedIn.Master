@@ -17,5 +17,6 @@
     
 </body>
     <asp:contentplaceholder runat="server" id="footerScripts"></asp:contentplaceholder>
+    <script src="jquery/jquery-1.9.0.min.js"></script>
     <% Response.Write(Application["custom_footer"]); %>
 </html>

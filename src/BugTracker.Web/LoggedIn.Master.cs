@@ -18,7 +18,7 @@ namespace BugTracker.Web
         protected void Page_Load(object sender, EventArgs e)
         {
             Menu.user = security.user;
-            //All logic is handled in aspx page.
+            Menu.SelectedItem = pageLink;
         }
     }
 }

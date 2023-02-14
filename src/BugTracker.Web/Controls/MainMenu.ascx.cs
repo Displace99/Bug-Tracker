@@ -11,6 +11,7 @@ namespace BugTracker.Web.Controls
     public partial class MainMenu : System.Web.UI.UserControl
     {
         public User user = new User();
+        public string SelectedItem { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
