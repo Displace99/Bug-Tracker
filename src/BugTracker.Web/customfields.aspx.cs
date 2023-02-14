@@ -10,19 +10,16 @@ namespace BugTracker.Web
     {
         protected DataSet ds;
 
-        protected Security security;
         private CustomFieldService _customFieldService = new CustomFieldService(HttpContext.Current);
 
         void Page_Load(Object sender, EventArgs e)
         {
-
             Util.do_not_cache(Response);
 
-            security = new Security();
-            security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.pageLink = "admin";
 
-            titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "custom fields";
+            Page.Title = string.Format("{0} - Custom Fields", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             ds = _customFieldService.GetCustomFields();
         }

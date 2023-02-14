@@ -15,12 +15,17 @@ namespace BugTracker.Web
     {
 
         /// <summary>
-        /// titl control.
+        /// Master property.
         /// </summary>
         /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// Auto-generated property.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl titl;
+        public new BugTracker.Web.LoggedIn Master
+        {
+            get
+            {
+                return ((BugTracker.Web.LoggedIn)(base.Master));
+            }
+        }
     }
 }
