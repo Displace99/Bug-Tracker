@@ -1,4 +1,5 @@
-﻿using System;
+﻿using btnet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -9,6 +10,8 @@ namespace BugTracker.Web.Controls
 {
     public partial class MainMenu : System.Web.UI.UserControl
     {
+        public User user = new User();
+
         protected void Page_Load(object sender, EventArgs e)
         {
 
