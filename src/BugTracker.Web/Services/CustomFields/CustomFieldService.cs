@@ -1,8 +1,11 @@
-﻿using System;
+﻿using btnet;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
+using System.Security.Cryptography.X509Certificates;
 using System.Web;
 
 namespace BugTracker.Web.Services.CustomFields
@@ -71,6 +74,70 @@ namespace BugTracker.Web.Services.CustomFields
                 _context.Application["custom_columns_dataset"] = ds;
                 return ds;
             }
+        }
+
+        public void DeleteField(int Id)
+        {
+            DataRow columnDR = GetColumns(Id);
+
+            string columnName = (string)columnDR["column_name"];
+            string constraintName = columnDR["default_constraint_name"].ToString();
+
+            // if there is a default, delete it
+            if (constraintName != "")
+            {
+                DeleteColumnConstraint(constraintName);
+            }
+
+            DeleteColumn(columnName);
+            DeleteRow(Id);
+        }
+
+        //****** Specific Methods for delete column workflow ******
+        private DataRow GetColumns(int Id)
+        {
+            string sql = @"select sc.name [column_name], df.name [default_constraint_name]
+			from syscolumns sc
+			inner join sysobjects so on sc.id = so.id
+			left outer join sysobjects df on df.id = sc.cdefault
+			where so.name = 'bugs'
+			and sc.colorder = @Id";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@Id", Id);
+            
+            return DbUtil.get_datarow(cmd);
+        }
+
+        private void DeleteColumnConstraint(string constraintName)
+        {
+            string sql = @"alter table bugs drop constraint [$df]";
+            sql = sql.Replace("$df", constraintName);
+            DbUtil.execute_nonquery(sql);
+        }
+
+        private void DeleteColumn(string columnName)
+        {
+            string sql = @"
+                alter table orgs drop column [og_$nm_field_permission_level]
+                alter table bugs drop column [$nm]";
+
+            //We have to keep the text replace
+            //Trying to parameterize the column name doesn't work, but also doesn't throw any errors.
+            sql = sql.Replace("$nm",columnName);
+            DbUtil.execute_nonquery(sql);
+        }
+
+        private void DeleteRow(int Id)
+        {
+            //delete row from custom column table
+            string sql = @"delete from custom_col_metadata where ccm_colorder = @Id";
+            
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@Id", Id);
+
+            _context.Application["custom_columns_dataset"] = null;
+            DbUtil.execute_nonquery(cmd);
         }
     }
 }
