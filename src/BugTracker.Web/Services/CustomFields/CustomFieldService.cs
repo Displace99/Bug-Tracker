@@ -170,7 +170,7 @@ namespace BugTracker.Web.Services.CustomFields
             cmd.Parameters.AddWithValue("@sortSeq", customField.SortSequence);
             cmd.Parameters.AddWithValue("@dropdownType", customField.DropdownType);
 
-            DbUtil.execute_nonquery(sql);
+            DbUtil.execute_nonquery(cmd);
 
             if (customField.DefaultValue != customField.OldDefaultValue)
             {

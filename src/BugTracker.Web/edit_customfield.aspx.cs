@@ -2,9 +2,7 @@ using btnet;
 using BugTracker.Web.Models.CustomFields;
 using BugTracker.Web.Services.CustomFields;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
 namespace BugTracker.Web
@@ -13,7 +11,6 @@ namespace BugTracker.Web
     {
         int id;
 
-        protected Security security;
         private CustomFieldService _customFieldService = new CustomFieldService(HttpContext.Current);
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
@@ -22,11 +19,10 @@ namespace BugTracker.Web
         {
             Util.do_not_cache(Response);
 
-            security = new Security();
-            security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.pageLink = "admin";
 
-            titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "edit custom column metadata";
+            Page.Title = string.Format("{0} - Edit Custom Column Metadata", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             msg.InnerText = "";
 
