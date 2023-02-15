@@ -93,6 +93,30 @@ namespace BugTracker.Web.Services.CustomFields
             DeleteRow(Id);
         }
 
+        public string GetColumnName(int Id)
+        {
+            string sql = @"select sc.name
+			from syscolumns sc
+			inner join sysobjects so on sc.id = so.id
+			left outer join sysobjects df on df.id = sc.cdefault
+			where so.name = 'bugs'
+			and sc.colorder = @Id";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@Id", Id);
+            
+            DataRow dr = DbUtil.get_datarow(cmd);
+
+            string columnName = string.Empty;
+
+            if (dr != null)
+            {
+                columnName = Convert.ToString(dr["name"]);
+            }
+
+            return columnName;
+        }
+
         //****** Specific Methods for delete column workflow ******
         private DataRow GetColumns(int Id)
         {

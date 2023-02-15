@@ -1,17 +1,12 @@
 using btnet;
 using BugTracker.Web.Services.CustomFields;
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
 namespace BugTracker.Web
 {
     public partial class delete_customfield : Page
     {
-        String sql;
-
         protected Security security;
         private CustomFieldService _customFieldService = new CustomFieldService(HttpContext.Current);
 
@@ -39,21 +34,9 @@ namespace BugTracker.Web
             }
             else
             {
-                //string id = Util.sanitize_integer(Request["id"]);
+                string columnName = _customFieldService.GetColumnName(id);
 
-                sql = @"select sc.name
-			from syscolumns sc
-			inner join sysobjects so on sc.id = so.id
-			left outer join sysobjects df on df.id = sc.cdefault
-			where so.name = 'bugs'
-			and sc.colorder = $id";
-
-                sql = sql.Replace("$id", id.ToString());
-                DataRow dr = btnet.DbUtil.get_datarow(sql);
-
-                confirm_href.InnerText = "confirm delete of \""
-                    + Convert.ToString(dr["name"])
-                    + "\"";
+                confirm_href.InnerText = string.Format("confirm delete of {0}", columnName);
 
                 row_id.Value = id.ToString();
             }
