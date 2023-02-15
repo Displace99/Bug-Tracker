@@ -15,5 +15,6 @@ namespace BugTracker.Web.Models.CustomFields
         public string DefaultValue { get; set; }
         public string OldDefaultValue { get; set; }
         public string DefaultName { get; set; }
+        public string DropdownType { get; set; }
     }
 }

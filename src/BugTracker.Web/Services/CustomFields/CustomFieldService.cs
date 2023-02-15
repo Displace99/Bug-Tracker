@@ -148,29 +148,29 @@ namespace BugTracker.Web.Services.CustomFields
 
         public void UpdateCustomFieldMetaData(CustomField customField)
         {
+            //I don't think the insert will ever be hit, as this sql will only be called on update,
+            //and in order to update you have to have info in the table already.
             string sql = @"declare @count int
 			    select @count = count(1) from custom_col_metadata
-			    where ccm_colorder = $co
+			    where ccm_colorder = @colOrder
 
 			    if @count = 0
 				    insert into custom_col_metadata
 				    (ccm_colorder, ccm_dropdown_vals, ccm_sort_seq, ccm_dropdown_type)
-				    values(@colOrder, @dropdownValues, @sortSeq, '$dt')
+				    values(@colOrder, @dropdownValues, @sortSeq, @dropdownType)
 			    else
 				    update custom_col_metadata
-				    set ccm_dropdown_vals = N'$v',
-				    ccm_sort_seq = $ss
-				    where ccm_colorder = $co";
+				    set ccm_dropdown_vals = @dropdownValues,
+				    ccm_sort_seq = @sortSeq
+				    where ccm_colorder = @colOrder";
 
             SqlCommand cmd = new SqlCommand(sql);
             cmd.Parameters.AddWithValue("@colOrder", customField.Id);
             cmd.Parameters.AddWithValue("@dropdownValues", customField.DropdownValues);
             cmd.Parameters.AddWithValue("@sortSeq", customField.SortSequence);
+            cmd.Parameters.AddWithValue("@dropdownType", customField.DropdownType);
 
-            
-
-            btnet.DbUtil.execute_nonquery(sql);
-            _context.Application["custom_columns_dataset"] = null;
+            DbUtil.execute_nonquery(sql);
 
             if (customField.DefaultValue != customField.OldDefaultValue)
             {
@@ -178,16 +178,16 @@ namespace BugTracker.Web.Services.CustomFields
                 {
                     sql = "alter table bugs drop constraint [" + customField.OldDefaultValue.Replace("'", "''") + "]";
                     DbUtil.execute_nonquery(sql);
-                    _context.Application["custom_columns_dataset"] = null;
                 }
 
                 if (customField.DefaultValue != "")
                 {
                     sql = "alter table bugs add constraint [" + Guid.NewGuid().ToString() + "] default " + customField.DefaultValue.Replace("'", "''") + " for [" + customField.Name + "]";
                     DbUtil.execute_nonquery(sql);
-                    _context.Application["custom_columns_dataset"] = null;
                 }
             }
+
+            _context.Application["custom_columns_dataset"] = null;
         }
 
         //****** Specific Methods for delete column workflow ******

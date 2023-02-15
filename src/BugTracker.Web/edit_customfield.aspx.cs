@@ -12,7 +12,6 @@ namespace BugTracker.Web
     public partial class edit_customfield : Page
     {
         int id;
-        String sql;
 
         protected Security security;
         private CustomFieldService _customFieldService = new CustomFieldService(HttpContext.Current);
@@ -109,44 +108,6 @@ namespace BugTracker.Web
 
             if (isValid)
             {
-
-                sql = @"declare @count int
-                select @count = count(1) from custom_col_metadata
-                where ccm_colorder = $co
-
-                if @count = 0
-                	insert into custom_col_metadata
-                	(ccm_colorder, ccm_dropdown_vals, ccm_sort_seq, ccm_dropdown_type)
-                	values($co, N'$v', $ss, '$dt')
-                else
-                	update custom_col_metadata
-                	set ccm_dropdown_vals = N'$v',
-                	ccm_sort_seq = $ss
-                	where ccm_colorder = $co";
-
-                sql = sql.Replace("$co", Convert.ToString(id));
-                sql = sql.Replace("$v", vals.Value.Replace("'", "''"));
-                sql = sql.Replace("$ss", sort_seq.Value);
-
-                btnet.DbUtil.execute_nonquery(sql);
-                Application["custom_columns_dataset"] = null;
-
-                if (default_value.Value != hidden_default_value.Value)
-                {
-                    if (hidden_default_name.Value != "")
-                    {
-                        sql = "alter table bugs drop constraint [" + hidden_default_name.Value.Replace("'", "''") + "]";
-                        btnet.DbUtil.execute_nonquery(sql);
-                        Application["custom_columns_dataset"] = null;
-                    }
-
-                    if (default_value.Value != "")
-                    {
-                        sql = "alter table bugs add constraint [" + System.Guid.NewGuid().ToString() + "] default " + default_value.Value.Replace("'", "''") + " for [" + name.InnerText + "]";
-                        btnet.DbUtil.execute_nonquery(sql);
-                        Application["custom_columns_dataset"] = null;
-                    }
-                }
                 CustomField customField = new CustomField 
                 {
                     Id = id,
@@ -155,10 +116,11 @@ namespace BugTracker.Web
                     SortSequence = Convert.ToInt32(sort_seq.Value),
                     DefaultValue = default_value.Value,
                     OldDefaultValue = hidden_default_value.Value,
-                    DefaultName = hidden_default_name.Value
+                    DefaultName = hidden_default_name.Value, 
+                    DropdownType = dropdown_type.Value
                 };
 
-
+                _customFieldService.UpdateCustomFieldMetaData(customField);
                 Server.Transfer("customfields.aspx");
             }
             else
