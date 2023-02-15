@@ -16,11 +16,11 @@ namespace BugTracker.Web
         {
             Util.do_not_cache(Response);
 
-            security = new Security();
-            security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            //security = new Security();
+            Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.pageLink = "admin";
 
-            titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "delete custom field";
+            Page.Title = string.Format("{0} - Delete Custom Field", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             int id = 0;
             Int32.TryParse(Request["id"], out id);
@@ -40,7 +40,6 @@ namespace BugTracker.Web
 
                 row_id.Value = id.ToString();
             }
-
         }
     }
 }
