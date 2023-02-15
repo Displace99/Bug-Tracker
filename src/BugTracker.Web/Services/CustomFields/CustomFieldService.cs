@@ -1,4 +1,5 @@
 ﻿using btnet;
+using BugTracker.Web.Models.CustomFields;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
+using System.Xml.Linq;
 
 namespace BugTracker.Web.Services.CustomFields
 {
@@ -76,6 +78,33 @@ namespace BugTracker.Web.Services.CustomFields
             }
         }
 
+        /// <summary>
+        /// Returns the details of a specific custom field
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        public DataRow GetFieldDetails(int Id)
+        {
+            string sql = @"
+                select sc.name,
+                isnull(ccm_dropdown_vals,'') [vals],
+                isnull(ccm_dropdown_type,'') [dropdown_type],
+                isnull(ccm_sort_seq, sc.colorder) [column order],
+                mm.text [default value], dflts.name [default name]
+                from syscolumns sc
+                inner join sysobjects so on sc.id = so.id
+                left outer join custom_col_metadata ccm on ccm_colorder = sc.colorder
+                left outer join syscomments mm on sc.cdefault = mm.id
+                left outer join sysobjects dflts on dflts.id = mm.id
+                where so.name = 'bugs'
+                and sc.colorder = @Id";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@Id", Id);
+
+            return DbUtil.get_datarow(cmd);
+        }
+
         public void DeleteField(int Id)
         {
             DataRow columnDR = GetColumns(Id);
@@ -115,6 +144,50 @@ namespace BugTracker.Web.Services.CustomFields
             }
 
             return columnName;
+        }
+
+        public void UpdateCustomFieldMetaData(CustomField customField)
+        {
+            string sql = @"declare @count int
+			    select @count = count(1) from custom_col_metadata
+			    where ccm_colorder = $co
+
+			    if @count = 0
+				    insert into custom_col_metadata
+				    (ccm_colorder, ccm_dropdown_vals, ccm_sort_seq, ccm_dropdown_type)
+				    values(@colOrder, @dropdownValues, @sortSeq, '$dt')
+			    else
+				    update custom_col_metadata
+				    set ccm_dropdown_vals = N'$v',
+				    ccm_sort_seq = $ss
+				    where ccm_colorder = $co";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@colOrder", customField.Id);
+            cmd.Parameters.AddWithValue("@dropdownValues", customField.DropdownValues);
+            cmd.Parameters.AddWithValue("@sortSeq", customField.SortSequence);
+
+            
+
+            btnet.DbUtil.execute_nonquery(sql);
+            _context.Application["custom_columns_dataset"] = null;
+
+            if (customField.DefaultValue != customField.OldDefaultValue)
+            {
+                if (customField.OldDefaultValue != "")
+                {
+                    sql = "alter table bugs drop constraint [" + customField.OldDefaultValue.Replace("'", "''") + "]";
+                    DbUtil.execute_nonquery(sql);
+                    _context.Application["custom_columns_dataset"] = null;
+                }
+
+                if (customField.DefaultValue != "")
+                {
+                    sql = "alter table bugs add constraint [" + Guid.NewGuid().ToString() + "] default " + customField.DefaultValue.Replace("'", "''") + " for [" + customField.Name + "]";
+                    DbUtil.execute_nonquery(sql);
+                    _context.Application["custom_columns_dataset"] = null;
+                }
+            }
         }
 
         //****** Specific Methods for delete column workflow ******

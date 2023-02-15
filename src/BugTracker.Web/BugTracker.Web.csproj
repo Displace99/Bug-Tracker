@@ -1193,6 +1193,7 @@
       <DependentUpon>mlogin.aspx</DependentUpon>
     </Compile>
     <Compile Include="Models\Category\CategoryVM.cs" />
+    <Compile Include="Models\CustomFields\CustomField.cs" />
     <Compile Include="Models\Organization\CustomFieldPermissions.cs" />
     <Compile Include="Models\Organization\Org.cs" />
     <Compile Include="Models\Priority\PriorityVM.cs" />
