@@ -1,5 +1,6 @@
 using btnet;
 using BugTracker.Web.Models.CustomFields;
+using BugTracker.Web.Services.CustomFields;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace BugTracker.Web
         String sql;
 
         protected Security security;
+
+        private CustomFieldService _customFieldService = new CustomFieldService(HttpContext.Current);
 
 
         void Page_Load(Object sender, EventArgs e)
@@ -206,89 +209,15 @@ namespace BugTracker.Web
                     DropDownType = dropdown_type.SelectedItem.Value
                 };
 
-                sql = @"
-                    alter table orgs add [og_$nm_field_permission_level] int null
-                    alter table bugs add [$nm] $dt $ln $null $df";
+                bool fieldAdded = _customFieldService.AddCustomField(customFieldVM);
 
-                sql = sql.Replace("$nm", customFieldVM.Name);
-                sql = sql.Replace("$dt", customFieldVM.DataType);
-
-                if (customFieldVM.FieldLength != "")
+                if (fieldAdded)
                 {
-                    if (customFieldVM.FieldLength.StartsWith("("))
-                    {
-                        sql = sql.Replace("$ln", customFieldVM.FieldLength);
-                    }
-                    else
-                    {
-                        sql = sql.Replace("$ln", "(" + customFieldVM.FieldLength + ")");
-                    }
-                }
-                else
-                {
-                    sql = sql.Replace("$ln", "");
-                }
-
-                if (customFieldVM.DefaultValue != "")
-                {
-                    if (default_text.Value.StartsWith("("))
-                    {
-                        sql = sql.Replace("$df", "DEFAULT " + customFieldVM.DefaultValue);
-                    }
-                    else
-                    {
-                        sql = sql.Replace("$df", "DEFAULT (" + customFieldVM.DefaultValue + ")");
-                    }
-                }
-                else
-                {
-                    sql = sql.Replace("$df", "");
-                }
-
-                if (required.Checked)
-                {
-                    sql = sql.Replace("$null", "NOT NULL");
-                }
-                else
-                {
-                    sql = sql.Replace("$null", "NULL");
-                }
-
-                bool alter_table_worked = false;
-                try
-                {
-                    btnet.DbUtil.execute_nonquery(sql);
-                    alter_table_worked = true;
-                }
-                catch (Exception e2)
-                {
-                    msg.InnerHtml = "The generated SQL was invalid:<br><br>SQL:&nbsp;" + sql + "<br><br>Error:&nbsp;" + e2.Message;
-                    alter_table_worked = false;
-                }
-
-                if (alter_table_worked)
-                {
-                    sql = @"declare @colorder int
-
-				select @colorder = sc.colorder
-				from syscolumns sc
-				inner join sysobjects so on sc.id = so.id
-				where so.name = 'bugs'
-				and sc.name = '$nm'
-
-				insert into custom_col_metadata
-				(ccm_colorder, ccm_dropdown_vals, ccm_sort_seq, ccm_dropdown_type)
-				values(@colorder, N'$v', $ss, '$dt')";
-
-
-                    sql = sql.Replace("$nm", customFieldVM.Name);
-                    sql = sql.Replace("$v", customFieldVM.DropDownValues.Replace("'", "''"));
-                    sql = sql.Replace("$ss", customFieldVM.SortSequence.ToString());
-                    sql = sql.Replace("$dt", customFieldVM.DropDownType.Replace("'", "''"));
-
-                    btnet.DbUtil.execute_nonquery(sql);
-                    Application["custom_columns_dataset"] = null;
                     Server.Transfer("customfields.aspx");
+                }
+                else
+                {
+                    msg.InnerText = "There was an error creating the custom field";
                 }
             }
             else

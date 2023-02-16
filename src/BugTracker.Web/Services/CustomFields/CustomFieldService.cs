@@ -190,7 +190,99 @@ namespace BugTracker.Web.Services.CustomFields
             _context.Application["custom_columns_dataset"] = null;
         }
 
+        public bool AddCustomField(NewCustomFieldVM customField)
+        {
+            //Because this is altering tables and columns we are unable to parameterize this and will need to 
+            //stay with the string replace.
+            string sql = @"
+                    alter table orgs add [og_$nm_field_permission_level] int null
+                    alter table bugs add [$nm] $dt $ln $null $df";
+
+            sql = sql.Replace("$nm", customField.Name);
+            sql = sql.Replace("$dt", customField.DataType);
+
+            if (customField.FieldLength != "")
+            {
+                if (customField.FieldLength.StartsWith("("))
+                {
+                    sql = sql.Replace("$ln", customField.FieldLength);
+                }
+                else
+                {
+                    sql = sql.Replace("$ln", "(" + customField.FieldLength + ")");
+                }
+            }
+            else
+            {
+                sql = sql.Replace("$ln", "");
+            }
+
+            if (customField.DefaultValue != "")
+            {
+                //Why do we have to wrap the default value in parenthesis?
+                if (customField.DefaultValue.StartsWith("("))
+                {
+                    sql = sql.Replace("$df", "DEFAULT " + customField.DefaultValue);
+                }
+                else
+                {
+                    sql = sql.Replace("$df", "DEFAULT (" + customField.DefaultValue + ")");
+                }
+            }
+            else
+            {
+                sql = sql.Replace("$df", "");
+            }
+
+            if (customField.IsRequired)
+            {
+                sql = sql.Replace("$null", "NOT NULL");
+            }
+            else
+            {
+                sql = sql.Replace("$null", "NULL");
+            }
+
+            bool alter_table_worked = false;
+            try
+            {
+                DbUtil.execute_nonquery(sql);
+                alter_table_worked = true;
+            }
+            catch (Exception e2)
+            {
+                //msg.InnerHtml = "The generated SQL was invalid:<br><br>SQL:&nbsp;" + sql + "<br><br>Error:&nbsp;" + e2.Message;
+                alter_table_worked = false;
+            }
+
+            if (alter_table_worked)
+            {
+                sql = @"declare @colorder int
+
+				select @colorder = sc.colorder
+				from syscolumns sc
+				inner join sysobjects so on sc.id = so.id
+				where so.name = 'bugs'
+				and sc.name = '$nm'
+
+				insert into custom_col_metadata
+				(ccm_colorder, ccm_dropdown_vals, ccm_sort_seq, ccm_dropdown_type)
+				values(@colorder, N'$v', $ss, '$dt')";
+
+
+                sql = sql.Replace("$nm", customField.Name);
+                sql = sql.Replace("$v", customField.DropDownValues.Replace("'", "''"));
+                sql = sql.Replace("$ss", customField.SortSequence.ToString());
+                sql = sql.Replace("$dt", customField.DropDownType.Replace("'", "''"));
+
+                DbUtil.execute_nonquery(sql);
+            }
+            _context.Application["custom_columns_dataset"] = null;
+            return alter_table_worked;
+        }
+
         //****** Specific Methods for delete column workflow ******
+        #region Delete Helper Methods
         private DataRow GetColumns(int Id)
         {
             string sql = @"select sc.name [column_name], df.name [default_constraint_name]
@@ -236,5 +328,6 @@ namespace BugTracker.Web.Services.CustomFields
             _context.Application["custom_columns_dataset"] = null;
             DbUtil.execute_nonquery(cmd);
         }
+        #endregion
     }
 }
