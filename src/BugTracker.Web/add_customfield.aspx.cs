@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Models.CustomFields;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,6 @@ namespace BugTracker.Web
 
         void Page_Load(Object sender, EventArgs e)
         {
-
             Util.do_not_cache(Response);
 
             security = new Security();
@@ -40,19 +40,18 @@ namespace BugTracker.Web
                 dropdown_type.Items.Insert(2, new ListItem("users", "users"));
 
                 sort_seq.Value = "1";
-
             }
             else
             {
-                on_update();
+                UpdateField();
             }
 
         }
 
 
-        Boolean validate()
+        bool ValidateForm()
         {
-
+            //Clear error messages
             name_err.InnerText = "";
             length_err.InnerText = "";
             sort_seq_err.InnerText = "";
@@ -61,7 +60,7 @@ namespace BugTracker.Web
             datatype_err.InnerText = "";
             required_err.InnerText = "";
 
-            Boolean good = true;
+            bool good = true;
 
             if (string.IsNullOrEmpty(name.Value))
             {
@@ -87,7 +86,6 @@ namespace BugTracker.Web
                 }
             }
 
-
             if (string.IsNullOrEmpty(length.Value))
             {
                 if (datatype.SelectedItem.Value == "int"
@@ -111,7 +109,6 @@ namespace BugTracker.Web
                 }
             }
 
-
             if (required.Checked)
             {
                 if (string.IsNullOrEmpty(default_text.Value))
@@ -127,7 +124,6 @@ namespace BugTracker.Web
                 }
 
             }
-
 
             if (dropdown_type.SelectedItem.Value == "normal")
             {
@@ -155,7 +151,6 @@ namespace BugTracker.Web
                         }
                     }
                 }
-
             }
             else if (dropdown_type.SelectedItem.Value == "users")
             {
@@ -166,7 +161,6 @@ namespace BugTracker.Web
                 }
             }
 
-
             if (dropdown_type.SelectedItem.Value != "normal")
             {
                 if (vals.Value != "")
@@ -175,7 +169,6 @@ namespace BugTracker.Web
                     vals_err.InnerText = "Dropdown values are only used for dropdown of type \"normal\".";
                 }
             }
-
 
             if (string.IsNullOrEmpty(sort_seq.Value))
             {
@@ -191,34 +184,44 @@ namespace BugTracker.Web
                 }
             }
 
-
             return good;
         }
 
 
-        void on_update()
+        void UpdateField()
         {
+            bool isValid = ValidateForm();
 
-            Boolean good = validate();
-
-            if (good)
+            if (isValid)
             {
+                NewCustomFieldVM customFieldVM= new NewCustomFieldVM 
+                {
+                    Name = name.Value,
+                    DataType = datatype.SelectedItem.Value,
+                    FieldLength = length.Value,
+                    DefaultValue = default_text.Value,
+                    IsRequired = required.Checked,
+                    DropDownValues = vals.Value,
+                    SortSequence = Convert.ToInt32(sort_seq.Value),
+                    DropDownType = dropdown_type.SelectedItem.Value
+                };
+
                 sql = @"
                     alter table orgs add [og_$nm_field_permission_level] int null
                     alter table bugs add [$nm] $dt $ln $null $df";
 
-                sql = sql.Replace("$nm", name.Value);
-                sql = sql.Replace("$dt", datatype.SelectedItem.Value);
+                sql = sql.Replace("$nm", customFieldVM.Name);
+                sql = sql.Replace("$dt", customFieldVM.DataType);
 
-                if (length.Value != "")
+                if (customFieldVM.FieldLength != "")
                 {
-                    if (length.Value.StartsWith("("))
+                    if (customFieldVM.FieldLength.StartsWith("("))
                     {
-                        sql = sql.Replace("$ln", length.Value);
+                        sql = sql.Replace("$ln", customFieldVM.FieldLength);
                     }
                     else
                     {
-                        sql = sql.Replace("$ln", "(" + length.Value + ")");
+                        sql = sql.Replace("$ln", "(" + customFieldVM.FieldLength + ")");
                     }
                 }
                 else
@@ -226,22 +229,21 @@ namespace BugTracker.Web
                     sql = sql.Replace("$ln", "");
                 }
 
-                if (default_text.Value != "")
+                if (customFieldVM.DefaultValue != "")
                 {
                     if (default_text.Value.StartsWith("("))
                     {
-                        sql = sql.Replace("$df", "DEFAULT " + default_text.Value);
+                        sql = sql.Replace("$df", "DEFAULT " + customFieldVM.DefaultValue);
                     }
                     else
                     {
-                        sql = sql.Replace("$df", "DEFAULT (" + default_text.Value + ")");
+                        sql = sql.Replace("$df", "DEFAULT (" + customFieldVM.DefaultValue + ")");
                     }
                 }
                 else
                 {
                     sql = sql.Replace("$df", "");
                 }
-
 
                 if (required.Checked)
                 {
@@ -279,22 +281,20 @@ namespace BugTracker.Web
 				values(@colorder, N'$v', $ss, '$dt')";
 
 
-                    sql = sql.Replace("$nm", name.Value);
-                    sql = sql.Replace("$v", vals.Value.Replace("'", "''"));
-                    sql = sql.Replace("$ss", sort_seq.Value);
-                    sql = sql.Replace("$dt", dropdown_type.SelectedItem.Value.Replace("'", "''"));
+                    sql = sql.Replace("$nm", customFieldVM.Name);
+                    sql = sql.Replace("$v", customFieldVM.DropDownValues.Replace("'", "''"));
+                    sql = sql.Replace("$ss", customFieldVM.SortSequence.ToString());
+                    sql = sql.Replace("$dt", customFieldVM.DropDownType.Replace("'", "''"));
 
                     btnet.DbUtil.execute_nonquery(sql);
                     Application["custom_columns_dataset"] = null;
                     Server.Transfer("customfields.aspx");
                 }
-
             }
             else
             {
                 msg.InnerText = "Custom field was not created.";
             }
-
         }
     }
 }
