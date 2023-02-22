@@ -629,7 +629,6 @@
     <Content Include="tasks_all_excel.aspx" />
     <Content Include="img\telephone.png" />
     <Content Include="img\telephone_edit.png" />
-    <Content Include="translate.aspx" />
     <Content Include="udfs.aspx" />
     <Content Include="update_dashboard.aspx" />
     <Content Include="upgrade_273_to_274.aspx" />
@@ -1447,13 +1446,6 @@
     <Compile Include="tasks_all_excel.aspx.designer.cs">
       <DependentUpon>tasks_all_excel.aspx</DependentUpon>
     </Compile>
-    <Compile Include="translate.aspx.cs">
-      <DependentUpon>translate.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="translate.aspx.designer.cs">
-      <DependentUpon>translate.aspx</DependentUpon>
-    </Compile>
     <Compile Include="udfs.aspx.cs">
       <DependentUpon>udfs.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1543,7 +1535,6 @@
     <Compile Include="btnet\security.cs" />
     <Compile Include="btnet\sortable_html_table.cs" />
     <Compile Include="btnet\tags.cs" />
-    <Compile Include="btnet\TranslationService.cs" />
     <Compile Include="btnet\user.cs" />
     <Compile Include="btnet\util.cs" />
     <Compile Include="btnet\version_control.cs" />
