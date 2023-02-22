@@ -757,6 +757,7 @@ namespace btnet
 
 
 				// custom bug link
+				//TODO: To be removed in 3.11 release
 				if (btnet.Util.get_setting("CustomPostLinkLabel","") != "")
 				{
 
