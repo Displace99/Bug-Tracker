@@ -27,6 +27,13 @@ namespace BugTracker.Web.Services
             return DbUtil.get_dataset(sql);
         }
 
+        public DataView GetUserDataView()
+        {
+            string sql = "SELECT us_id, us_username FROM users ORDER BY us_username";
+
+            return DbUtil.get_dataview(sql);
+        }
+
         /// <summary>
         /// Returns a DataSet of all users in the system. Used by Admin users only
         /// </summary>
