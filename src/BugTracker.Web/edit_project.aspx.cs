@@ -133,18 +133,20 @@ namespace BugTracker.Web
         }
 
 
-        Boolean validate()
+        bool ValidateForm()
         {
+            bool good = true;
 
-            Boolean good = true;
+            //Clear error messages 
+            name_err.InnerText = "";
+            custom_dropdown_values1_err.InnerText = "";
+            custom_dropdown_values2_err.InnerText = "";
+            custom_dropdown_values3_err.InnerText = "";
+
             if (name.Value == "")
             {
                 good = false;
                 name_err.InnerText = "Description is required.";
-            }
-            else
-            {
-                name_err.InnerText = "";
             }
 
             string vals_error_string = "";
@@ -156,10 +158,6 @@ namespace BugTracker.Web
                 custom_dropdown_values1_err.InnerText = vals_error_string;
                 errors_with_custom_dropdowns = true;
             }
-            else
-            {
-                custom_dropdown_values1_err.InnerText = "";
-            }
 
             vals_error_string = btnet.Util.validate_dropdown_values(custom_dropdown_values2.Value);
             if (!string.IsNullOrEmpty(vals_error_string))
@@ -168,10 +166,6 @@ namespace BugTracker.Web
                 custom_dropdown_values2_err.InnerText = vals_error_string;
                 errors_with_custom_dropdowns = true;
             }
-            else
-            {
-                custom_dropdown_values2_err.InnerText = "";
-            }
 
             vals_error_string = btnet.Util.validate_dropdown_values(custom_dropdown_values3.Value);
             if (!string.IsNullOrEmpty(vals_error_string))
@@ -179,10 +173,6 @@ namespace BugTracker.Web
                 good = false;
                 custom_dropdown_values3_err.InnerText = vals_error_string;
                 errors_with_custom_dropdowns = true;
-            }
-            else
-            {
-                custom_dropdown_values3_err.InnerText = "";
             }
 
             if (errors_with_custom_dropdowns)
@@ -196,10 +186,9 @@ namespace BugTracker.Web
 
         void on_update()
         {
+            bool isValid = ValidateForm();
 
-            Boolean good = validate();
-
-            if (good)
+            if (isValid)
             {
                 if (id == 0)  // insert new
                 {
