@@ -28,11 +28,10 @@ namespace BugTracker.Web
 
             Util.do_not_cache(Response);
 
-            security = new Security();
-            security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
+            Master.pageLink = "admin";
 
-            titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "edit project";
+            Page.Title = string.Format("{0} - Edit Project", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             msg.InnerText = "";
 
