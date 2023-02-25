@@ -249,9 +249,8 @@ namespace BugTracker.Web.Services.CustomFields
                 DbUtil.execute_nonquery(sql);
                 alter_table_worked = true;
             }
-            catch (Exception e2)
+            catch
             {
-                //msg.InnerHtml = "The generated SQL was invalid:<br><br>SQL:&nbsp;" + sql + "<br><br>Error:&nbsp;" + e2.Message;
                 alter_table_worked = false;
             }
 
