@@ -105,6 +105,141 @@ namespace BugTracker.Web.Services.Project
             return DbUtil.get_datarow(cmd);
         }
 
+        public DataRow GetFullProjectDetails(int projectId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("select pj_name, pj_active, isnull(pj_default_user,0) [pj_default_user], pj_default, ");
+			sql.AppendLine("isnull(pj_auto_assign_default_user,0) [pj_auto_assign_default_user],");
+			sql.AppendLine("isnull(pj_auto_subscribe_default_user,0) [pj_auto_subscribe_default_user],");
+			sql.AppendLine("isnull(pj_enable_pop3,0) [pj_enable_pop3],");
+			sql.AppendLine("isnull(pj_pop3_username,'') [pj_pop3_username],");
+			sql.AppendLine("isnull(pj_pop3_email_from,'') [pj_pop3_email_from],");
+			sql.AppendLine("isnull(pj_description,'') [pj_description],");
+			sql.AppendLine("isnull(pj_enable_custom_dropdown1,0) [pj_enable_custom_dropdown1],");
+			sql.AppendLine("isnull(pj_enable_custom_dropdown2,0) [pj_enable_custom_dropdown2],");
+			sql.AppendLine("isnull(pj_enable_custom_dropdown3,0) [pj_enable_custom_dropdown3],");
+			sql.AppendLine("isnull(pj_custom_dropdown_label1,'') [pj_custom_dropdown_label1],");
+			sql.AppendLine("isnull(pj_custom_dropdown_label2,'') [pj_custom_dropdown_label2],");
+			sql.AppendLine("isnull(pj_custom_dropdown_label3,'') [pj_custom_dropdown_label3],");
+			sql.AppendLine("isnull(pj_custom_dropdown_values1,'') [pj_custom_dropdown_values1],");
+			sql.AppendLine("isnull(pj_custom_dropdown_values2,'') [pj_custom_dropdown_values2],");
+			sql.AppendLine("isnull(pj_custom_dropdown_values3,'') [pj_custom_dropdown_values3]");
+			sql.AppendLine("from projects");
+			sql.AppendLine("where pj_id = @projectId");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+            cmd.Parameters.AddWithValue("@projectId", projectId);
+
+            return DbUtil.get_datarow(cmd);
+        }
+
+        public void AddNewProject(UpdateProject project)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("insert into projects");
+            sql.AppendLine("(pj_name, pj_active, pj_default_user, pj_default, pj_auto_assign_default_user, pj_auto_subscribe_default_user,");
+			sql.AppendLine("pj_enable_pop3, pj_pop3_username, pj_pop3_password, pj_pop3_email_from,");
+			sql.AppendLine("pj_description,");
+			sql.AppendLine("pj_enable_custom_dropdown1, pj_enable_custom_dropdown2, pj_enable_custom_dropdown3,");
+			sql.AppendLine("pj_custom_dropdown_label1, pj_custom_dropdown_label2, pj_custom_dropdown_label3,");
+			sql.AppendLine("pj_custom_dropdown_values1, pj_custom_dropdown_values2, pj_custom_dropdown_values3)");
+			sql.AppendLine("values (@Name, @IsActive, @DefaultUser, @DefaultSelection, @AutoAssign, @AutoSubscribe,");
+			sql.AppendLine("@EnablePop, @PopUserName,@PopPassword,@PopEmailFrom,");
+			sql.AppendLine("@Description, ");
+			sql.AppendLine("@EnableDD1,@EnableDD2,@EnableDD3,");
+			sql.AppendLine("@DD1Label,@DD2Label,@DD3Label,");
+			sql.AppendLine("@DD1Value,@DD2Value,@DD3Value)");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@Name", project.Name);
+            cmd.Parameters.AddWithValue("@IsActive", project.IsActive);
+            cmd.Parameters.AddWithValue("@DefaultUser", project.DefaultUserId);
+            cmd.Parameters.AddWithValue("@DefaultSelection", project.IsDefaultSelection);
+            cmd.Parameters.AddWithValue("@AutoAssign", project.IsAutoAssign);
+            cmd.Parameters.AddWithValue("@AutoSubscribe", project.IsAutoSubscribe);
+            cmd.Parameters.AddWithValue("@EnablePop", project.EnablePop3);
+            cmd.Parameters.AddWithValue("@PopUserName", project.Pop3UserName);
+            cmd.Parameters.AddWithValue("@PopPassword", project.Pop3Password);
+            cmd.Parameters.AddWithValue("@PopEmailFrom", project.Pop3EmailFrom);
+
+            cmd.Parameters.AddWithValue("@Description", project.Description);
+            cmd.Parameters.AddWithValue("@EnableDD1", project.EnableDropdown1);
+            cmd.Parameters.AddWithValue("@EnableDD2", project.EnableDropdown2);
+            cmd.Parameters.AddWithValue("@EnableDD3", project.EnableDropdown3);
+            cmd.Parameters.AddWithValue("@DD1Label", project.Dropdown1Label);
+            cmd.Parameters.AddWithValue("@DD2Label", project.Dropdown2Label);
+            cmd.Parameters.AddWithValue("@DD3Label", project.Dropdown3Label);
+            cmd.Parameters.AddWithValue("@DD1Value", project.Dropdown1Values);
+            cmd.Parameters.AddWithValue("@DD2Value", project.Dropdown2Values);
+            cmd.Parameters.AddWithValue("@DD3Value", project.Dropdown3Values);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public void UpdateProject(UpdateProject project)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine("update projects set");
+			sql.AppendLine("pj_name = @Name,");
+
+            if (!string.IsNullOrEmpty(project.Pop3Password))
+            {
+                sql.AppendLine("pj_pop3_password = @PopPassword,");
+            }
+			
+			sql.AppendLine("pj_active = @IsActive,");
+			sql.AppendLine("pj_default_user = @DefaultUser,");
+			sql.AppendLine("pj_default = @DefaultSelection,");
+			sql.AppendLine("pj_auto_assign_default_user = @AutoAssign,");
+			sql.AppendLine("pj_auto_subscribe_default_user = @AutoSubscribe,");
+			sql.AppendLine("pj_enable_pop3 = @EnablePop,");
+			sql.AppendLine("pj_pop3_username = @PopUserName,");
+			sql.AppendLine("pj_pop3_email_from = @PopEmailFrom,");
+			sql.AppendLine("pj_description = @Description,");
+			sql.AppendLine("pj_enable_custom_dropdown1 = @EnableDD1,");
+			sql.AppendLine("pj_enable_custom_dropdown2 = @EnableDD2,");
+			sql.AppendLine("pj_enable_custom_dropdown3 = @EnableDD3,");
+			sql.AppendLine("pj_custom_dropdown_label1 = @DD1Label,");
+			sql.AppendLine("pj_custom_dropdown_label2 = @DD2Label,");
+			sql.AppendLine("pj_custom_dropdown_label3 = @DD3Label,");
+			sql.AppendLine("pj_custom_dropdown_values1 = @DD1Value,");
+			sql.AppendLine("pj_custom_dropdown_values2 = @DD2Value,");
+			sql.AppendLine("pj_custom_dropdown_values3 = @DD3Value");
+            sql.AppendLine("where pj_id = @Id");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@Id", project.Id);
+            cmd.Parameters.AddWithValue("@Name", project.Name);
+            cmd.Parameters.AddWithValue("@IsActive", project.IsActive);
+            cmd.Parameters.AddWithValue("@DefaultUser", project.DefaultUserId);
+            cmd.Parameters.AddWithValue("@DefaultSelection", project.IsDefaultSelection);
+            cmd.Parameters.AddWithValue("@AutoAssign", project.IsAutoAssign);
+            cmd.Parameters.AddWithValue("@AutoSubscribe", project.IsAutoSubscribe);
+            cmd.Parameters.AddWithValue("@EnablePop", project.EnablePop3);
+            cmd.Parameters.AddWithValue("@PopUserName", project.Pop3UserName);
+            
+            if (!string.IsNullOrEmpty(project.Pop3Password)) 
+            {
+                cmd.Parameters.AddWithValue("@PopPassword", project.Pop3Password);
+            }
+                
+            cmd.Parameters.AddWithValue("@PopEmailFrom", project.Pop3EmailFrom);
+            cmd.Parameters.AddWithValue("@Description", project.Description);
+            cmd.Parameters.AddWithValue("@EnableDD1", project.EnableDropdown1);
+            cmd.Parameters.AddWithValue("@EnableDD2", project.EnableDropdown2);
+            cmd.Parameters.AddWithValue("@EnableDD3", project.EnableDropdown3);
+            cmd.Parameters.AddWithValue("@DD1Label", project.Dropdown1Label);
+            cmd.Parameters.AddWithValue("@DD2Label", project.Dropdown2Label);
+            cmd.Parameters.AddWithValue("@DD3Label", project.Dropdown3Label);
+            cmd.Parameters.AddWithValue("@DD1Value", project.Dropdown1Values);
+            cmd.Parameters.AddWithValue("@DD2Value", project.Dropdown2Values);
+            cmd.Parameters.AddWithValue("@DD3Value", project.Dropdown3Values);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
         public DataSet GetProjectSettings(int projectId)
         {
             int defaultPermissionLevel = Convert.ToInt32(Util.get_setting("DefaultPermissionLevel", "2"));
