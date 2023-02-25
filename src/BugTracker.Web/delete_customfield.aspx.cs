@@ -16,7 +16,6 @@ namespace BugTracker.Web
         {
             Util.do_not_cache(Response);
 
-            //security = new Security();
             Master.security.check_security(HttpContext.Current, Security.MUST_BE_ADMIN);
             Master.pageLink = "admin";
 
