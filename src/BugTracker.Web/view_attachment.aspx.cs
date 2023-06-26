@@ -40,18 +40,18 @@ namespace BugTracker.Web
 
             int.TryParse(Request["id"], out bugPostId);
             int.TryParse(Request["bug_id"], out bugId);
-            
+
+            int permission_level = Bug.get_bug_permission_level(bugId, security);
+            if (permission_level == Security.PERMISSION_NONE)
+            {
+                Response.Write("You are not allowed to view this item");
+                Response.End();
+            }
+
             DataRow dr = _attachmentService.GetAttachmentsFromDatabase(bugPostId, bugId);
 
             if (dr == null)
             {
-                Response.End();
-            }
-
-            int permission_level = Bug.get_bug_permission_level(Convert.ToInt32(bug_id), security);
-            if (permission_level == Security.PERMISSION_NONE)
-            {
-                Response.Write("You are not allowed to view this item");
                 Response.End();
             }
 
@@ -65,7 +65,6 @@ namespace BugTracker.Web
             {
                 download = false;
             }
-
 
             string filename = (string)dr["bp_file"];
             string content_type = (string)dr["bp_content_type"];
