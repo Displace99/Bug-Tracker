@@ -11,7 +11,13 @@ namespace BugTracker.Web.Services.Attachment
 {
     public class AttachmentService
     {
-        public DataRow GetAttachmentsFromDatabase(int bugPostId, int bugId)
+        /// <summary>
+        /// This checks to see if there is an attached file
+        /// </summary>
+        /// <param name="bugPostId">ID of the bug Post</param>
+        /// <param name="bugId">ID of the bug</param>
+        /// <returns></returns>
+        public DataRow GetAttachmentInfo(int bugPostId, int bugId)
         {
             string sql = @"select bp_file, isnull(bp_content_type,'') [bp_content_type] from bug_posts where bp_id = @bugPostId and bp_bug = @bugId";
 

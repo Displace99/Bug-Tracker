@@ -48,7 +48,7 @@ namespace BugTracker.Web
                 Response.End();
             }
 
-            DataRow dr = _attachmentService.GetAttachmentsFromDatabase(bugPostId, bugId);
+            DataRow dr = _attachmentService.GetAttachmentInfo(bugPostId, bugId);
 
             if (dr == null)
             {
