@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Attachment;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,6 +12,7 @@ namespace BugTracker.Web
     public partial class delete_attachment : Page
     {
         private string sql;
+        private AttachmentService _attachmentService = new AttachmentService();
 
         protected Security security;
 
@@ -34,10 +36,13 @@ namespace BugTracker.Web
                 Response.End();
             }
 
-            string attachment_id_string = Util.sanitize_integer(Request["id"]);
-            string bug_id_string = Util.sanitize_integer(Request["bug_id"]);
+            int attachmentId = 0;
+            int bugId = 0;
 
-            int permission_level = btnet.Bug.get_bug_permission_level(Convert.ToInt32(bug_id_string), security);
+            int.TryParse(Request["id"], out attachmentId);
+            int.TryParse(Request["bug_id"], out bugId);
+
+            int permission_level = Bug.get_bug_permission_level(bugId, security);
             if (permission_level != Security.PERMISSION_ALL)
             {
                 Response.Write("You are not allowed to edit this item");
@@ -47,46 +52,21 @@ namespace BugTracker.Web
 
             if (IsPostBack)
             {
-                // save the filename before deleting the row
-                sql = @"select bp_file from bug_posts where bp_id = $ba";
-                sql = sql.Replace("$ba", attachment_id_string);
-                string filename = (string)btnet.DbUtil.execute_scalar(sql);
+                string filename = _attachmentService.GetAttachmentFileName(attachmentId);
 
-                // delete the row representing the attachment
-                sql = @"delete bug_post_attachments where bpa_post = $ba
-            delete bug_posts where bp_id = $ba";
-                sql = sql.Replace("$ba", attachment_id_string);
-                btnet.DbUtil.execute_nonquery(sql);
+                _attachmentService.DeleteAttachment(attachmentId, bugId, filename);
 
-                // delete the file too
-                string upload_folder = Util.get_upload_folder();
-                if (upload_folder != null)
-                {
-                    StringBuilder path = new StringBuilder(upload_folder);
-                    path.Append("\\");
-                    path.Append(bug_id_string);
-                    path.Append("_");
-                    path.Append(attachment_id_string);
-                    path.Append("_");
-                    path.Append(filename);
-                    if (System.IO.File.Exists(path.ToString()))
-                    {
-                        System.IO.File.Delete(path.ToString());
-                    }
-                }
-
-
-                Response.Redirect("edit_bug.aspx?id=" + bug_id_string);
+                Response.Redirect("edit_bug.aspx?id=" + bugId);
             }
             else
             {
                 titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
                     + "delete attachment";
 
-                back_href.HRef = "edit_bug.aspx?id=" + bug_id_string;
+                back_href.HRef = "edit_bug.aspx?id=" + bugId;
 
                 sql = @"select bp_file from bug_posts where bp_id = $1";
-                sql = sql.Replace("$1", attachment_id_string);
+                sql = sql.Replace("$1", attachmentId.ToString());
 
                 DataRow dr = btnet.DbUtil.get_datarow(sql);
 
@@ -94,9 +74,8 @@ namespace BugTracker.Web
 
                 confirm_href.InnerText = "confirm delete of attachment: " + s;
 
-                row_id.Value = attachment_id_string;
+                row_id.Value = attachmentId.ToString();
             }
-
         }
     }
 }

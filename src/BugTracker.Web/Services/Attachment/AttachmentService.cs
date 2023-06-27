@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.EnterpriseServices;
 using System.Linq;
+using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 using System.Web;
@@ -139,6 +140,78 @@ namespace BugTracker.Web.Services.Attachment
 
                 } // end using sql reader
             } // end using sql command
+        }
+
+        /// <summary>
+        /// Returns the name of the file for the specific attachmentId
+        /// </summary>
+        /// <param name="attachmentId"></param>
+        /// <returns></returns>
+        public string GetAttachmentFileName(int attachmentId)
+        {
+            string sql = @"select bp_file from bug_posts where bp_id = @bugPostId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugPostId", attachmentId);
+
+            string filename = (string)DbUtil.execute_scalar(cmd);
+
+            return filename;
+        }
+
+        /// <summary>
+        /// Removes the attachment information from the database as well as the 
+        /// file folder
+        /// </summary>
+        /// <param name="attachmentId">Id of the attachment to delete</param>
+        /// <param name="bugId">Id of the Bug attachment is on</param>
+        /// <param name="filename">Attachment Filename</param>
+        public void DeleteAttachment(int attachmentId, int bugId, string filename)
+        {
+            DeleteAttachmentFromDatabase(attachmentId);
+            DeleteFileFromFolder(attachmentId, bugId, filename);
+        }
+
+        /// <summary>
+        /// Deletes any attachment from the Database
+        /// </summary>
+        /// <param name="attachmentId"></param>
+        public void DeleteAttachmentFromDatabase(int attachmentId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append("delete bug_post_attachments where bpa_post = @bugPostId");
+            sql.AppendLine("delete bug_posts where bp_id = @bugPostId");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+            cmd.Parameters.AddWithValue("@bugPostId", attachmentId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        /// <summary>
+        /// Deletes the actual attachment file from the file folder.
+        /// </summary>
+        /// <param name="attachmentId"></param>
+        /// <param name="bugId"></param>
+        /// <param name="filename"></param>
+        public void DeleteFileFromFolder(int attachmentId, int bugId, string filename)
+        {
+            // delete the file too
+            string upload_folder = Util.get_upload_folder();
+            if (upload_folder != null)
+            {
+                StringBuilder path = new StringBuilder(upload_folder);
+                path.Append("\\");
+                path.Append(bugId.ToString());
+                path.Append("_");
+                path.Append(attachmentId.ToString());
+                path.Append("_");
+                path.Append(filename);
+                if (System.IO.File.Exists(path.ToString()))
+                {
+                    System.IO.File.Delete(path.ToString());
+                }
+            }
         }
     }
 }
