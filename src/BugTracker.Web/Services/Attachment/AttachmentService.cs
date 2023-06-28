@@ -7,6 +7,7 @@ using System.EnterpriseServices;
 using System.Linq;
 using System.Net.Mail;
 using System.Net.Mime;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 
@@ -157,6 +158,42 @@ namespace BugTracker.Web.Services.Attachment
             string filename = (string)DbUtil.execute_scalar(cmd);
 
             return filename;
+        }
+
+        /// <summary>
+        /// Returns attachment information
+        /// </summary>
+        /// <param name="attachmentId"></param>
+        /// <returns></returns>
+        public DataRow GetAttachmentData(int attachmentId)
+        {
+            string sql = @"select bp_comment, bp_file, bp_hidden_from_external_users from bug_posts where bp_id = @bugPostId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugPostId", attachmentId);
+
+            return DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
+        /// Updates the attachment info in the database
+        /// </summary>
+        /// <param name="bugPostId"></param>
+        /// <param name="comment"></param>
+        /// <param name="isInternal"></param>
+        public void UpdateAttachment(int bugPostId, string comment, bool isInternal)
+        {
+            string sql = @"update bug_posts set
+			bp_comment = @comment,
+			bp_hidden_from_external_users = @isInternal
+			where bp_id = @bugPostId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@comment", comment);
+            cmd.Parameters.AddWithValue("@isInternal", isInternal); 
+            cmd.Parameters.AddWithValue("@bugPostId", bugPostId);
+
+            DbUtil.execute_nonquery(cmd);
         }
 
         /// <summary>
