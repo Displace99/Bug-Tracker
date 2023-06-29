@@ -9,7 +9,7 @@ Deleting a Project
 ****************
 Delete a project
 ****************
-To delete a project, click the **admin** link on the main menu, then click **Projects**, and then select the **Delete** link next to the project you want to have deleted. You will then be taken to a confirmation page to confirm the delete.
+To delete a project, click the **admin** link on the main menu, then click **Projects**, and then select the **delete** link next to the project you want to have deleted. You will then be taken to a confirmation page to confirm the delete.
 
 .. note::
 
