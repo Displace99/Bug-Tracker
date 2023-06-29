@@ -8,3 +8,5 @@ A project is a place for users and organizations to track the progress of bugs a
 
     create-project.rst
     view-project-issues.rst
+    edit-project.rst
+    delete-project.rst
