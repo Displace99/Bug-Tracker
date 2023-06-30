@@ -1466,6 +1466,9 @@
       <DependentUpon>update_dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="update_dashboard.aspx.designer.cs">
+      <DependentUpon>update_dashboard.aspx</DependentUpon>
+    </Compile>
     <Compile Include="upgrade_273_to_274.aspx.cs">
       <DependentUpon>upgrade_273_to_274.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
