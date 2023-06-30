@@ -1,3 +1,4 @@
+<%@ Page language="C#" CodeBehind="dashboard.aspx.cs" Inherits="BugTracker.Web.dashboard" AutoEventWireup="True" %>
 <!-- #include file = "inc.aspx" -->
 
 <html>

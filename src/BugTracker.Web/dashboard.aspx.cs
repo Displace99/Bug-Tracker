@@ -22,7 +22,7 @@ namespace BugTracker.Web
             security = new Security();
             security.check_security(HttpContext.Current, Security.ANY_USER_OK);
 
-            //titl.InnerText = String.Format("{0} - Dashboard", Util.get_setting("AppTitle", "BugTracker.NET")); 
+            titl.InnerText = String.Format("{0} - Dashboard", Util.get_setting("AppTitle", "BugTracker.NET")); 
 
             if (security.user.is_admin || security.user.can_use_reports)
             {

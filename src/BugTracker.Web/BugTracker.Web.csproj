@@ -735,6 +735,9 @@
       <DependentUpon>dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="dashboard.aspx.designer.cs">
+      <DependentUpon>dashboard.aspx</DependentUpon>
+    </Compile>
     <Compile Include="default.aspx.cs">
       <DependentUpon>default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -899,6 +902,9 @@
     <Compile Include="edit_dashboard.aspx.cs">
       <DependentUpon>edit_dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="edit_dashboard.aspx.designer.cs">
+      <DependentUpon>edit_dashboard.aspx</DependentUpon>
     </Compile>
     <Compile Include="edit_org.aspx.cs">
       <DependentUpon>edit_org.aspx</DependentUpon>
