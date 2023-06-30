@@ -1353,6 +1353,7 @@
     <Compile Include="Services\Bug\BugSubscriptionService.cs" />
     <Compile Include="Services\Category\CategoryService.cs" />
     <Compile Include="Services\CustomFields\CustomFieldService.cs" />
+    <Compile Include="Services\Dashboard\DashboardService.cs" />
     <Compile Include="Services\EncryptionService.cs" />
     <Compile Include="Services\Organization\OrganizationService.cs" />
     <Compile Include="Services\PasswordResetResult.cs" />
