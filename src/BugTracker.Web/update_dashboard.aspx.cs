@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Dashboard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,10 @@ namespace BugTracker.Web
 {
     public partial class update_dashboard : Page
     {
-        Security security;
+        protected Security security;
 
-        ///////////////////////////////////////////////////////////////////////
+        private DashboardService _dashboardService = new DashboardService();
+
         void Page_Load(Object sender, EventArgs e)
         {
 
@@ -19,9 +21,11 @@ namespace BugTracker.Web
             security = new Security();
             security.check_security(HttpContext.Current, Security.ANY_USER_OK_EXCEPT_GUEST);
 
+            int userId = security.user.usid;
+
             if (security.user.is_admin || security.user.can_use_reports)
             {
-                //
+                //Do nothing as they have proper access
             }
             else
             {
@@ -36,6 +40,10 @@ namespace BugTracker.Web
             }
 
             string action = Request["actn"];
+            if (string.IsNullOrEmpty(action))
+            {
+                Response.End();
+            }
 
             string sql = "";
 
@@ -43,88 +51,26 @@ namespace BugTracker.Web
             {
                 int rp_id = Convert.ToInt32(Util.sanitize_integer(Request["rp_id"]));
                 int rp_col = Convert.ToInt32(Util.sanitize_integer(Request["rp_col"]));
+                string chartType = ((string)Request["rp_chart_type"]).Replace("'", "''");
 
-                sql = @"
-declare @last_row int
-set @last_row = -1
-
-select @last_row = max(ds_row) from dashboard_items
-where ds_user = $user
-and ds_col = $col
-
-if @last_row = -1 or @last_row is null
-	set @last_row = 1
-else
-	set @last_row = @last_row + 1
-
-insert into dashboard_items
-(ds_user, ds_report, ds_chart_type, ds_col, ds_row)
-values ($user, $report, '$chart_type', $col, @last_row)";
-
-                sql = sql.Replace("$user", Convert.ToString(security.user.usid));
-                sql = sql.Replace("$report", Convert.ToString(rp_id));
-                sql = sql.Replace("$chart_type", ((string)Request["rp_chart_type"]).Replace("'", "''"));
-                sql = sql.Replace("$col", Convert.ToString(rp_col));
-
+                _dashboardService.AddDashboardItem(userId, rp_id, chartType, rp_col);
+                Response.Redirect("edit_dashboard.aspx");
             }
             else if (action == "delete")
             {
                 int ds_id = Convert.ToInt32(Util.sanitize_integer(Request["ds_id"]));
-                sql = "delete from dashboard_items where ds_id = $ds_id and ds_user = $user";
-                sql = sql.Replace("$ds_id", Convert.ToString(ds_id));
-                sql = sql.Replace("$user", Convert.ToString(security.user.usid));
+
+                _dashboardService.DeleteDashboardItem(ds_id, userId);
+                Response.Redirect("edit_dashboard.aspx");
             }
             else if (action == "moveup" || action == "movedown")
             {
                 int ds_id = Convert.ToInt32(Util.sanitize_integer(Request["ds_id"]));
+                int delta = action == "moveup" ? -1 : 1;
 
-                sql = @"
-/* swap positions */
-declare @other_row int
-declare @this_row int
-declare @col int
-
-select @this_row = ds_row, @col = ds_col
-from dashboard_items
-where ds_id = $ds_id and ds_user = $user
-
-set @other_row = @this_row + $delta
-
-update dashboard_items
-set ds_row = @this_row
-where ds_user = $user
-and ds_col = @col
-and ds_row = @other_row
-
-update dashboard_items
-set ds_row = @other_row
-where ds_user = $user
-and ds_id = $ds_id
-";
-
-                if (action == "moveup")
-                {
-                    sql = sql.Replace("$delta", "-1");
-                }
-                else
-                {
-                    sql = sql.Replace("$delta", "1");
-                }
-                sql = sql.Replace("$ds_id", Convert.ToString(ds_id));
-                sql = sql.Replace("$user", Convert.ToString(security.user.usid));
-            }
-
-            if (action != "")
-            {
-                btnet.DbUtil.execute_nonquery(sql);
+                _dashboardService.MoveDashboardItem(ds_id, delta, userId);
                 Response.Redirect("edit_dashboard.aspx");
             }
-            else
-            {
-                Response.Write("?");
-                Response.End();
-            }
-
         }
     }
 }
