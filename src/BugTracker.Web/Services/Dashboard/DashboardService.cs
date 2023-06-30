@@ -40,8 +40,8 @@ namespace BugTracker.Web.Services.Dashboard
             set @last_row = -1
 
             select @last_row = max(ds_row) from dashboard_items
-            where ds_user = $user
-            and ds_col = $col
+            where ds_user = @userId
+            and ds_col = @columnNum
 
             if @last_row = -1 or @last_row is null
 	            set @last_row = 1
@@ -50,25 +50,39 @@ namespace BugTracker.Web.Services.Dashboard
 
             insert into dashboard_items
             (ds_user, ds_report, ds_chart_type, ds_col, ds_row)
-            values ($user, $report, '$chart_type', $col, @last_row)";
+            values (@userId, @reportId, @chartType, @columnNum, @last_row)";
 
-            sql = sql.Replace("$user", Convert.ToString(userId));
-            sql = sql.Replace("$report", Convert.ToString(reportId));
-            sql = sql.Replace("$chart_type", chartType);
-            sql = sql.Replace("$col", Convert.ToString(dashboardColumn));
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@userId", userId);
+            cmd.Parameters.AddWithValue("@reportId", reportId);
+            cmd.Parameters.AddWithValue("@chartType", chartType);
+            cmd.Parameters.AddWithValue("@columnNum", dashboardColumn);
 
-            DbUtil.execute_nonquery(sql);
+            DbUtil.execute_nonquery(cmd);
         }
 
+        /// <summary>
+        /// Removes an item from the dashboard. 
+        /// </summary>
+        /// <param name="dashboardItemId">Id of the dashboard Item you want to remove</param>
+        /// <param name="userId">Id of the user requesting the delete</param>
         public void DeleteDashboardItem(int dashboardItemId, int userId)
         {
-            string sql = "delete from dashboard_items where ds_id = $ds_id and ds_user = $user";
-            sql = sql.Replace("$ds_id", Convert.ToString(dashboardItemId));
-            sql = sql.Replace("$user", Convert.ToString(userId));
+            string sql = "delete from dashboard_items where ds_id = @dashboardItem and ds_user = @userId";
+            
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@dashboardItem", dashboardItemId);
+            cmd.Parameters.AddWithValue("@userId", userId);
 
-            DbUtil.execute_nonquery(sql);
+            DbUtil.execute_nonquery(cmd);
         }
 
+        /// <summary>
+        /// Moves a dashboard item up or down a row
+        /// </summary>
+        /// <param name="dashboardItemId">Id of the dashboard item to move</param>
+        /// <param name="delta">If the item is moving up or down a row. -1 moves up, 1 moves down</param>
+        /// <param name="userId">Id of the user permforming the move</param>
         public void MoveDashboardItem(int dashboardItemId, int delta, int userId)
         {
             string sql = @"
@@ -79,26 +93,28 @@ namespace BugTracker.Web.Services.Dashboard
 
                     select @this_row = ds_row, @col = ds_col
                     from dashboard_items
-                    where ds_id = $ds_id and ds_user = $user
+                    where ds_id = @dashboardItemId and ds_user = @userId
 
-                    set @other_row = @this_row + $delta
+                    set @other_row = @this_row + @delta
 
                     update dashboard_items
                     set ds_row = @this_row
-                    where ds_user = $user
+                    where ds_user = @userId
                     and ds_col = @col
                     and ds_row = @other_row
 
                     update dashboard_items
                     set ds_row = @other_row
-                    where ds_user = $user
-                    and ds_id = $ds_id";
+                    where ds_user = @userId
+                    and ds_id = @dashboardItemId";
 
-            sql = sql.Replace("$delta", delta.ToString());
-            sql = sql.Replace("$ds_id", Convert.ToString(dashboardItemId));
-            sql = sql.Replace("$user", Convert.ToString(userId));
+            SqlCommand cmd = new SqlCommand(sql);
 
-            DbUtil.execute_nonquery(sql);
+            cmd.Parameters.AddWithValue("@dashboardItemId", dashboardItemId);
+            cmd.Parameters.AddWithValue("@delta", delta);
+            cmd.Parameters.AddWithValue("@userId", userId);
+
+            DbUtil.execute_nonquery(cmd);
         }
     }
 }
