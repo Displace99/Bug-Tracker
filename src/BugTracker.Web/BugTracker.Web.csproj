@@ -1361,6 +1361,7 @@
     <Compile Include="Services\CustomFields\CustomFieldService.cs" />
     <Compile Include="Services\Dashboard\DashboardService.cs" />
     <Compile Include="Services\EncryptionService.cs" />
+    <Compile Include="Services\Notification\NotificationService.cs" />
     <Compile Include="Services\Organization\OrganizationService.cs" />
     <Compile Include="Services\PasswordResetResult.cs" />
     <Compile Include="Services\Priority\PriorityService.cs" />
