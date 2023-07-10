@@ -7,36 +7,36 @@ Distributed under the terms of the GNU General Public License
 
 <script language="C#" runat="server">
 
-DataSet ds;
+//DataSet ds;
 
-Security security;
-string ses;
+//Security security;
+//string ses;
 
-void Page_Load(Object sender, EventArgs e)
-{
+//void Page_Load(Object sender, EventArgs e)
+//{
 
-	Util.do_not_cache(Response);
-	
-	security = new Security();
-	security.check_security( HttpContext.Current, Security.MUST_BE_ADMIN);
+//	Util.do_not_cache(Response);
 
-	titl.InnerText = Util.get_setting("AppTitle","BugTracker.NET") + " - "
-		+ "queued notifications";
+//	security = new Security();
+//	security.check_security( HttpContext.Current, Security.MUST_BE_ADMIN);
 
-	ds = btnet.DbUtil.get_dataset(
-		@"select
-		qn_id [id],
-		qn_date_created [date created],
-		qn_to [to],
-		qn_bug [bug],
-		qn_status [status],
-		qn_retries [retries],
-		qn_last_exception [last error]
-		from queued_notifications
-		order by id;");
+//	titl.InnerText = Util.get_setting("AppTitle","BugTracker.NET") + " - "
+//		+ "queued notifications";
 
-	ses = (string) Session["session_cookie"];
-}
+//	ds = btnet.DbUtil.get_dataset(
+//		@"select
+//		qn_id [id],
+//		qn_date_created [date created],
+//		qn_to [to],
+//		qn_bug [bug],
+//		qn_status [status],
+//		qn_retries [retries],
+//		qn_last_exception [last error]
+//		from queued_notifications
+//		order by id;");
+
+//	ses = (string) Session["session_cookie"];
+//}
 
 
 </script>
