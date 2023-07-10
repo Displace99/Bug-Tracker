@@ -735,6 +735,9 @@
       <DependentUpon>dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="dashboard.aspx.designer.cs">
+      <DependentUpon>dashboard.aspx</DependentUpon>
+    </Compile>
     <Compile Include="default.aspx.cs">
       <DependentUpon>default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -899,6 +902,9 @@
     <Compile Include="edit_dashboard.aspx.cs">
       <DependentUpon>edit_dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="edit_dashboard.aspx.designer.cs">
+      <DependentUpon>edit_dashboard.aspx</DependentUpon>
     </Compile>
     <Compile Include="edit_org.aspx.cs">
       <DependentUpon>edit_org.aspx</DependentUpon>
@@ -1353,6 +1359,7 @@
     <Compile Include="Services\Bug\BugSubscriptionService.cs" />
     <Compile Include="Services\Category\CategoryService.cs" />
     <Compile Include="Services\CustomFields\CustomFieldService.cs" />
+    <Compile Include="Services\Dashboard\DashboardService.cs" />
     <Compile Include="Services\EncryptionService.cs" />
     <Compile Include="Services\Organization\OrganizationService.cs" />
     <Compile Include="Services\PasswordResetResult.cs" />
@@ -1458,6 +1465,9 @@
     <Compile Include="update_dashboard.aspx.cs">
       <DependentUpon>update_dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="update_dashboard.aspx.designer.cs">
+      <DependentUpon>update_dashboard.aspx</DependentUpon>
     </Compile>
     <Compile Include="upgrade_273_to_274.aspx.cs">
       <DependentUpon>upgrade_273_to_274.aspx</DependentUpon>
