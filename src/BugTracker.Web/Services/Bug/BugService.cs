@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.EnterpriseServices;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -88,6 +89,21 @@ namespace BugTracker.Web.Services.Bug
             DataRow dr = DbUtil.get_datarow(cmd);
 
             return (int)dr["cnt"];
+        }
+
+        public void FlagBug(int bugId, int userId, int flagged)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append("if not exists (select bu_bug from bug_user where bu_bug = $bg and bu_user = @userId) ");
+            sql.AppendLine("insert into bug_user (bu_bug, bu_user, bu_flag, bu_seen, bu_vote) values(@bugId, @userId, 1, 0, 0) ");
+            sql.AppendLine("update bug_user set bu_flag = @flagged, bu_flag_datetime = getdate() where bu_bug = @bugId and bu_user = @userId and bu_flag <> @flagged");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+            cmd.Parameters.AddWithValue("@userId", userId);
+            cmd.Parameters.AddWithValue("@flagged", flagged);
+
+            DbUtil.execute_nonquery(cmd);
         }
     }
 }
