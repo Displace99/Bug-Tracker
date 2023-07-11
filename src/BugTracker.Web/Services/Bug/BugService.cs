@@ -105,5 +105,107 @@ namespace BugTracker.Web.Services.Bug
 
             DbUtil.execute_nonquery(cmd);
         }
+
+        /// <summary>
+        /// Performs a mass delete of a list of bugs
+        /// </summary>
+        /// <param name="bugIds">List of Id's of the bugs you want to delete</param>
+        public void MassDeleteBugs(List<int> bugIds) 
+        {
+            string paramNames = string.Join(",", bugIds.Select(n => "@prm" + n).ToArray());
+
+            StringBuilder sql = new StringBuilder();
+            sql.Append(string.Format("delete bug_post_attachments from bug_post_attachments inner join bug_posts on bug_post_attachments.bpa_post = bug_posts.bp_id where bug_posts.bp_bug in ({0});", paramNames));
+            sql.AppendLine(string.Format("delete from bug_posts where bp_bug in ({0});", paramNames));
+            sql.AppendLine(string.Format("delete from bug_subscriptions where bs_bug in ({0});", paramNames));
+            sql.AppendLine(string.Format("delete from bug_relationships where re_bug1 in ({0});", paramNames));
+            sql.AppendLine(string.Format("delete from bug_relationships where re_bug2 in ({0});", paramNames));
+            sql.AppendLine(string.Format("delete from bug_user where bu_bug in ({0});", paramNames));
+            sql.AppendLine(string.Format("delete from bug_tasks where tsk_bug in ({0});", paramNames));
+            sql.AppendLine(string.Format("delete from bugs where bg_id in ({0});", paramNames));
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            foreach (int n in bugIds)
+            {
+                cmd.Parameters.AddWithValue("@prm" + n, n);
+            }
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        /// <summary>
+        /// Mass updates bugs
+        /// </summary>
+        /// <param name="bugIds">List of Id's of bugs you want to update</param>
+        /// <param name="projectId">Project Id to update to</param>
+        /// <param name="orgId">Org Id to update to</param>
+        /// <param name="categoryId">Category Id to update to</param>
+        /// <param name="priorityId">Priority Id to update to</param>
+        /// <param name="assignedTo">Assigned To to update to</param>
+        /// <param name="reportedBy">Reported By to update to</param>
+        /// <param name="statusId">Status Id to update to</param>
+        public void MassUpdateBugs(List<int> bugIds, int projectId, int orgId, int categoryId, int priorityId, int assignedTo, int reportedBy, int statusId)
+        {
+            SqlCommand cmd = new SqlCommand();
+            List<string> updateList = new List<string>();
+
+            //Creates the set statement and parameter for each property
+            if (projectId != -1)
+            {
+                updateList.Add(" bg_project = @projectId");
+                cmd.Parameters.AddWithValue("@projectId", projectId);
+            }
+            if (orgId != -1)
+            {
+                updateList.Add(" bg_org = @orgId");
+                cmd.Parameters.AddWithValue("@orgId", orgId);
+            }
+            if (categoryId != -1)
+            {
+                updateList.Add(" bg_category = @categoryId");
+                cmd.Parameters.AddWithValue("@categoryId", categoryId);
+            }
+            if (priorityId != -1)
+            {
+                updateList.Add(" bg_priority = @priorityId");
+                cmd.Parameters.AddWithValue("@priorityId", priorityId);
+            }
+            if (assignedTo != -1)
+            {
+                updateList.Add(" bg_assigned_to_user = @assignedToId");
+                cmd.Parameters.AddWithValue("@assignedToId", assignedTo);
+            }
+            if (reportedBy != -1)
+            {
+                updateList.Add(" bg_reported_user = @reportedById");
+                cmd.Parameters.AddWithValue("@reportedById", reportedBy);
+            }
+            if (statusId != -1)
+            {
+                updateList.Add(" bg_status = @statusId");
+                cmd.Parameters.AddWithValue("@statusId", statusId);
+            }
+
+            //Creates a comma separated list from the set statements above
+            string setStatement = string.Join(",", updateList);
+
+            //Creates parameters from the bugs in the list
+            string paramNames = string.Join(",", bugIds.Select(n => "@prm" + n).ToArray());
+
+            StringBuilder sql = new StringBuilder();
+            sql.Append("UPDATE bugs SET");
+            sql.Append(setStatement);
+            sql.Append(string.Format(" WHERE bg_id in ({0})", paramNames));
+
+            cmd.CommandText = sql.ToString();
+
+            foreach (int n in bugIds)
+            {
+                cmd.Parameters.AddWithValue("@prm" + n, n);
+            }
+
+            DbUtil.execute_nonquery(cmd);
+        }
     }
 }

@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Bug;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,6 +14,7 @@ namespace BugTracker.Web
         String sql;
 
         protected Security security;
+        private BugService _bugService = new BugService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -38,6 +40,37 @@ namespace BugTracker.Web
 
 
             string list = "";
+            List<int> bugList = new List<int>();
+            int projectId = 0;
+            int orgId = 0;
+            int categoryId = 0;
+            int priorityId = 0;
+            int assignedTo = 0;
+            int reportedBy = 0;
+            int statusId = 0;
+
+            int.TryParse(Request["mass_project"], out projectId);
+            int.TryParse(Request["mass_org"], out orgId);
+            int.TryParse(Request["mass_category"], out categoryId);
+            int.TryParse(Request["mass_priority"], out priorityId);
+            int.TryParse(Request["mass_assigned_to"], out assignedTo);
+            int.TryParse(Request["mass_reported_by"], out reportedBy);
+            int.TryParse(Request["mass_status"], out statusId);
+
+            // create list of bugs affected
+            foreach (string var in Request.QueryString)
+            {
+                if (Util.is_int(var))
+                {
+                    if (list != "")
+                    {
+                        list += ",";
+                    }
+                    list += var;
+
+                    bugList.Add(int.Parse(var));
+                };
+            }
 
             if (!IsPostBack)
             {
@@ -53,33 +86,20 @@ namespace BugTracker.Web
                     update_or_delete.Value = "update";
                 }
 
-                // create list of bugs affected
-                foreach (string var in Request.QueryString)
-                {
-                    if (Util.is_int(var))
-                    {
-                        if (list != "")
-                        {
-                            list += ",";
-                        }
-                        list += var;
-                    };
-                }
-
                 bug_list.Value = list;
 
                 if (update_or_delete.Value == "delete")
                 {
-                    update_or_delete.Value = "delete";
-
-                    sql += "delete bug_post_attachments from bug_post_attachments inner join bug_posts on bug_post_attachments.bpa_post = bug_posts.bp_id where bug_posts.bp_bug in (" + list + ")";
-                    sql += "\ndelete from bug_posts where bp_bug in (" + list + ")";
-                    sql += "\ndelete from bug_subscriptions where bs_bug in (" + list + ")";
-                    sql += "\ndelete from bug_relationships where re_bug1 in (" + list + ")";
-                    sql += "\ndelete from bug_relationships where re_bug2 in (" + list + ")";
-                    sql += "\ndelete from bug_user where bu_bug in (" + list + ")";
-                    sql += "\ndelete from bug_tasks where tsk_bug in (" + list + ")";
-                    sql += "\ndelete from bugs where bg_id in (" + list + ")";
+                    //This is created and then saved to sql_text.InnerText. On postback it is retrieved from that field and executed.
+                    //It needs to be removed from here and put further down in the postback statement.
+                    //sql += "delete bug_post_attachments from bug_post_attachments inner join bug_posts on bug_post_attachments.bpa_post = bug_posts.bp_id where bug_posts.bp_bug in (" + list + ")";
+                    //sql += "\ndelete from bug_posts where bp_bug in (" + list + ")";
+                    //sql += "\ndelete from bug_subscriptions where bs_bug in (" + list + ")";
+                    //sql += "\ndelete from bug_relationships where re_bug1 in (" + list + ")";
+                    //sql += "\ndelete from bug_relationships where re_bug2 in (" + list + ")";
+                    //sql += "\ndelete from bug_user where bu_bug in (" + list + ")";
+                    //sql += "\ndelete from bug_tasks where tsk_bug in (" + list + ")";
+                    //sql += "\ndelete from bugs where bg_id in (" + list + ")";
 
                     confirm_href.InnerText = "Confirm Delete";
 
@@ -88,69 +108,86 @@ namespace BugTracker.Web
                 {
                     update_or_delete.Value = "update";
 
-                    sql = "update bugs \nset ";
+                    //This SQL is created and then saved to sql_text.InnerText. On postback it is retrieved from that field and executed.
+                    //It needs to be removed from here and put further down in the postback statement.
+                    //sql = "update bugs \nset ";
 
                     string updates = "";
 
                     string val;
+                    //int projectId = 0;
+                    //int orgId = 0;
+                    //int categoryId = 0;
+                    //int priorityId = 0;
+                    //int assignedTo = 0;
+                    //int reportedBy = 0;
+                    //int statusId = 0;
 
-                    val = Request["mass_project"];
-                    if (val != "-1" && Util.is_int(val))
-                    {
-                        if (updates != "") { updates += ",\n"; }
-                        updates += "bg_project = " + val;
-                    }
+                    //int.TryParse(Request["mass_project"], out projectId);
+                    //int.TryParse(Request["mass_org"], out orgId);
+                    //int.TryParse(Request["mass_category"], out categoryId);
+                    //int.TryParse(Request["mass_priority"], out priorityId);
+                    //int.TryParse(Request["mass_assigned_to"], out assignedTo);
+                    //int.TryParse(Request["mass_reported_by"], out reportedBy);
+                    //int.TryParse(Request["mass_status"], out statusId);
 
-                    val = Request["mass_org"];
-                    if (val != "-1" && Util.is_int(val))
-                    {
-                        if (updates != "") { updates += ",\n"; }
-                        updates += "bg_org = " + val;
-                    }
+                    //val = Request["mass_project"];
+                    //if (val != "-1" && Util.is_int(val))
+                    //{
+                    //    if (updates != "") { updates += ",\n"; }
+                    //    updates += "bg_project = " + val;
+                    //}
 
-                    val = Request["mass_category"];
-                    if (val != "-1" && Util.is_int(val))
-                    {
-                        if (updates != "") { updates += ",\n"; }
-                        updates += "bg_category = " + val;
-                    }
+                    //val = Request["mass_org"];
+                    //if (val != "-1" && Util.is_int(val))
+                    //{
+                    //    if (updates != "") { updates += ",\n"; }
+                    //    updates += "bg_org = " + val;
+                    //}
 
-                    val = Request["mass_priority"];
-                    if (val != "-1" && Util.is_int(val))
-                    {
-                        if (updates != "") { updates += ",\n"; }
-                        updates += "bg_priority = " + val;
-                    }
+                    //val = Request["mass_category"];
+                    //if (val != "-1" && Util.is_int(val))
+                    //{
+                    //    if (updates != "") { updates += ",\n"; }
+                    //    updates += "bg_category = " + val;
+                    //}
 
-                    val = Request["mass_assigned_to"];
-                    if (val != "-1" && Util.is_int(val))
-                    {
-                        if (updates != "") { updates += ",\n"; }
-                        updates += "bg_assigned_to_user = " + val;
-                    }
+                    //val = Request["mass_priority"];
+                    //if (val != "-1" && Util.is_int(val))
+                    //{
+                    //    if (updates != "") { updates += ",\n"; }
+                    //    updates += "bg_priority = " + val;
+                    //}
 
-                    val = Request["mass_reported_by"];
-                    if (val != "-1" && Util.is_int(val))
-                    {
-                        if (updates != "") { updates += ",\n"; }
-                        updates += "bg_reported_user = " + val;
-                    }
+                    //val = Request["mass_assigned_to"];
+                    //if (val != "-1" && Util.is_int(val))
+                    //{
+                    //    if (updates != "") { updates += ",\n"; }
+                    //    updates += "bg_assigned_to_user = " + val;
+                    //}
 
-                    val = Request["mass_status"];
-                    if (val != "-1" && Util.is_int(val))
-                    {
-                        if (updates != "") { updates += ",\n"; }
-                        updates += "bg_status = " + val;
-                    }
+                    //val = Request["mass_reported_by"];
+                    //if (val != "-1" && Util.is_int(val))
+                    //{
+                    //    if (updates != "") { updates += ",\n"; }
+                    //    updates += "bg_reported_user = " + val;
+                    //}
+
+                    //val = Request["mass_status"];
+                    //if (val != "-1" && Util.is_int(val))
+                    //{
+                    //    if (updates != "") { updates += ",\n"; }
+                    //    updates += "bg_status = " + val;
+                    //}
 
 
-                    sql += updates + "\nwhere bg_id in (" + list + ")";
+                    //sql += updates + "\nwhere bg_id in (" + list + ")";
 
                     confirm_href.InnerText = "Confirm Update";
 
                 }
 
-                sql_text.InnerText = sql;
+                //sql_text.InnerText = sql;
 
             }
             else // postback
@@ -190,10 +227,15 @@ namespace BugTracker.Web
                             }
                         }
                     }
+
+                    //TODO: Put delete statement here.
+                    _bugService.MassDeleteBugs(bugList);
                 }
-
-
-                btnet.DbUtil.execute_nonquery(sql_text.InnerText);
+                else
+                {
+                    _bugService.MassUpdateBugs(bugList, projectId, orgId, categoryId, priorityId, assignedTo, reportedBy, statusId);
+                }
+                //btnet.DbUtil.execute_nonquery(sql_text.InnerText);
                 Response.Redirect("search.aspx");
 
             }
