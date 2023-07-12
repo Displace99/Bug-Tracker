@@ -51,15 +51,6 @@ namespace BugTracker.Web
         protected global::System.Web.UI.HtmlControls.HtmlAnchor confirm_href;
 
         /// <summary>
-        /// bug_list control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputHidden bug_list;
-
-        /// <summary>
         /// update_or_delete control.
         /// </summary>
         /// <remarks>
@@ -67,14 +58,5 @@ namespace BugTracker.Web
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlInputHidden update_or_delete;
-
-        /// <summary>
-        /// sql_text control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl sql_text;
     }
 }
