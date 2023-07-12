@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Bug;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,12 +16,11 @@ namespace BugTracker.Web
         protected Security security;
         DataRow dr;
 
-        ///////////////////////////////////////////////////////////////////////
+        private BugService _bugService = new BugService();
+
         void Page_Load(Object sender, EventArgs e)
         {
-
             Util.do_not_cache(Response);
-
 
             security = new Security();
 
@@ -28,7 +28,7 @@ namespace BugTracker.Web
 
             if (security.user.is_admin || security.user.can_merge_bugs)
             {
-                //
+                //Do nothing as they have proper access
             }
             else
             {
@@ -38,7 +38,6 @@ namespace BugTracker.Web
 
             titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
                 + "merge " + Util.get_setting("SingularBugLabel", "bug");
-
 
             if (!IsPostBack)
             {
@@ -53,18 +52,13 @@ namespace BugTracker.Web
                 into_err.InnerText = "";
                 on_update();
             }
-
         }
 
-
-        ///////////////////////////////////////////////////////////////////////
-        bool validate()
+        bool ValidateForm()
         {
-
             bool good = true;
 
             // validate FROM
-
             if (from_bug.Value == "")
             {
                 from_err.InnerText = "\"From\" bug is required.";
@@ -74,14 +68,12 @@ namespace BugTracker.Web
             {
                 if (!Util.is_int(from_bug.Value))
                 {
-                    from_err.InnerText = "\"From\" bug must be an integer.";
+                    from_err.InnerText = "\"From\" bug is not valid.";
                     good = false;
-
                 }
             }
 
             // validate INTO
-
             if (into_bug.Value == "")
             {
                 into_err.InnerText = "\"Into\" bug is required.";
@@ -91,18 +83,15 @@ namespace BugTracker.Web
             {
                 if (!Util.is_int(into_bug.Value))
                 {
-                    into_err.InnerText = "\"Into\" bug must be an integer.";
+                    into_err.InnerText = "\"Into\" bug is not valid.";
                     good = false;
-
                 }
             }
-
 
             if (!good)
             {
                 return false;
             }
-
 
             if (from_bug.Value == into_bug.Value)
             {
@@ -110,51 +99,26 @@ namespace BugTracker.Web
                 return false;
             }
 
-            // Continue and see if from and to exist in db
-
-            sql = @"
-	declare @from_desc nvarchar(200)
-	declare @into_desc nvarchar(200)
-	declare @from_id int
-	declare @into_id int
-	set @from_id = -1
-	set @into_id = -1
-	select @from_desc = bg_short_desc, @from_id = bg_id from bugs where bg_id = $from
-	select @into_desc = bg_short_desc, @into_id = bg_id from bugs where bg_id = $into
-	select @from_desc, @into_desc, @from_id, @into_id	";
-
-            sql = sql.Replace("$from", from_bug.Value);
-            sql = sql.Replace("$into", into_bug.Value);
-
-            dr = btnet.DbUtil.get_datarow(sql);
-
-            if ((int)dr[2] == -1)
+            //Searches for the "FROM" bug
+            dr = _bugService.GetBugById(int.Parse(from_bug.Value));
+            if (dr == null)
             {
                 from_err.InnerText = "\"From\" bug not found.";
                 good = false;
             }
 
-
-            if ((int)dr[3] == -1)
+            //Searches for the "INTO" bug
+            dr = _bugService.GetBugById(int.Parse(into_bug.Value));
+            if (dr == null)
             {
                 into_err.InnerText = "\"Into\" bug not found.";
                 good = false;
             }
 
-
-            if (!good)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-
+            return good;
         }
 
 
-        ///////////////////////////////////////////////////////////////////////
         void on_update()
         {
 
@@ -162,7 +126,7 @@ namespace BugTracker.Web
 
             if (submit.Value == "Merge")
             {
-                if (!validate())
+                if (!ValidateForm())
                 {
                     prev_from_bug.Value = "";
                     prev_into_bug.Value = "";
