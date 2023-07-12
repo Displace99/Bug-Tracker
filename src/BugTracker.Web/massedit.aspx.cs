@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Attachment;
 using BugTracker.Web.Services.Bug;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace BugTracker.Web
 
         protected Security security;
         private BugService _bugService = new BugService();
+        private AttachmentService _attachmentService = new AttachmentService();
 
         void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
         
@@ -61,12 +63,6 @@ namespace BugTracker.Web
             {
                 if (Util.is_int(var))
                 {
-                    //if (list != "")
-                    //{
-                    //    list += ",";
-                    //}
-                    //list += var;
-
                     bugList.Add(int.Parse(var));
                 };
             }
@@ -87,46 +83,12 @@ namespace BugTracker.Web
                     confirm_href.InnerText = "Confirm Update";
                 }
 
-                //bug_list.Value = list;
             }
             else // postback
             {
-                //list = bug_list.Value;
-
                 if (update_or_delete.Value == "delete")
                 {
-                    string upload_folder = Util.get_upload_folder();
-                    if (upload_folder != null)
-                    {
-                        // double check the bug_list
-                        string[] ints = bug_list.Value.Split(',');
-                        for (int i = 0; i < ints.Length; i++)
-                        {
-                            if (!btnet.Util.is_int(ints[i]))
-                            {
-                                Response.End();
-                            }
-                        }
-
-                        string sql2 = @"select bp_bug, bp_id, bp_file from bug_posts where bp_type = 'file' and bp_bug in (" + bug_list.Value + ")";
-                        DataSet ds = btnet.DbUtil.get_dataset(sql2);
-                        foreach (DataRow dr in ds.Tables[0].Rows)
-                        {
-                            // create path
-                            StringBuilder path = new StringBuilder(upload_folder);
-                            path.Append("\\");
-                            path.Append(Convert.ToString(dr["bp_bug"]));
-                            path.Append("_");
-                            path.Append(Convert.ToString(dr["bp_id"]));
-                            path.Append("_");
-                            path.Append(Convert.ToString(dr["bp_file"]));
-                            if (System.IO.File.Exists(path.ToString()))
-                            {
-                                System.IO.File.Delete(path.ToString());
-                            }
-                        }
-                    }
-
+                    _attachmentService.MassDeleteAttachments(bugList);
                     _bugService.MassDeleteBugs(bugList);
                 }
                 else

@@ -250,5 +250,25 @@ namespace BugTracker.Web.Services.Attachment
                 }
             }
         }
+
+        public void MassDeleteAttachments(List<int> bugIds)
+        {
+            string paramNames = string.Join(",", bugIds.Select(n => "@prm" + n).ToArray());
+
+            string sql = string.Format("SELECT bp_bug, bp_id, bp_file FROM bug_posts WHERE bp_type = 'file' AND bp_bug IN ({0})", paramNames);
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+            foreach (int n in bugIds)
+            {
+                cmd.Parameters.AddWithValue("@prm" + n, n);
+            }
+
+            DataSet ds = DbUtil.get_dataset(cmd);
+
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                DeleteFileFromFolder((int)dr["bp_bug"], (int)dr["bp_id"], Convert.ToString(dr["bp_file"]));
+            }
+        }
     }
 }
