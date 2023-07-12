@@ -91,6 +91,24 @@ namespace BugTracker.Web.Services.Bug
             return (int)dr["cnt"];
         }
 
+        /// <summary>
+        /// Returns bug details by bug ID
+        /// </summary>
+        /// <param name="bugId">Id of the bug we are searching for</param>
+        /// <returns></returns>
+        public DataRow GetBugById(int bugId)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append("SELECT bg_id, bg_short_desc, bg_reported_user, bg_reported_date, bg_status, bg_priority, bg_org, bg_category, bg_project, ");
+            sql.Append("bg_assigned_to_user, bg_last_updated_user, bg_last_updated_date, bg_user_defined_attribute, bg_project_custom_dropdown_value1, ");
+            sql.Append("bg_project_custom_dropdown_value2, bg_project_custom_dropdown_value3, bg_tags FROM bugs WHERE bg_id = @bugId");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+
+            return DbUtil.get_datarow(cmd);
+        }
+
         public void FlagBug(int bugId, int userId, int flagged)
         {
             StringBuilder sql = new StringBuilder();

@@ -14,7 +14,8 @@ namespace BugTracker.Web
         String sql;
 
         protected Security security;
-        DataRow dr;
+        DataRow fromBugDr;
+        DataRow toBugDr;
 
         private BugService _bugService = new BugService();
 
@@ -66,7 +67,7 @@ namespace BugTracker.Web
             }
             else
             {
-                if (!Util.is_int(from_bug.Value))
+                if (!int.TryParse(from_bug.Value, out int fromBug))
                 {
                     from_err.InnerText = "\"From\" bug is not valid.";
                     good = false;
@@ -81,7 +82,7 @@ namespace BugTracker.Web
             }
             else
             {
-                if (!Util.is_int(into_bug.Value))
+                if (!int.TryParse(into_bug.Value, out int intoBug))
                 {
                     into_err.InnerText = "\"Into\" bug is not valid.";
                     good = false;
@@ -100,16 +101,16 @@ namespace BugTracker.Web
             }
 
             //Searches for the "FROM" bug
-            dr = _bugService.GetBugById(int.Parse(from_bug.Value));
-            if (dr == null)
+            fromBugDr = _bugService.GetBugById(int.Parse(from_bug.Value));
+            if (fromBugDr == null)
             {
                 from_err.InnerText = "\"From\" bug not found.";
                 good = false;
             }
 
             //Searches for the "INTO" bug
-            dr = _bugService.GetBugById(int.Parse(into_bug.Value));
-            if (dr == null)
+            toBugDr = _bugService.GetBugById(int.Parse(into_bug.Value));
+            if (toBugDr == null)
             {
                 into_err.InnerText = "\"Into\" bug not found.";
                 good = false;
@@ -121,9 +122,7 @@ namespace BugTracker.Web
 
         void on_update()
         {
-
             // does it say "Merge" or "Confirm Merge"?
-
             if (submit.Value == "Merge")
             {
                 if (!ValidateForm())
@@ -134,11 +133,10 @@ namespace BugTracker.Web
                 }
             }
 
-
+            //This if statement will only be true on the "Confirm Merge" action
             if (prev_from_bug.Value == from_bug.Value
             && prev_into_bug.Value == into_bug.Value)
             {
-
                 prev_from_bug.Value = btnet.Util.sanitize_integer(prev_from_bug.Value);
                 prev_into_bug.Value = btnet.Util.sanitize_integer(prev_into_bug.Value);
 
@@ -178,10 +176,8 @@ namespace BugTracker.Web
 
                             System.IO.File.Move(path.ToString(), path2.ToString());
                         }
-
                     }
                 }
-
 
                 // copy the from db entries to the to
                 sql = @"
@@ -234,7 +230,6 @@ update git_commits   set gitcom_bug = $into where gitcom_bug = $from
                 sql = sql.Replace("$bc", Convert.ToString(comment_id));
                 btnet.DbUtil.execute_nonquery(sql);
 
-
                 // delete the from bug
                 int from_bugid = Convert.ToInt32(prev_from_bug.Value);
                 Bug.delete_bug(from_bugid);
@@ -259,16 +254,17 @@ update git_commits   set gitcom_bug = $into where gitcom_bug = $from
                 btnet.Bug.send_notifications(btnet.Bug.UPDATE, Convert.ToInt32(prev_into_bug.Value), security);
 
                 Response.Redirect("edit_bug.aspx?id=" + prev_into_bug.Value);
-
             }
+            /*This will be hit the first time the "Merge" button is clicked and will set some values for the 
+              "Confirm Merge action */
             else
             {
                 prev_from_bug.Value = from_bug.Value;
                 prev_into_bug.Value = into_bug.Value;
                 static_from_bug.InnerText = from_bug.Value;
                 static_into_bug.InnerText = into_bug.Value;
-                static_from_desc.InnerText = (string)dr[0];
-                static_into_desc.InnerText = (string)dr[1];
+                static_from_desc.InnerText = (string)fromBugDr["bg_short_desc"];
+                static_into_desc.InnerText = (string)toBugDr["bg_short_desc"];
                 from_bug.Style["display"] = "none";
                 into_bug.Style["display"] = "none";
                 static_from_bug.Style["display"] = "";
@@ -277,7 +273,6 @@ update git_commits   set gitcom_bug = $into where gitcom_bug = $from
                 static_into_desc.Style["display"] = "";
                 submit.Value = "Confirm Merge";
             }
-
         }
     }
 }
