@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Attachment;
 using BugTracker.Web.Services.Bug;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace BugTracker.Web
         DataRow toBugDr;
 
         private BugService _bugService = new BugService();
+        private AttachmentService _attachmentService = new AttachmentService();
 
         void Page_Load(Object sender, EventArgs e)
         {
@@ -137,47 +139,14 @@ namespace BugTracker.Web
             if (prev_from_bug.Value == from_bug.Value
             && prev_into_bug.Value == into_bug.Value)
             {
-                prev_from_bug.Value = btnet.Util.sanitize_integer(prev_from_bug.Value);
-                prev_into_bug.Value = btnet.Util.sanitize_integer(prev_into_bug.Value);
+                //We don't need a try parse here because it was already sanitized before we assigned it.
+                //If it is no longer an integer at this point then the hidden field was altered. 
+                int fromBugId = int.Parse(prev_from_bug.Value);
+                int intoBugId = int.Parse(prev_into_bug.Value);
 
                 // rename the attachments
-
-                string upload_folder = Util.get_upload_folder();
-                if (upload_folder != null)
-                {
-
-                    sql = @"select bp_id, bp_file from bug_posts
-			where bp_type = 'file' and bp_bug = $from";
-
-                    sql = sql.Replace("$from", prev_from_bug.Value);
-                    DataSet ds = btnet.DbUtil.get_dataset(sql);
-
-                    foreach (DataRow dr in ds.Tables[0].Rows)
-                    {
-
-                        // create path
-                        StringBuilder path = new StringBuilder(upload_folder);
-                        path.Append("\\");
-                        path.Append(prev_from_bug.Value);
-                        path.Append("_");
-                        path.Append(Convert.ToString(dr["bp_id"]));
-                        path.Append("_");
-                        path.Append(Convert.ToString(dr["bp_file"]));
-                        if (System.IO.File.Exists(path.ToString()))
-                        {
-
-                            StringBuilder path2 = new StringBuilder(upload_folder);
-                            path2.Append("\\");
-                            path2.Append(prev_into_bug.Value);
-                            path2.Append("_");
-                            path2.Append(Convert.ToString(dr["bp_id"]));
-                            path2.Append("_");
-                            path2.Append(Convert.ToString(dr["bp_file"]));
-
-                            System.IO.File.Move(path.ToString(), path2.ToString());
-                        }
-                    }
-                }
+                _attachmentService.MoveAttachmentToOtherBug(fromBugId, intoBugId);
+                
 
                 // copy the from db entries to the to
                 sql = @"
@@ -202,8 +171,8 @@ update hg_revisions  set hgrev_bug  = $into where hgrev_bug = $from
 update git_commits   set gitcom_bug = $into where gitcom_bug = $from
 ";
 
-                sql = sql.Replace("$from", prev_from_bug.Value);
-                sql = sql.Replace("$into", prev_into_bug.Value);
+                sql = sql.Replace("$from", fromBugId.ToString());
+                sql = sql.Replace("$into", intoBugId.ToString());
 
                 btnet.DbUtil.execute_nonquery(sql);
 
@@ -214,8 +183,8 @@ update git_commits   set gitcom_bug = $into where gitcom_bug = $from
 			values($into,$us,getdate(), 'comment', 'merged bug $from into this bug:', 'merged bug $from into this bug:')
 			select scope_identity()";
 
-                sql = sql.Replace("$from", prev_from_bug.Value);
-                sql = sql.Replace("$into", prev_into_bug.Value);
+                sql = sql.Replace("$from", fromBugId.ToString());
+                sql = sql.Replace("$into", intoBugId.ToString());
                 sql = sql.Replace("$us", Convert.ToString(security.user.usid));
 
                 int comment_id = Convert.ToInt32(btnet.DbUtil.execute_scalar(sql));
@@ -226,12 +195,12 @@ update git_commits   set gitcom_bug = $into where gitcom_bug = $from
 			from bugs where bg_id = $from
 			and bp_id = $bc";
 
-                sql = sql.Replace("$from", prev_from_bug.Value);
+                sql = sql.Replace("$from", fromBugId.ToString());
                 sql = sql.Replace("$bc", Convert.ToString(comment_id));
                 btnet.DbUtil.execute_nonquery(sql);
 
                 // delete the from bug
-                int from_bugid = Convert.ToInt32(prev_from_bug.Value);
+                int from_bugid = Convert.ToInt32(fromBugId.ToString());
                 Bug.delete_bug(from_bugid);
 
                 // delete the from bug from the list, if there is a list
@@ -251,9 +220,9 @@ update git_commits   set gitcom_bug = $into where gitcom_bug = $from
                     }
                 }
 
-                btnet.Bug.send_notifications(btnet.Bug.UPDATE, Convert.ToInt32(prev_into_bug.Value), security);
+                btnet.Bug.send_notifications(btnet.Bug.UPDATE, intoBugId, security);
 
-                Response.Redirect("edit_bug.aspx?id=" + prev_into_bug.Value);
+                Response.Redirect("edit_bug.aspx?id=" + intoBugId);
             }
             /*This will be hit the first time the "Merge" button is clicked and will set some values for the 
               "Confirm Merge action */

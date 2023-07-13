@@ -176,6 +176,21 @@ namespace BugTracker.Web.Services.Attachment
         }
 
         /// <summary>
+        /// Returns attachments that are a file for a given bug
+        /// </summary>
+        /// <param name="bugId"></param>
+        /// <returns></returns>
+        public DataSet GetAttachmentFileInfoByBugId(int bugId)
+        {
+            string sql = @"select bp_id, bp_file from bug_posts where bp_type = 'file' and bp_bug = @bugId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+
+            return DbUtil.get_dataset(cmd);
+        }
+
+        /// <summary>
         /// Updates the attachment info in the database
         /// </summary>
         /// <param name="bugPostId"></param>
@@ -268,6 +283,40 @@ namespace BugTracker.Web.Services.Attachment
             foreach (DataRow dr in ds.Tables[0].Rows)
             {
                 DeleteFileFromFolder((int)dr["bp_bug"], (int)dr["bp_id"], Convert.ToString(dr["bp_file"]));
+            }
+        }
+
+        public void MoveAttachmentToOtherBug(int fromBugId, int intoBugId)
+        {
+            string upload_folder = Util.get_upload_folder();
+            if (upload_folder != null)
+            {
+                DataSet ds = GetAttachmentFileInfoByBugId(fromBugId);
+
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                {
+
+                    // create path
+                    StringBuilder path = new StringBuilder(upload_folder);
+                    path.Append("\\");
+                    path.Append(fromBugId.ToString());
+                    path.Append("_");
+                    path.Append(Convert.ToString(dr["bp_id"]));
+                    path.Append("_");
+                    path.Append(Convert.ToString(dr["bp_file"]));
+                    if (System.IO.File.Exists(path.ToString()))
+                    {
+                        StringBuilder path2 = new StringBuilder(upload_folder);
+                        path2.Append("\\");
+                        path2.Append(intoBugId.ToString());
+                        path2.Append("_");
+                        path2.Append(Convert.ToString(dr["bp_id"]));
+                        path2.Append("_");
+                        path2.Append(Convert.ToString(dr["bp_file"]));
+
+                        System.IO.File.Move(path.ToString(), path2.ToString());
+                    }
+                }
             }
         }
     }
