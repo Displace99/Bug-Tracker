@@ -144,37 +144,9 @@ namespace BugTracker.Web
                 int fromBugId = int.Parse(prev_from_bug.Value);
                 int intoBugId = int.Parse(prev_into_bug.Value);
 
-                // rename the attachments
                 _attachmentService.MoveAttachmentToOtherBug(fromBugId, intoBugId);
                 
-
-                // copy the from db entries to the to
-                sql = @"
-insert into bug_subscriptions
-(bs_bug, bs_user)
-select $into, bs_user
-from bug_subscriptions
-where bs_bug = $from
-and bs_user not in (select bs_user from bug_subscriptions where bs_bug = $into)
-
-insert into bug_user
-(bu_bug, bu_user, bu_flag, bu_flag_datetime, bu_seen, bu_seen_datetime, bu_vote, bu_vote_datetime)
-select $into, bu_user, bu_flag, bu_flag_datetime, bu_seen, bu_seen_datetime, bu_vote, bu_vote_datetime
-from bug_user
-where bu_bug = $from
-and bu_user not in (select bu_user from bug_user where bu_bug = $into)
-
-update bug_posts     set bp_bug     = $into	where bp_bug = $from
-update bug_tasks     set tsk_bug    = $into where tsk_bug = $from
-update svn_revisions set svnrev_bug = $into where svnrev_bug = $from
-update hg_revisions  set hgrev_bug  = $into where hgrev_bug = $from
-update git_commits   set gitcom_bug = $into where gitcom_bug = $from
-";
-
-                sql = sql.Replace("$from", fromBugId.ToString());
-                sql = sql.Replace("$into", intoBugId.ToString());
-
-                btnet.DbUtil.execute_nonquery(sql);
+                _bugService.MergeBugs(fromBugId, intoBugId);
 
                 // record the merge itself
 

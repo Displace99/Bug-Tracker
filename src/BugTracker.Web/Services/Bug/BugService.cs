@@ -225,5 +225,42 @@ namespace BugTracker.Web.Services.Bug
 
             DbUtil.execute_nonquery(cmd);
         }
+
+        /// <summary>
+        /// This is a massive method that moves a bunch of information from a lot of different tables
+        /// over to the new "merged" bug.
+        /// </summary>
+        /// <param name="fromBugId"></param>
+        /// <param name="toBugId"></param>
+        public void MergeBugs(int fromBugId, int intoBugId)
+        {
+            string sql = @"
+                insert into bug_subscriptions
+                (bs_bug, bs_user)
+                select @intoBugId, bs_user
+                from bug_subscriptions
+                where bs_bug = @fromBugId
+                and bs_user not in (select bs_user from bug_subscriptions where bs_bug = $into)
+
+                insert into bug_user
+                (bu_bug, bu_user, bu_flag, bu_flag_datetime, bu_seen, bu_seen_datetime, bu_vote, bu_vote_datetime)
+                select @intoBugId, bu_user, bu_flag, bu_flag_datetime, bu_seen, bu_seen_datetime, bu_vote, bu_vote_datetime
+                from bug_user
+                where bu_bug = @fromBugId
+                and bu_user not in (select bu_user from bug_user where bu_bug = @intoBugId)
+
+                update bug_posts     set bp_bug     = @intoBugId where bp_bug = @fromBugId
+                update bug_tasks     set tsk_bug    = @intoBugId where tsk_bug = @fromBugId
+                update svn_revisions set svnrev_bug = @intoBugId where svnrev_bug = @fromBugId
+                update hg_revisions  set hgrev_bug  = @intoBugId where hgrev_bug = @fromBugId
+                update git_commits   set gitcom_bug = @intoBugId where gitcom_bug = @fromBugId
+                ";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@fromBugId", fromBugId);
+            cmd.Parameters.AddWithValue("@intoBugId", intoBugId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
     }
 }
