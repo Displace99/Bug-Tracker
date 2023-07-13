@@ -240,7 +240,7 @@ namespace BugTracker.Web.Services.Bug
                 select @intoBugId, bs_user
                 from bug_subscriptions
                 where bs_bug = @fromBugId
-                and bs_user not in (select bs_user from bug_subscriptions where bs_bug = $into)
+                and bs_user not in (select bs_user from bug_subscriptions where bs_bug = @intoBugId)
 
                 insert into bug_user
                 (bu_bug, bu_user, bu_flag, bu_flag_datetime, bu_seen, bu_seen_datetime, bu_vote, bu_vote_datetime)
