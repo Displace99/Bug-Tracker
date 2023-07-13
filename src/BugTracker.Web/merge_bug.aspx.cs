@@ -1,6 +1,7 @@
 using btnet;
 using BugTracker.Web.Services.Attachment;
 using BugTracker.Web.Services.Bug;
+using BugTracker.Web.Services.Comment;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -20,6 +21,7 @@ namespace BugTracker.Web
 
         private BugService _bugService = new BugService();
         private AttachmentService _attachmentService = new AttachmentService();
+        private CommentService _commentService = new CommentService();
 
         void Page_Load(Object sender, EventArgs e)
         {
@@ -149,28 +151,12 @@ namespace BugTracker.Web
                 _bugService.MergeBugs(fromBugId, intoBugId);
 
                 // record the merge itself
-
-                sql = @"insert into bug_posts
-			(bp_bug, bp_user, bp_date, bp_type, bp_comment, bp_comment_search)
-			values($into,$us,getdate(), 'comment', 'merged bug $from into this bug:', 'merged bug $from into this bug:')
-			select scope_identity()";
-
-                sql = sql.Replace("$from", fromBugId.ToString());
-                sql = sql.Replace("$into", intoBugId.ToString());
-                sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-
-                int comment_id = Convert.ToInt32(btnet.DbUtil.execute_scalar(sql));
+                string insertComment = string.Format("merged bug {0} into this bug:", fromBugId);
+                int commentId = _commentService.AddComment(insertComment, security.user.usid, intoBugId);
 
                 // update bug comments with info from old bug
-                sql = @"update bug_posts
-			set bp_comment = convert(nvarchar,bp_comment) + char(10) + bg_short_desc
-			from bugs where bg_id = $from
-			and bp_id = $bc";
-
-                sql = sql.Replace("$from", fromBugId.ToString());
-                sql = sql.Replace("$bc", Convert.ToString(comment_id));
-                btnet.DbUtil.execute_nonquery(sql);
-
+                _commentService.UpdateMergeComments(fromBugId, commentId);
+                
                 // delete the from bug
                 int from_bugid = Convert.ToInt32(fromBugId.ToString());
                 Bug.delete_bug(from_bugid);
