@@ -10,9 +10,6 @@ namespace BugTracker.Web
 {
     public partial class print_bugs2 : Page
     {
-        String sql;
-
-
         protected Security security;
         protected DataSet ds = null;
         protected DataView dv = null;
