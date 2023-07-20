@@ -36,7 +36,7 @@ namespace BugTracker.Web
 
             if (qu_id_string != null)
             {
-                //// use sql specified in query string
+                // use sql specified in query string
                 int qu_id = Convert.ToInt32(qu_id_string);
                 ds = _searchService.FindBugsFromSavedQuery(qu_id, security.user.usid, security);
             }

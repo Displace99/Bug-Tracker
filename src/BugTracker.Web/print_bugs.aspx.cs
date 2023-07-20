@@ -1,8 +1,7 @@
 using btnet;
+using BugTracker.Web.Services.Search;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
 namespace BugTracker.Web
@@ -19,6 +18,8 @@ namespace BugTracker.Web
         DataSet ds;
         DataView dv;
 
+        private SearchService _searchService = new SearchService();
+
 
         ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
@@ -29,11 +30,8 @@ namespace BugTracker.Web
                 Util.do_not_cache(Response);
             }
 
-
             security = new Security();
-
             security.check_security(HttpContext.Current, Security.ANY_USER_OK);
-
 
             // fetch the sql
             string qu_id_string = Util.sanitize_integer(Request["qu_id"]);
@@ -46,23 +44,14 @@ namespace BugTracker.Web
 
                 // use sql specified in query string
                 int qu_id = Convert.ToInt32(qu_id_string);
-                sql = @"select qu_sql from queries where qu_id = $1";
-                sql = sql.Replace("$1", qu_id_string);
-                string bug_sql = (string)btnet.DbUtil.execute_scalar(sql);
 
-                // replace magic variables
-                bug_sql = bug_sql.Replace("$ME", Convert.ToString(security.user.usid));
-
-                bug_sql = Util.alter_sql_per_project_permissions(bug_sql, security);
-
-                ds = btnet.DbUtil.get_dataset(bug_sql);
+                ds = _searchService.FindBugsFromSavedQuery(qu_id, security.user.usid, security);
                 dv = new DataView(ds.Tables[0]);
             }
             else
             {
                 dv = (DataView)Session["bugs"];
             }
-
 
             if (dv == null)
             {
@@ -77,17 +66,14 @@ namespace BugTracker.Web
             }
             else
             {
-                print_as_html();
+                PrintAsHTML();
             }
 
         }
 
-        ///////////////////////////////////////////////////////////////////////
-        void print_as_html()
+        void PrintAsHTML()
         {
-
             Response.Write("<html><head><link rel='StyleSheet' href='btnet.css' type='text/css'></head><body>");
-
             Response.Write("<table class=bugt border=1>");
             int col;
 
