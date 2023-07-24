@@ -1368,6 +1368,7 @@
     <Compile Include="Services\Priority\PriorityService.cs" />
     <Compile Include="Services\Project\ProjectService.cs" />
     <Compile Include="Services\Query\QueryService.cs" />
+    <Compile Include="Services\Search\SearchService.cs" />
     <Compile Include="Services\SignInService.cs" />
     <Compile Include="Services\Status\StatusService.cs" />
     <Compile Include="Services\UserDefinedFields\UserDefinedFieldService.cs" />
