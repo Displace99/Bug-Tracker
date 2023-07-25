@@ -1,5 +1,10 @@
 using btnet;
+using BugTracker.Web.Services.Category;
+using BugTracker.Web.Services.Organization;
+using BugTracker.Web.Services.Priority;
 using BugTracker.Web.Services.Project;
+using BugTracker.Web.Services.Status;
+using BugTracker.Web.Services.UserDefinedFields;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -39,6 +44,12 @@ namespace BugTracker.Web
         public Dictionary<int, BtnetProject> map_projects = new Dictionary<int, BtnetProject>();
 
         private ProjectService _projectService = new ProjectService();
+        private OrganizationService _organizationService = new OrganizationService();
+        private CategoryService _categoryService = new CategoryService();
+        private PriorityService _priorityService = new PriorityService();
+        private StatusService _statusService = new StatusService();
+        private UserDefinedFieldService _userDefinedFieldService = new UserDefinedFieldService();
+
 
         void Page_Load(Object sender, EventArgs e)
         {
@@ -964,68 +975,61 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
             reported_by.DataValueField = "us_id";
             reported_by.DataBind();
 
-
-            //Only show projects where user has permissions
-            DataView projectDVList = _projectService.GetProjectListByPermission(security.user.is_admin, security.user.usid);
-
-            if (security.user.other_orgs_permission_level != 0)
-            {
-                sql = " select og_id, og_name from orgs order by og_name;";
-            }
-            else
-            {
-                sql = " select og_id, og_name from orgs where og_id = " + Convert.ToInt32(security.user.org) + " order by og_name;";
-                org.Visible = false;
-                org_label.Visible = false;
-            }
-
-            sql += @"
-	            select ct_id, ct_name from categories order by ct_sort_seq, ct_name;
-	            select pr_id, pr_name from priorities order by pr_sort_seq, pr_name;
-	            select st_id, st_name from statuses order by st_sort_seq, st_name;
-	            select udf_id, udf_name from user_defined_attribute order by udf_sort_seq, udf_name";
-
-            DataSet ds_dropdowns = btnet.DbUtil.get_dataset(sql);
-
-            project.DataSource = projectDVList; //ds_dropdowns.Tables[0];
-            project.DataTextField = "pj_name";
-            project.DataValueField = "pj_id";
-            project.DataBind();
-            project.Items.Insert(0, new ListItem("[no project]", "0"));
-
-            org.DataSource = ds_dropdowns.Tables[0];
-            org.DataTextField = "og_name";
-            org.DataValueField = "og_id";
-            org.DataBind();
-            org.Items.Insert(0, new ListItem("[no organization]", "0"));
-
-            category.DataSource = ds_dropdowns.Tables[1];
-            category.DataTextField = "ct_name";
-            category.DataValueField = "ct_id";
-            category.DataBind();
-            category.Items.Insert(0, new ListItem("[no category]", "0"));
-
-            priority.DataSource = ds_dropdowns.Tables[2];
-            priority.DataTextField = "pr_name";
-            priority.DataValueField = "pr_id";
-            priority.DataBind();
-            priority.Items.Insert(0, new ListItem("[no priority]", "0"));
-
-            status.DataSource = ds_dropdowns.Tables[3];
-            status.DataTextField = "st_name";
-            status.DataValueField = "st_id";
-            status.DataBind();
-            status.Items.Insert(0, new ListItem("[no status]", "0"));
-
-            assigned_to.DataSource = reported_by.DataSource;
+            assigned_to.DataSource = dt_users;
             assigned_to.DataTextField = "us_username";
             assigned_to.DataValueField = "us_id";
             assigned_to.DataBind();
             assigned_to.Items.Insert(0, new ListItem("[not assigned]", "0"));
 
+
+            //Only show projects where user has permissions
+            DataView projectDVList = _projectService.GetProjectListByPermission(security.user.is_admin, security.user.usid);
+            
+            DataView orgDVList = _organizationService.GetOrganizationListByPermission(security.user.other_orgs_permission_level, security.user.org);
+            DataView categoryDVList = _categoryService.GetCategoryListForSearch();
+            DataView priorityDVList = _priorityService.GetPriorityListForSearch();
+            DataView statusDVList = _statusService.GetStatusListForSearch();
+            DataView udfDVList = _userDefinedFieldService.GetFieldListForSearch();
+
+            if (security.user.other_orgs_permission_level == 0)
+            {
+                org.Visible = false;
+                org_label.Visible = false;
+            }
+
+            project.DataSource = projectDVList; 
+            project.DataTextField = "pj_name";
+            project.DataValueField = "pj_id";
+            project.DataBind();
+            project.Items.Insert(0, new ListItem("[no project]", "0"));
+
+            org.DataSource = orgDVList; 
+            org.DataTextField = "og_name";
+            org.DataValueField = "og_id";
+            org.DataBind();
+            org.Items.Insert(0, new ListItem("[no organization]", "0"));
+
+            category.DataSource = categoryDVList; 
+            category.DataTextField = "ct_name";
+            category.DataValueField = "ct_id";
+            category.DataBind();
+            category.Items.Insert(0, new ListItem("[no category]", "0"));
+
+            priority.DataSource = priorityDVList; 
+            priority.DataTextField = "pr_name";
+            priority.DataValueField = "pr_id";
+            priority.DataBind();
+            priority.Items.Insert(0, new ListItem("[no priority]", "0"));
+
+            status.DataSource = statusDVList; 
+            status.DataTextField = "st_name";
+            status.DataValueField = "st_id";
+            status.DataBind();
+            status.Items.Insert(0, new ListItem("[no status]", "0"));
+
             if (show_udf)
             {
-                udf.DataSource = ds_dropdowns.Tables[4];
+                udf.DataSource = udfDVList; 
                 udf.DataTextField = "udf_name";
                 udf.DataValueField = "udf_id";
                 udf.DataBind();

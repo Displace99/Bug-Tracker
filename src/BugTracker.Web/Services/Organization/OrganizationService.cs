@@ -94,6 +94,25 @@ namespace BugTracker.Web.Services.Organization
 			return DbUtil.get_dataset(sql);
         }
 
+		public DataView GetOrganizationListByPermission(int orgPermissionLevel, int userOrgId)
+		{
+			string sql = string.Empty;
+			SqlCommand cmd = new SqlCommand();
+
+            if (orgPermissionLevel != 0)
+            {
+                sql = "select og_id, og_name from orgs order by og_name;";
+            }
+            else
+            {
+                sql = "select og_id, og_name from orgs where og_id = @orgId order by og_name;";
+				cmd.Parameters.AddWithValue("@orgId", userOrgId);
+            }
+
+			cmd.CommandText = sql;
+			return DbUtil.get_dataview(cmd);
+        }
+
 		/// <summary>
 		/// Adds a new Organization to the system
 		/// </summary>

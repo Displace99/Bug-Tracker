@@ -33,6 +33,17 @@ namespace BugTracker.Web.Services.Priority
         }
 
         /// <summary>
+        /// Returns a list of Priority fields. Used by the Search Service
+        /// </summary>
+        /// <returns>DataView</returns>
+        public DataView GetPriorityListForSearch()
+        {
+            string sql = "select pr_id, pr_name from priorities order by pr_sort_seq, pr_name";
+
+            return DbUtil.get_dataview(sql);
+        }
+
+        /// <summary>
         /// Deletes a priority from the database
         /// </summary>
         /// <param name="priorityId">Id of the priority you want deleted</param>

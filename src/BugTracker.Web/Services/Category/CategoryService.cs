@@ -25,6 +25,13 @@ namespace BugTracker.Web.Services.Category
             return DbUtil.get_dataset(sql);
         }
 
+        public DataView GetCategoryListForSearch()
+        {
+            string sql = "select ct_id, ct_name from categories order by ct_sort_seq, ct_name";
+
+            return DbUtil.get_dataview(sql);
+        }
+
         public DataRow GetCategoryById(int Id)
         {
             string sql = @"select ct_name, ct_sort_seq, ct_default from categories where ct_id = @Id";
