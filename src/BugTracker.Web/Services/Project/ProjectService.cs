@@ -94,6 +94,33 @@ namespace BugTracker.Web.Services.Project
             return DbUtil.get_dataset(sql);
         }
 
+        public DataView GetProjectListByPermission(bool isAdmin, int userId)
+        {
+            string sql = string.Empty;
+            SqlCommand cmd = new SqlCommand();
+
+            if (isAdmin)
+            {
+                sql = "/* drop downs */ select pj_id, pj_name from projects order by pj_name;";
+            }
+            else
+            {
+                sql = @"/* drop downs */ select pj_id, pj_name
+			        from projects
+			        left outer join project_user_xref on pj_id = pu_project
+			        and pu_user = @userId
+			        where isnull(pu_permission_level, @permissionLevel) <> 0
+			        order by pj_name;";
+
+                cmd.Parameters.AddWithValue("@permissionLevel", Convert.ToInt32(Util.get_setting("DefaultPermissionLevel", "2")));
+                cmd.Parameters.AddWithValue("@userId", userId);
+            }
+
+            cmd.CommandText = sql;
+
+            return DbUtil.get_dataview(cmd);
+        }
+
         public DataRow GetProjectDetails(int projectId)
         {
             string sql = "select pj_name from projects where pj_id = @projectId";

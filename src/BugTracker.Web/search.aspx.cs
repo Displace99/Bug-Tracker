@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Project;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,6 +10,18 @@ using System.Web.UI.WebControls;
 
 namespace BugTracker.Web
 {
+    public class ProjectDropdown
+    {
+        public bool enabled = false;
+        public string label = "";
+        public string values = "";
+    };
+
+    public class BtnetProject
+    {
+        public Dictionary<int, ProjectDropdown> map_dropdowns = new Dictionary<int, ProjectDropdown>();
+    };
+
     public partial class search : Page
     {
         public string sql;
@@ -24,6 +37,8 @@ namespace BugTracker.Web
 		public string project_dropdown_select_cols = "";
 
         public Dictionary<int, BtnetProject> map_projects = new Dictionary<int, BtnetProject>();
+
+        private ProjectService _projectService = new ProjectService();
 
         void Page_Load(Object sender, EventArgs e)
         {
@@ -950,32 +965,16 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
             reported_by.DataBind();
 
 
-            // only show projects where user has permissions
-            if (security.user.is_admin)
-            {
-                sql = "/* drop downs */ select pj_id, pj_name from projects order by pj_name;";
-            }
-            else
-            {
-                sql = @"/* drop downs */ select pj_id, pj_name
-			        from projects
-			        left outer join project_user_xref on pj_id = pu_project
-			        and pu_user = $us
-			        where isnull(pu_permission_level,$dpl) <> 0
-			        order by pj_name;";
-
-                sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-                sql = sql.Replace("$dpl", Util.get_setting("DefaultPermissionLevel", "2"));
-            }
-
+            //Only show projects where user has permissions
+            DataView projectDVList = _projectService.GetProjectListByPermission(security.user.is_admin, security.user.usid);
 
             if (security.user.other_orgs_permission_level != 0)
             {
-                sql += " select og_id, og_name from orgs order by og_name;";
+                sql = " select og_id, og_name from orgs order by og_name;";
             }
             else
             {
-                sql += " select og_id, og_name from orgs where og_id = " + Convert.ToInt32(security.user.org) + " order by og_name;";
+                sql = " select og_id, og_name from orgs where og_id = " + Convert.ToInt32(security.user.org) + " order by og_name;";
                 org.Visible = false;
                 org_label.Visible = false;
             }
@@ -988,31 +987,31 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
 
             DataSet ds_dropdowns = btnet.DbUtil.get_dataset(sql);
 
-            project.DataSource = ds_dropdowns.Tables[0];
+            project.DataSource = projectDVList; //ds_dropdowns.Tables[0];
             project.DataTextField = "pj_name";
             project.DataValueField = "pj_id";
             project.DataBind();
             project.Items.Insert(0, new ListItem("[no project]", "0"));
 
-            org.DataSource = ds_dropdowns.Tables[1];
+            org.DataSource = ds_dropdowns.Tables[0];
             org.DataTextField = "og_name";
             org.DataValueField = "og_id";
             org.DataBind();
             org.Items.Insert(0, new ListItem("[no organization]", "0"));
 
-            category.DataSource = ds_dropdowns.Tables[2];
+            category.DataSource = ds_dropdowns.Tables[1];
             category.DataTextField = "ct_name";
             category.DataValueField = "ct_id";
             category.DataBind();
             category.Items.Insert(0, new ListItem("[no category]", "0"));
 
-            priority.DataSource = ds_dropdowns.Tables[3];
+            priority.DataSource = ds_dropdowns.Tables[2];
             priority.DataTextField = "pr_name";
             priority.DataValueField = "pr_id";
             priority.DataBind();
             priority.Items.Insert(0, new ListItem("[no priority]", "0"));
 
-            status.DataSource = ds_dropdowns.Tables[4];
+            status.DataSource = ds_dropdowns.Tables[3];
             status.DataTextField = "st_name";
             status.DataValueField = "st_id";
             status.DataBind();
@@ -1026,7 +1025,7 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
 
             if (show_udf)
             {
-                udf.DataSource = ds_dropdowns.Tables[5];
+                udf.DataSource = ds_dropdowns.Tables[4];
                 udf.DataTextField = "udf_name";
                 udf.DataValueField = "udf_id";
                 udf.DataBind();
@@ -1146,18 +1145,5 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
 		}
 
 	}
-
-	public class ProjectDropdown
-	{
-		public bool enabled = false;
-		public string label = "";
-		public string values = "";
-	};
-
-	public class BtnetProject
-	{
-		public Dictionary<int, ProjectDropdown> map_dropdowns = new Dictionary<int, ProjectDropdown>();
-	};
-
 	
 }
