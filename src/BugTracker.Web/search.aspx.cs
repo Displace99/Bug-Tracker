@@ -8,7 +8,6 @@ using BugTracker.Web.Services.UserDefinedFields;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -30,8 +29,8 @@ namespace BugTracker.Web
     public partial class search : Page
     {
         public string sql;
-        public System.Data.DataView dv;
-        public System.Data.DataSet ds_custom_cols = null;
+        public DataView dv;
+        public DataSet ds_custom_cols = null;
         
 		public Security security;
 		public bool show_udf;
@@ -229,7 +228,11 @@ namespace BugTracker.Web
         }
 
 
-        ///////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Formats values for the IN or NOT IN sql clause
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public string format_in_not_in(string s)
         {
 
@@ -278,7 +281,9 @@ namespace BugTracker.Web
         }
 
 
-        ///////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Builds the sql query to do the search. This is built from all of the controls on the page. 
+        /// </summary>
         public void do_query()
         {
             prev_sort.Value = "-1";
@@ -1075,6 +1080,10 @@ namespace BugTracker.Web
             Response.Write("')\">&nbsp;[select]</a>");
         }
 
+        /// <summary>
+        /// Called from the aspx page to add date controls to page.
+        /// </summary>
+        /// <param name="name"></param>
         public void write_custom_date_controls(string name)
         {
             Response.Write("from:&nbsp;&nbsp;");
@@ -1083,6 +1092,10 @@ namespace BugTracker.Web
             write_custom_date_control("to__" + name); // magic
         }
 
+        /// <summary>
+        /// Called by the aspx page to display search results of query
+        /// </summary>
+        /// <param name="show_checkboxes"></param>
         public void display_bugs(bool show_checkboxes)
 		{
 			btnet.BugList.display_bugs(
@@ -1096,6 +1109,9 @@ namespace BugTracker.Web
 				filter.Value);
 		}
 
+        /// <summary>
+        /// Sorts and filters the bug query results table
+        /// </summary>
 		public void call_sort_and_filter_buglist_dataview()
 		{
 			string filter_val = filter.Value;
