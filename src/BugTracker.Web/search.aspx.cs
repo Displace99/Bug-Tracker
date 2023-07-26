@@ -91,45 +91,18 @@ namespace BugTracker.Web
                 project_custom_dropdown3.Style["display"] = "none";
 
                 // are there any project dropdowns?
-
-                string sql = @"
-select count(1)
-from projects
-where isnull(pj_enable_custom_dropdown1,0) = 1
-or isnull(pj_enable_custom_dropdown2,0) = 1
-or isnull(pj_enable_custom_dropdown3,0) = 1";
-
-                int projects_with_custom_dropdowns = (int)btnet.DbUtil.execute_scalar(sql);
+                int projects_with_custom_dropdowns = _projectService.GetProjectsWithCustomColumCount();
 
                 if (projects_with_custom_dropdowns == 0)
                 {
                     project.AutoPostBack = false;
                 }
-
             }
             else
             {
 
                 // get the project dropdowns
-
-                string sql = @"
-select
-pj_id,
-isnull(pj_enable_custom_dropdown1,0) pj_enable_custom_dropdown1,
-isnull(pj_enable_custom_dropdown2,0) pj_enable_custom_dropdown2,
-isnull(pj_enable_custom_dropdown3,0) pj_enable_custom_dropdown3,
-isnull(pj_custom_dropdown_label1,'') pj_custom_dropdown_label1,
-isnull(pj_custom_dropdown_label2,'') pj_custom_dropdown_label2,
-isnull(pj_custom_dropdown_label3,'') pj_custom_dropdown_label3,
-isnull(pj_custom_dropdown_values1,'') pj_custom_dropdown_values1,
-isnull(pj_custom_dropdown_values2,'') pj_custom_dropdown_values2,
-isnull(pj_custom_dropdown_values3,'') pj_custom_dropdown_values3
-from projects
-where isnull(pj_enable_custom_dropdown1,0) = 1
-or isnull(pj_enable_custom_dropdown2,0) = 1
-or isnull(pj_enable_custom_dropdown3,0) = 1";
-
-                DataSet ds_projects = btnet.DbUtil.get_dataset(sql);
+                DataSet ds_projects = _projectService.GetProjectsWithCustomColumns(); 
 
                 foreach (DataRow dr in ds_projects.Tables[0].Rows)
                 {
@@ -160,7 +133,6 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
                 }
 
                 // which button did the user hit?
-
                 if (project_changed.Value == "1" && project.AutoPostBack == true)
                 {
                     handle_project_custom_dropdowns();
@@ -723,10 +695,8 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
                             + "[" + column_name + "]\n";
 
                         user_type_cnt++;
-
                     }
                 }
-
 
                 if (show_udf)
                 {
