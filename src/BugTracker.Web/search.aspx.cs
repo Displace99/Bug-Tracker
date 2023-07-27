@@ -219,14 +219,14 @@ namespace BugTracker.Web
             return selected_projects;
         }
 
-        public List<string> GetSelectedItemsFromListBox(ListBox listBox)
+        public List<ListItem> GetSelectedItemsFromListBox(ListBox listBox)
         {
-            List<string> selectedItems = new List<string>();
+            List<ListItem> selectedItems = new List<ListItem>();
             foreach (ListItem item in listBox.Items)
             {
                 if (item.Selected)
                 {
-                    selectedItems.Add(item.Value);
+                    selectedItems.Add(item);
                 }
             }
 
@@ -244,37 +244,21 @@ namespace BugTracker.Web
             string whereConditionalOperator = and.Checked ? "and " : "or ";
 
             //Get selected items from ListBox Controls
-            List<string> reportedBySelectedItemsList = GetSelectedItemsFromListBox(reported_by);
-            List<string> assignedToSelectedItemsList = GetSelectedItemsFromListBox(assigned_to);
-            List<string> projectSelectedItemsList = GetSelectedItemsFromListBox(project);
-            List<string> projectCustomDD1SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown1);
-            List<string> projectCustomDD2SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown2);
-            List<string> projectCustomDD3SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown3);
-            List<string> orgSelectedItemsList = GetSelectedItemsFromListBox(org);
-            List<string> categorySelectedItemsList = GetSelectedItemsFromListBox(category);
-            List<string> prioritySelectedItemsList = GetSelectedItemsFromListBox(priority);
-            List<string> statusSelectedItemsList = GetSelectedItemsFromListBox(status);
-            List<string> udfSelectedItemsList = new List<string>();
+            List<ListItem> reportedBySelectedItemsList = GetSelectedItemsFromListBox(reported_by);
+            List<ListItem> assignedToSelectedItemsList = GetSelectedItemsFromListBox(assigned_to);
+            List<ListItem> projectSelectedItemsList = GetSelectedItemsFromListBox(project);
+            List<ListItem> projectCustomDD1SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown1);
+            List<ListItem> projectCustomDD2SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown2);
+            List<ListItem> projectCustomDD3SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown3);
+            List<ListItem> orgSelectedItemsList = GetSelectedItemsFromListBox(org);
+            List<ListItem> categorySelectedItemsList = GetSelectedItemsFromListBox(category);
+            List<ListItem> prioritySelectedItemsList = GetSelectedItemsFromListBox(priority);
+            List<ListItem> statusSelectedItemsList = GetSelectedItemsFromListBox(status);
+            List<ListItem> udfSelectedItemsList = new List<ListItem>();
 
             // Create "WHERE" clause
 
             string where = "";
-
-            //string reported_by_clause = build_clause_from_listbox(reported_by, "bg_reported_user");
-            //string assigned_to_clause = build_clause_from_listbox(assigned_to, "bg_assigned_to_user");
-            //string project_clause = build_clause_from_listbox(project, "bg_project");
-
-            //string project_custom_dropdown1_clause
-            //    = build_clause_from_listbox(project_custom_dropdown1, "bg_project_custom_dropdown_value1");
-            //string project_custom_dropdown2_clause
-            //    = build_clause_from_listbox(project_custom_dropdown2, "bg_project_custom_dropdown_value2");
-            //string project_custom_dropdown3_clause
-            //    = build_clause_from_listbox(project_custom_dropdown3, "bg_project_custom_dropdown_value3");
-
-            //string org_clause = build_clause_from_listbox(org, "bg_org");
-            //string category_clause = build_clause_from_listbox(category, "bg_category");
-            //string priority_clause = build_clause_from_listbox(priority, "bg_priority");
-            //string status_clause = build_clause_from_listbox(status, "bg_status");
 
             string reported_by_clause = _searchService.BuildWhereFromList(reportedBySelectedItemsList, "bg_reported_user");
             string assigned_to_clause = _searchService.BuildWhereFromList(assignedToSelectedItemsList, "bg_assigned_to_user");
@@ -574,15 +558,13 @@ namespace BugTracker.Web
                 select += custom_cols_sql;
 
                 // Handle project custom dropdowns
-                List<ListItem> selected_projects = get_selected_projects();
-
                 string project_dropdown_select_cols_server_side = "";
 
                 string alias1 = null;
                 string alias2 = null;
                 string alias3 = null;
 
-                foreach (ListItem selected_project in selected_projects)
+                foreach (ListItem selected_project in projectSelectedItemsList)
                 {
                     if (selected_project.Value == "0")
                         continue;
@@ -634,6 +616,7 @@ namespace BugTracker.Web
                     }
                 }
 
+                //This variable is used on the ASPX page to help construct the SQL query.
                 if (alias1 != null)
                 {
                     project_dropdown_select_cols_server_side

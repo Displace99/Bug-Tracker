@@ -72,12 +72,12 @@ namespace BugTracker.Web.Services.Search
         /// <param name="selectedItems"></param>
         /// <param name="columnName"></param>
         /// <returns></returns>
-        public string BuildWhereFromList(List<string> selectedItems, string columnName)
+        public string BuildWhereFromList(List<ListItem> selectedItems, string columnName)
         {
             string clause = "";
             if (selectedItems.Count > 0)
             {
-                clause = string.Format("{0} in ({1}) ", columnName, string.Join(",", selectedItems));
+                clause = string.Format("{0} in ({1}) ", columnName, string.Join(",", selectedItems.Select(x => x.Value).ToArray()));
             }
 
             return clause;
