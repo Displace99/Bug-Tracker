@@ -1,8 +1,10 @@
 using btnet;
 using BugTracker.Web.Services.Category;
+using BugTracker.Web.Services.CustomFields;
 using BugTracker.Web.Services.Organization;
 using BugTracker.Web.Services.Priority;
 using BugTracker.Web.Services.Project;
+using BugTracker.Web.Services.Search;
 using BugTracker.Web.Services.Status;
 using BugTracker.Web.Services.UserDefinedFields;
 using System;
@@ -38,6 +40,7 @@ namespace BugTracker.Web
         
 		public DataTable dt_users = null;
         
+        //This is used in the aspx page to build out the SQL on the page
 		public string project_dropdown_select_cols = "";
 
         public Dictionary<int, BtnetProject> map_projects = new Dictionary<int, BtnetProject>();
@@ -48,6 +51,8 @@ namespace BugTracker.Web
         private PriorityService _priorityService = new PriorityService();
         private StatusService _statusService = new StatusService();
         private UserDefinedFieldService _userDefinedFieldService = new UserDefinedFieldService();
+        private CustomFieldService _customFieldService = new CustomFieldService(HttpContext.Current);
+        private SearchService _searchService = new SearchService();
 
 
         void Page_Load(Object sender, EventArgs e)
@@ -59,7 +64,7 @@ namespace BugTracker.Web
 
             if (security.user.is_admin || security.user.can_search)
             {
-                //
+                //Do nothing. They have access
             }
             else
             {
@@ -73,7 +78,7 @@ namespace BugTracker.Web
             show_udf = (Util.get_setting("ShowUserDefinedBugAttribute", "1") == "1");
             use_full_names = (Util.get_setting("UseFullNames", "0") == "1");
 
-            ds_custom_cols = Util.get_custom_columns();
+            ds_custom_cols = _customFieldService.GetCustomFields();
 
             dt_users = Util.get_related_users(security, false);
 
@@ -89,7 +94,7 @@ namespace BugTracker.Web
                 project_custom_dropdown3_label.Style["display"] = "none";
                 project_custom_dropdown3.Style["display"] = "none";
 
-                // are there any project dropdowns?
+                // are there any custom columns in project?
                 int projects_with_custom_dropdowns = _projectService.GetProjectsWithCustomColumCount();
 
                 if (projects_with_custom_dropdowns == 0)
@@ -103,6 +108,7 @@ namespace BugTracker.Web
                 // get the project dropdowns
                 DataSet ds_projects = _projectService.GetProjectsWithCustomColumns(); 
 
+                //Loads the custom drop down controls
                 foreach (DataRow dr in ds_projects.Tables[0].Rows)
                 {
                     BtnetProject btnet_project = new BtnetProject();
@@ -158,108 +164,41 @@ namespace BugTracker.Web
         }
 
         /// <summary>
-        /// Used to build the full where clause for a sql statement. 
-        /// This is called multiple times to build out the where clause for all possible selections.
-        /// </summary>
-        /// <param name="where">The current where clause</param>
-        /// <param name="clause">What needs to be added to the where clause</param>
-        /// <returns>Full where clause for a specific property</returns>
-        public string build_where(string where, string clause)
-        {
-            if (clause == "")
-            {
-                return where;
-            }
-
-            string sql = "";
-
-            if (where == "")
-            {
-                sql = " where ";
-                sql += clause;
-            }
-            else
-            {
-                sql = where;
-                string and_or = and.Checked ? "and " : "or ";
-                sql += and_or;
-                sql += clause;
-            }
-
-            return sql;
-        }
-
-
-        /// <summary>
         /// Takes the list of selected values from a list box and builds part of the where clause 
         /// </summary>
         /// <param name="lb">ListBox element to pull selected values from</param>
         /// <param name="column_name">Name of the database column</param>
-        /// <returns>part of the where clause of a sql statement</returns>
-        public string build_clause_from_listbox(ListBox lb, string column_name)
-        {
+        /// <returns>part of the where clause of a sql statement e.x. "in (1,4)"</returns>
+        //public string build_clause_from_listbox(ListBox lb, string column_name)
+        //{
 
-            string clause = "";
-            foreach (ListItem li in lb.Items)
-            {
-                if (li.Selected)
-                {
-                    if (clause == "")
-                    {
-                        clause += column_name + " in (";
-                    }
-                    else
-                    {
-                        clause += ",";
-                    }
+        //    string clause = "";
+        //    foreach (ListItem li in lb.Items)
+        //    {
+        //        if (li.Selected)
+        //        {
+        //            if (clause == "")
+        //            {
+        //                clause += column_name + " in (";
+        //            }
+        //            else
+        //            {
+        //                clause += ",";
+        //            }
 
-                    clause += li.Value;
+        //            clause += li.Value;
 
-                }
-            }
+        //        }
+        //    }
 
-            if (clause != "")
-            {
-                clause += ") ";
-            }
+        //    if (clause != "")
+        //    {
+        //        clause += ") ";
+        //    }
 
-            return clause;
+        //    return clause;
 
-        }
-
-
-        /// <summary>
-        /// Formats values for the IN or NOT IN sql clause
-        /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
-        public string format_in_not_in(string s)
-        {
-
-            string vals = "(";
-            string opts = "";
-
-            string[] s2 = Util.split_string_using_commas(s);
-            for (int i = 0; i < s2.Length; i++)
-            {
-                if (opts != "")
-                {
-                    opts += ",";
-                }
-
-                string one_opt = "N'";
-                one_opt += s2[i].Replace("'", "''");
-                one_opt += "'";
-
-                opts += one_opt;
-            }
-            vals += opts;
-            vals += ")";
-
-            return vals;
-
-        }
-
+        //}
 
         /// <summary>
         /// Returns a list of of Projects selected in the Project List Item control
@@ -280,6 +219,19 @@ namespace BugTracker.Web
             return selected_projects;
         }
 
+        public List<string> GetSelectedItemsFromListBox(ListBox listBox)
+        {
+            List<string> selectedItems = new List<string>();
+            foreach (ListItem item in listBox.Items)
+            {
+                if (item.Selected)
+                {
+                    selectedItems.Add(item.Value);
+                }
+            }
+
+            return selectedItems;
+        }
 
         /// <summary>
         /// Builds the sql query to do the search. This is built from all of the controls on the page. 
@@ -289,31 +241,62 @@ namespace BugTracker.Web
             prev_sort.Value = "-1";
             prev_dir.Value = "ASC";
             new_page.Value = "0";
+            string whereConditionalOperator = and.Checked ? "and " : "or ";
+
+            //Get selected items from ListBox Controls
+            List<string> reportedBySelectedItemsList = GetSelectedItemsFromListBox(reported_by);
+            List<string> assignedToSelectedItemsList = GetSelectedItemsFromListBox(assigned_to);
+            List<string> projectSelectedItemsList = GetSelectedItemsFromListBox(project);
+            List<string> projectCustomDD1SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown1);
+            List<string> projectCustomDD2SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown2);
+            List<string> projectCustomDD3SelectedItemsList = GetSelectedItemsFromListBox(project_custom_dropdown3);
+            List<string> orgSelectedItemsList = GetSelectedItemsFromListBox(org);
+            List<string> categorySelectedItemsList = GetSelectedItemsFromListBox(category);
+            List<string> prioritySelectedItemsList = GetSelectedItemsFromListBox(priority);
+            List<string> statusSelectedItemsList = GetSelectedItemsFromListBox(status);
+            List<string> udfSelectedItemsList = new List<string>();
 
             // Create "WHERE" clause
 
             string where = "";
 
-            string reported_by_clause = build_clause_from_listbox(reported_by, "bg_reported_user");
-            string assigned_to_clause = build_clause_from_listbox(assigned_to, "bg_assigned_to_user");
-            string project_clause = build_clause_from_listbox(project, "bg_project");
+            //string reported_by_clause = build_clause_from_listbox(reported_by, "bg_reported_user");
+            //string assigned_to_clause = build_clause_from_listbox(assigned_to, "bg_assigned_to_user");
+            //string project_clause = build_clause_from_listbox(project, "bg_project");
+
+            //string project_custom_dropdown1_clause
+            //    = build_clause_from_listbox(project_custom_dropdown1, "bg_project_custom_dropdown_value1");
+            //string project_custom_dropdown2_clause
+            //    = build_clause_from_listbox(project_custom_dropdown2, "bg_project_custom_dropdown_value2");
+            //string project_custom_dropdown3_clause
+            //    = build_clause_from_listbox(project_custom_dropdown3, "bg_project_custom_dropdown_value3");
+
+            //string org_clause = build_clause_from_listbox(org, "bg_org");
+            //string category_clause = build_clause_from_listbox(category, "bg_category");
+            //string priority_clause = build_clause_from_listbox(priority, "bg_priority");
+            //string status_clause = build_clause_from_listbox(status, "bg_status");
+
+            string reported_by_clause = _searchService.BuildWhereFromList(reportedBySelectedItemsList, "bg_reported_user");
+            string assigned_to_clause = _searchService.BuildWhereFromList(assignedToSelectedItemsList, "bg_assigned_to_user");
+            string project_clause = _searchService.BuildWhereFromList(projectSelectedItemsList, "bg_project");
 
             string project_custom_dropdown1_clause
-                = build_clause_from_listbox(project_custom_dropdown1, "bg_project_custom_dropdown_value1");
+                = _searchService.BuildWhereFromList(projectCustomDD1SelectedItemsList, "bg_project_custom_dropdown_value1");
             string project_custom_dropdown2_clause
-                = build_clause_from_listbox(project_custom_dropdown2, "bg_project_custom_dropdown_value2");
+                = _searchService.BuildWhereFromList(projectCustomDD2SelectedItemsList, "bg_project_custom_dropdown_value2");
             string project_custom_dropdown3_clause
-                = build_clause_from_listbox(project_custom_dropdown3, "bg_project_custom_dropdown_value3");
+                = _searchService.BuildWhereFromList(projectCustomDD3SelectedItemsList, "bg_project_custom_dropdown_value3");
 
-            string org_clause = build_clause_from_listbox(org, "bg_org");
-            string category_clause = build_clause_from_listbox(category, "bg_category");
-            string priority_clause = build_clause_from_listbox(priority, "bg_priority");
-            string status_clause = build_clause_from_listbox(status, "bg_status");
+            string org_clause = _searchService.BuildWhereFromList(orgSelectedItemsList, "bg_org");
+            string category_clause = _searchService.BuildWhereFromList(categorySelectedItemsList, "bg_category");
+            string priority_clause = _searchService.BuildWhereFromList(prioritySelectedItemsList, "bg_priority");
+            string status_clause = _searchService.BuildWhereFromList(statusSelectedItemsList, "bg_status");
             string udf_clause = "";
 
             if (show_udf)
             {
-                udf_clause = build_clause_from_listbox(udf, "bg_user_defined_attribute");
+                udfSelectedItemsList = GetSelectedItemsFromListBox(udf);
+                udf_clause = _searchService.BuildWhereFromList(udfSelectedItemsList, "bg_user_defined_attribute");
             }
 
 
@@ -353,56 +336,56 @@ namespace BugTracker.Web
             if (comments_since.Value != "")
             {
                 comments_since_clause = " bg_id in (select bp_bug from bug_posts where bp_type in ('comment','received','sent') and bp_date > '";
-                comments_since_clause += format_to_date(comments_since.Value);
+                comments_since_clause += _searchService.FormatToDate(comments_since.Value);
                 comments_since_clause += "')\n";
             }
 
             string from_clause = "";
             if (from_date.Value != "")
             {
-                from_clause = " bg_reported_date >= '" + format_from_date(from_date.Value) + "'\n";
+                from_clause = " bg_reported_date >= '" + _searchService.FormatFromDate(from_date.Value) + "'\n";
             }
 
             string to_clause = "";
             if (to_date.Value != "")
             {
-                to_clause = " bg_reported_date <= '" + format_to_date(to_date.Value) + "'\n";
+                to_clause = " bg_reported_date <= '" + _searchService.FormatToDate(to_date.Value) + "'\n";
             }
 
             string lu_from_clause = "";
             if (lu_from_date.Value != "")
             {
-                lu_from_clause = " bg_last_updated_date >= '" + format_from_date(lu_from_date.Value) + "'\n";
+                lu_from_clause = " bg_last_updated_date >= '" + _searchService.FormatFromDate(lu_from_date.Value) + "'\n";
             }
 
             string lu_to_clause = "";
             if (lu_to_date.Value != "")
             {
-                lu_to_clause = " bg_last_updated_date <= '" + format_to_date(lu_to_date.Value) + "'\n";
+                lu_to_clause = " bg_last_updated_date <= '" + _searchService.FormatToDate(lu_to_date.Value) + "'\n";
             }
 
 
-            where = build_where(where, reported_by_clause);
-            where = build_where(where, assigned_to_clause);
-            where = build_where(where, project_clause);
-            where = build_where(where, project_custom_dropdown1_clause);
-            where = build_where(where, project_custom_dropdown2_clause);
-            where = build_where(where, project_custom_dropdown3_clause);
-            where = build_where(where, org_clause);
-            where = build_where(where, category_clause);
-            where = build_where(where, priority_clause);
-            where = build_where(where, status_clause);
-            where = build_where(where, desc_clause);
-            where = build_where(where, comments_clause);
-            where = build_where(where, comments_since_clause);
-            where = build_where(where, from_clause);
-            where = build_where(where, to_clause);
-            where = build_where(where, lu_from_clause);
-            where = build_where(where, lu_to_clause);
+            where = _searchService.BuildWhere(where, reported_by_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, assigned_to_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, project_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, project_custom_dropdown1_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, project_custom_dropdown2_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, project_custom_dropdown3_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, org_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, category_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, priority_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, status_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, desc_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, comments_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, comments_since_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, from_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, to_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, lu_from_clause, whereConditionalOperator);
+            where = _searchService.BuildWhere(where, lu_to_clause, whereConditionalOperator);
 
             if (show_udf)
             {
-                where = build_where(where, udf_clause);
+                where = _searchService.BuildWhere(where, udf_clause, whereConditionalOperator);
             }
 
             foreach (DataRow drcc in ds_custom_cols.Tables[0].Rows)
@@ -430,23 +413,23 @@ namespace BugTracker.Web
                         if (values != "")
                         {
                             custom_clause = " [" + column_name + "] like '%" + values + "%'\n";
-                            where = build_where(where, custom_clause);
+                            where = _searchService.BuildWhere(where, custom_clause, whereConditionalOperator);
                         }
                     }
                     else if (datatype == "datetime")
                     {
                         if (values != "")
                         {
-                            custom_clause = " [" + column_name + "] >= '" + format_from_date(values) + "'\n";
-                            where = build_where(where, custom_clause);
+                            custom_clause = " [" + column_name + "] >= '" + _searchService.FormatFromDate(values) + "'\n";
+                            where = _searchService.BuildWhere(where, custom_clause, whereConditionalOperator);
 
                             // reset, and do the to date
                             custom_clause = "";
                             values = Request["to__" + column_name];
                             if (values != "")
                             {
-                                custom_clause = " [" + column_name + "] <= '" + format_to_date(values) + "'\n";
-                                where = build_where(where, custom_clause);
+                                custom_clause = " [" + column_name + "] <= '" + _searchService.FormatToDate(values) + "'\n";
+                                where = _searchService.BuildWhere(where, custom_clause, whereConditionalOperator);
                             }
                         }
                     }
@@ -458,9 +441,9 @@ namespace BugTracker.Web
                         }
                         else
                         {
-                            string in_not_in = format_in_not_in(values);
+                            string in_not_in = _searchService.FormatInNotIn(values);
                             custom_clause = " [" + column_name + "] in " + in_not_in + "\n";
-                            where = build_where(where, custom_clause);
+                            where = _searchService.BuildWhere(where, custom_clause, whereConditionalOperator);
                         }
                     }
                 }
@@ -724,26 +707,6 @@ namespace BugTracker.Web
             dv = new DataView(ds.Tables[0]);
             Session["bugs"] = dv;
             Session["bugs_unfiltered"] = ds.Tables[0];
-        }
-
-        /// <summary>
-        /// Changes the date from a page element into a database date format
-        /// </summary>
-        /// <param name="dt">Date that you want to format</param>
-        /// <returns>Database formatted date</returns>
-        public string format_from_date(string dt)
-        {
-            return Util.format_local_date_into_db_format(dt).Replace(" 12:00:00", "").Replace(" 00:00:00", "");
-        }
-
-        /// <summary>
-        /// Changes the date from a page element into a database date format
-        /// </summary>
-        /// <param name="dt">Date that you want to format</param>
-        /// <returns>Database formatted date</returns>
-        public string format_to_date(string dt)
-        {
-            return Util.format_local_date_into_db_format(dt).Replace(" 12:00:00", " 23:59:59").Replace(" 00:00:00", " 23:59:59");
         }
 
         /// <summary>
