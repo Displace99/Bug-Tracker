@@ -10,4 +10,4 @@ A project is a place for users and organizations to track the progress of bugs a
     view-project-issues.rst
     edit-project.rst
     delete-project.rst
-    project-permission.rst
+    project-permissions.rst
