@@ -1212,7 +1212,6 @@
     <Compile Include="Models\Registration\RegisteredUser.cs" />
     <Compile Include="Models\Search\BtnetProject.cs" />
     <Compile Include="Models\Search\ExtendedSearch.cs" />
-    <Compile Include="Models\Search\ExtendedSearchResponse.cs" />
     <Compile Include="Models\Search\ProjectDropdown.cs" />
     <Compile Include="Models\Status\StatusVM.cs" />
     <Compile Include="Models\UDF\UserDefinedField.cs" />
