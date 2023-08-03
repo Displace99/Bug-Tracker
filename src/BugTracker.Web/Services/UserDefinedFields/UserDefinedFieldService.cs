@@ -26,6 +26,17 @@ namespace BugTracker.Web.Services.UserDefinedFields
         }
 
         /// <summary>
+        /// Returns a list of User Defined Fields. Used for Search
+        /// </summary>
+        /// <returns>DataView</returns>
+        public DataView GetFieldListForSearch()
+        {
+            string sql = "select udf_id, udf_name from user_defined_attribute order by udf_sort_seq, udf_name";
+
+            return DbUtil.get_dataview(sql);
+        }
+
+        /// <summary>
         /// Returns details of a specific user defined field
         /// </summary>
         /// <param name="id"></param>

@@ -24,6 +24,17 @@ namespace BugTracker.Web.Services.Status
         }
 
         /// <summary>
+        /// Returns a list of statuses. Used for Search
+        /// </summary>
+        /// <returns></returns>
+        public DataView GetStatusListForSearch()
+        {
+            string sql = "select st_id, st_name from statuses order by st_sort_seq, st_name";
+
+            return DbUtil.get_dataview(sql);
+        }
+
+        /// <summary>
         /// Returns status details by status id
         /// </summary>
         /// <param name="Id"></param>

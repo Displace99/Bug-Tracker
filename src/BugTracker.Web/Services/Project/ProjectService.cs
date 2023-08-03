@@ -94,6 +94,75 @@ namespace BugTracker.Web.Services.Project
             return DbUtil.get_dataset(sql);
         }
 
+        public DataView GetProjectListByPermission(bool isAdmin, int userId)
+        {
+            string sql = string.Empty;
+            SqlCommand cmd = new SqlCommand();
+
+            if (isAdmin)
+            {
+                sql = "/* drop downs */ select pj_id, pj_name from projects order by pj_name;";
+            }
+            else
+            {
+                sql = @"/* drop downs */ select pj_id, pj_name
+			        from projects
+			        left outer join project_user_xref on pj_id = pu_project
+			        and pu_user = @userId
+			        where isnull(pu_permission_level, @permissionLevel) <> 0
+			        order by pj_name;";
+
+                cmd.Parameters.AddWithValue("@permissionLevel", Convert.ToInt32(Util.get_setting("DefaultPermissionLevel", "2")));
+                cmd.Parameters.AddWithValue("@userId", userId);
+            }
+
+            cmd.CommandText = sql;
+
+            return DbUtil.get_dataview(cmd);
+        }
+
+        /// <summary>
+        /// Gets a count of all projects with custom columns. Used in Search
+        /// </summary>
+        /// <returns>Number of projects</returns>
+        public int GetProjectsWithCustomColumCount()
+        {
+            string sql = @"
+                select count(1)
+                from projects
+                where isnull(pj_enable_custom_dropdown1,0) = 1
+                or isnull(pj_enable_custom_dropdown2,0) = 1
+                or isnull(pj_enable_custom_dropdown3,0) = 1";
+
+            return (int)btnet.DbUtil.execute_scalar(sql);
+        }
+
+        /// <summary>
+        /// Gets a list of projects along with their custom columns
+        /// </summary>
+        /// <returns></returns>
+        public DataSet GetProjectsWithCustomColumns()
+        {
+            string sql = @"
+                select
+                pj_id,
+                isnull(pj_enable_custom_dropdown1,0) pj_enable_custom_dropdown1,
+                isnull(pj_enable_custom_dropdown2,0) pj_enable_custom_dropdown2,
+                isnull(pj_enable_custom_dropdown3,0) pj_enable_custom_dropdown3,
+                isnull(pj_custom_dropdown_label1,'') pj_custom_dropdown_label1,
+                isnull(pj_custom_dropdown_label2,'') pj_custom_dropdown_label2,
+                isnull(pj_custom_dropdown_label3,'') pj_custom_dropdown_label3,
+                isnull(pj_custom_dropdown_values1,'') pj_custom_dropdown_values1,
+                isnull(pj_custom_dropdown_values2,'') pj_custom_dropdown_values2,
+                isnull(pj_custom_dropdown_values3,'') pj_custom_dropdown_values3
+                from projects
+                where isnull(pj_enable_custom_dropdown1,0) = 1
+                or isnull(pj_enable_custom_dropdown2,0) = 1
+                or isnull(pj_enable_custom_dropdown3,0) = 1";
+
+            return btnet.DbUtil.get_dataset(sql);
+        }
+
         public DataRow GetProjectDetails(int projectId)
         {
             string sql = "select pj_name from projects where pj_id = @projectId";

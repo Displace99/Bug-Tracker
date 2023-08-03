@@ -1,19 +1,39 @@
 using btnet;
+using BugTracker.Web.Models.Search;
+using BugTracker.Web.Services.Category;
+using BugTracker.Web.Services.CustomFields;
+using BugTracker.Web.Services.Organization;
+using BugTracker.Web.Services.Priority;
+using BugTracker.Web.Services.Project;
+using BugTracker.Web.Services.Search;
+using BugTracker.Web.Services.Status;
+using BugTracker.Web.Services.UserDefinedFields;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace BugTracker.Web
 {
+    //public class ProjectDropdown
+    //{
+    //    public bool enabled = false;
+    //    public string label = "";
+    //    public string values = "";
+    //};
+
+    //public class BtnetProject
+    //{
+    //    public Dictionary<int, ProjectDropdown> map_dropdowns = new Dictionary<int, ProjectDropdown>();
+    //};
+
     public partial class search : Page
     {
         public string sql;
-        public System.Data.DataView dv;
-        public System.Data.DataSet ds_custom_cols = null;
+        public DataView dv;
+        public DataSet ds_custom_cols = null;
         
 		public Security security;
 		public bool show_udf;
@@ -21,9 +41,20 @@ namespace BugTracker.Web
         
 		public DataTable dt_users = null;
         
+        //This is used in the aspx page to build out the SQL on the page
 		public string project_dropdown_select_cols = "";
 
         public Dictionary<int, BtnetProject> map_projects = new Dictionary<int, BtnetProject>();
+
+        private ProjectService _projectService = new ProjectService();
+        private OrganizationService _organizationService = new OrganizationService();
+        private CategoryService _categoryService = new CategoryService();
+        private PriorityService _priorityService = new PriorityService();
+        private StatusService _statusService = new StatusService();
+        private UserDefinedFieldService _userDefinedFieldService = new UserDefinedFieldService();
+        private CustomFieldService _customFieldService = new CustomFieldService(HttpContext.Current);
+        private SearchService _searchService = new SearchService();
+
 
         void Page_Load(Object sender, EventArgs e)
         {
@@ -34,7 +65,7 @@ namespace BugTracker.Web
 
             if (security.user.is_admin || security.user.can_search)
             {
-                //
+                //Do nothing. They have access
             }
             else
             {
@@ -48,7 +79,7 @@ namespace BugTracker.Web
             show_udf = (Util.get_setting("ShowUserDefinedBugAttribute", "1") == "1");
             use_full_names = (Util.get_setting("UseFullNames", "0") == "1");
 
-            ds_custom_cols = Util.get_custom_columns();
+            ds_custom_cols = _customFieldService.GetCustomFields();
 
             dt_users = Util.get_related_users(security, false);
 
@@ -64,47 +95,21 @@ namespace BugTracker.Web
                 project_custom_dropdown3_label.Style["display"] = "none";
                 project_custom_dropdown3.Style["display"] = "none";
 
-                // are there any project dropdowns?
-
-                string sql = @"
-select count(1)
-from projects
-where isnull(pj_enable_custom_dropdown1,0) = 1
-or isnull(pj_enable_custom_dropdown2,0) = 1
-or isnull(pj_enable_custom_dropdown3,0) = 1";
-
-                int projects_with_custom_dropdowns = (int)btnet.DbUtil.execute_scalar(sql);
+                // are there any custom columns in project?
+                int projects_with_custom_dropdowns = _projectService.GetProjectsWithCustomColumCount();
 
                 if (projects_with_custom_dropdowns == 0)
                 {
                     project.AutoPostBack = false;
                 }
-
             }
             else
             {
 
                 // get the project dropdowns
+                DataSet ds_projects = _projectService.GetProjectsWithCustomColumns(); 
 
-                string sql = @"
-select
-pj_id,
-isnull(pj_enable_custom_dropdown1,0) pj_enable_custom_dropdown1,
-isnull(pj_enable_custom_dropdown2,0) pj_enable_custom_dropdown2,
-isnull(pj_enable_custom_dropdown3,0) pj_enable_custom_dropdown3,
-isnull(pj_custom_dropdown_label1,'') pj_custom_dropdown_label1,
-isnull(pj_custom_dropdown_label2,'') pj_custom_dropdown_label2,
-isnull(pj_custom_dropdown_label3,'') pj_custom_dropdown_label3,
-isnull(pj_custom_dropdown_values1,'') pj_custom_dropdown_values1,
-isnull(pj_custom_dropdown_values2,'') pj_custom_dropdown_values2,
-isnull(pj_custom_dropdown_values3,'') pj_custom_dropdown_values3
-from projects
-where isnull(pj_enable_custom_dropdown1,0) = 1
-or isnull(pj_enable_custom_dropdown2,0) = 1
-or isnull(pj_enable_custom_dropdown3,0) = 1";
-
-                DataSet ds_projects = btnet.DbUtil.get_dataset(sql);
-
+                //Loads the custom drop down controls
                 foreach (DataRow dr in ds_projects.Tables[0].Rows)
                 {
                     BtnetProject btnet_project = new BtnetProject();
@@ -134,7 +139,6 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
                 }
 
                 // which button did the user hit?
-
                 if (project_changed.Value == "1" && project.AutoPostBack == true)
                 {
                     handle_project_custom_dropdowns();
@@ -142,14 +146,14 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
                 else if (hit_submit_button.Value == "1")
                 {
                     handle_project_custom_dropdowns();
-                    do_query();
+                    SubmitQuery();
                 }
                 else
                 {
                     dv = (DataView)Session["bugs"];
                     if (dv == null)
                     {
-                        do_query();
+                        SubmitQuery();
                     }
                     call_sort_and_filter_buglist_dataview();
                 }
@@ -160,105 +164,7 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
 
         }
 
-        /// <summary>
-        /// Used to build the full where clause for a sql statement. 
-        /// This is called multiple times to build out the where clause for all possible selections.
-        /// </summary>
-        /// <param name="where">The current where clause</param>
-        /// <param name="clause">What needs to be added to the where clause</param>
-        /// <returns>Full where clause for a specific property</returns>
-        public string build_where(string where, string clause)
-        {
-            if (clause == "")
-            {
-                return where;
-            }
-
-            string sql = "";
-
-            if (where == "")
-            {
-                sql = " where ";
-                sql += clause;
-            }
-            else
-            {
-                sql = where;
-                string and_or = and.Checked ? "and " : "or ";
-                sql += and_or;
-                sql += clause;
-            }
-
-            return sql;
-        }
-
-
-        /// <summary>
-        /// Takes the list of selected values from a list box and builds part of the where clause 
-        /// </summary>
-        /// <param name="lb">ListBox element to pull selected values from</param>
-        /// <param name="column_name">Name of the database column</param>
-        /// <returns>part of the where clause of a sql statement</returns>
-        public string build_clause_from_listbox(ListBox lb, string column_name)
-        {
-
-            string clause = "";
-            foreach (ListItem li in lb.Items)
-            {
-                if (li.Selected)
-                {
-                    if (clause == "")
-                    {
-                        clause += column_name + " in (";
-                    }
-                    else
-                    {
-                        clause += ",";
-                    }
-
-                    clause += li.Value;
-
-                }
-            }
-
-            if (clause != "")
-            {
-                clause += ") ";
-            }
-
-            return clause;
-
-        }
-
-
-        ///////////////////////////////////////////////////////////////////////
-        public string format_in_not_in(string s)
-        {
-
-            string vals = "(";
-            string opts = "";
-
-            string[] s2 = Util.split_string_using_commas(s);
-            for (int i = 0; i < s2.Length; i++)
-            {
-                if (opts != "")
-                {
-                    opts += ",";
-                }
-
-                string one_opt = "N'";
-                one_opt += s2[i].Replace("'", "''");
-                one_opt += "'";
-
-                opts += one_opt;
-            }
-            vals += opts;
-            vals += ")";
-
-            return vals;
-
-        }
-
+       
 
         /// <summary>
         /// Returns a list of of Projects selected in the Project List Item control
@@ -279,470 +185,68 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
             return selected_projects;
         }
 
+        public List<ListItem> GetSelectedItemsFromListBox(ListBox listBox)
+        {
+            List<ListItem> selectedItems = new List<ListItem>();
+            foreach (ListItem item in listBox.Items)
+            {
+                if (item.Selected)
+                {
+                    selectedItems.Add(item);
+                }
+            }
 
-        ///////////////////////////////////////////////////////////////////////
-        public void do_query()
+            return selectedItems;
+        }
+
+        public void SubmitQuery()
         {
             prev_sort.Value = "-1";
             prev_dir.Value = "ASC";
             new_page.Value = "0";
+            string whereConditionalOperator = and.Checked ? "and " : "or ";
 
-            // Create "WHERE" clause
+            ExtendedSearch extendedSearch = new ExtendedSearch();
 
-            string where = "";
+            extendedSearch.DescriptionContainsFilter = like.Value;
+            extendedSearch.CommentsContainsFilter = like2.Value;
+            extendedSearch.UseFullNames = use_full_names;
 
-            string reported_by_clause = build_clause_from_listbox(reported_by, "bg_reported_user");
-            string assigned_to_clause = build_clause_from_listbox(assigned_to, "bg_assigned_to_user");
-            string project_clause = build_clause_from_listbox(project, "bg_project");
+            //Get selected items from ListBox Controls
+            extendedSearch.ReportedByList = GetSelectedItemsFromListBox(reported_by);
+            extendedSearch.AssignedToList = GetSelectedItemsFromListBox(assigned_to);
+            extendedSearch.ProjectList = GetSelectedItemsFromListBox(project);
+            extendedSearch.ProjectCustomDD1List = GetSelectedItemsFromListBox(project_custom_dropdown1);
+            extendedSearch.ProjectCustomDD2List = GetSelectedItemsFromListBox(project_custom_dropdown2);
+            extendedSearch.ProjectCustomDD3List = GetSelectedItemsFromListBox(project_custom_dropdown3);
+            extendedSearch.OrgList = GetSelectedItemsFromListBox(org);
+            extendedSearch.CategoryList = GetSelectedItemsFromListBox(category);
+            extendedSearch.PriorityList = GetSelectedItemsFromListBox(priority);
+            extendedSearch.StatusList = GetSelectedItemsFromListBox(status);
+            extendedSearch.UDFList = new List<ListItem>();
 
-            string project_custom_dropdown1_clause
-                = build_clause_from_listbox(project_custom_dropdown1, "bg_project_custom_dropdown_value1");
-            string project_custom_dropdown2_clause
-                = build_clause_from_listbox(project_custom_dropdown2, "bg_project_custom_dropdown_value2");
-            string project_custom_dropdown3_clause
-                = build_clause_from_listbox(project_custom_dropdown3, "bg_project_custom_dropdown_value3");
+            extendedSearch.IsExternalUser = security.user.external_user;
+            extendedSearch.CommentSinceDateString = comments_since.Value;
+            extendedSearch.FromDateString = from_date.Value;
+            extendedSearch.ToDateString = to_date.Value;
+            extendedSearch.LastUpdatedFromDateString = lu_from_date.Value;
+            extendedSearch.LastUpdatedToDateString = lu_to_date.Value;
 
-            string org_clause = build_clause_from_listbox(org, "bg_org");
-            string category_clause = build_clause_from_listbox(category, "bg_category");
-            string priority_clause = build_clause_from_listbox(priority, "bg_priority");
-            string status_clause = build_clause_from_listbox(status, "bg_status");
-            string udf_clause = "";
+            extendedSearch.CustomColumns = ds_custom_cols;
 
-            if (show_udf)
-            {
-                udf_clause = build_clause_from_listbox(udf, "bg_user_defined_attribute");
-            }
-
-
-            // SQL "LIKE" uses [, %, and _ in a special way
-
-            string like_string = like.Value.Replace("'", "''");
-            like_string = like_string.Replace("[", "[[]");
-            like_string = like_string.Replace("%", "[%]");
-            like_string = like_string.Replace("_", "[_]");
-
-            string like2_string = like2.Value.Replace("'", "''");
-            like2_string = like2_string.Replace("[", "[[]");
-            like2_string = like2_string.Replace("%", "[%]");
-            like2_string = like2_string.Replace("_", "[_]");
-
-            string desc_clause = "";
-            if (like.Value != "")
-            {
-                desc_clause = " bg_short_desc like";
-                desc_clause += " N'%" + like_string + "%'\n";
-            }
-
-            string comments_clause = "";
-            if (like2.Value != "")
-            {
-                comments_clause = " bg_id in (select bp_bug from bug_posts where bp_type in ('comment','received','sent') and isnull(bp_comment_search,bp_comment) like";
-                comments_clause += " N'%" + like2_string + "%'";
-                if (security.user.external_user)
-                {
-                    comments_clause += " and bp_hidden_from_external_users = 0";
-                }
-                comments_clause += ")\n";
-            }
-
-
-            string comments_since_clause = "";
-            if (comments_since.Value != "")
-            {
-                comments_since_clause = " bg_id in (select bp_bug from bug_posts where bp_type in ('comment','received','sent') and bp_date > '";
-                comments_since_clause += format_to_date(comments_since.Value);
-                comments_since_clause += "')\n";
-            }
-
-            string from_clause = "";
-            if (from_date.Value != "")
-            {
-                from_clause = " bg_reported_date >= '" + format_from_date(from_date.Value) + "'\n";
-            }
-
-            string to_clause = "";
-            if (to_date.Value != "")
-            {
-                to_clause = " bg_reported_date <= '" + format_to_date(to_date.Value) + "'\n";
-            }
-
-            string lu_from_clause = "";
-            if (lu_from_date.Value != "")
-            {
-                lu_from_clause = " bg_last_updated_date >= '" + format_from_date(lu_from_date.Value) + "'\n";
-            }
-
-            string lu_to_clause = "";
-            if (lu_to_date.Value != "")
-            {
-                lu_to_clause = " bg_last_updated_date <= '" + format_to_date(lu_to_date.Value) + "'\n";
-            }
-
-
-            where = build_where(where, reported_by_clause);
-            where = build_where(where, assigned_to_clause);
-            where = build_where(where, project_clause);
-            where = build_where(where, project_custom_dropdown1_clause);
-            where = build_where(where, project_custom_dropdown2_clause);
-            where = build_where(where, project_custom_dropdown3_clause);
-            where = build_where(where, org_clause);
-            where = build_where(where, category_clause);
-            where = build_where(where, priority_clause);
-            where = build_where(where, status_clause);
-            where = build_where(where, desc_clause);
-            where = build_where(where, comments_clause);
-            where = build_where(where, comments_since_clause);
-            where = build_where(where, from_clause);
-            where = build_where(where, to_clause);
-            where = build_where(where, lu_from_clause);
-            where = build_where(where, lu_to_clause);
+            extendedSearch.Security = security;
+            extendedSearch.MapProjects = map_projects;
 
             if (show_udf)
             {
-                where = build_where(where, udf_clause);
+                extendedSearch.UDFList = GetSelectedItemsFromListBox(udf);
             }
 
-            foreach (DataRow drcc in ds_custom_cols.Tables[0].Rows)
-            {
-                string column_name = (string)drcc["name"];
-                if (security.user.dict_custom_field_permission_level[column_name] == Security.PERMISSION_NONE)
-                {
-                    continue;
-                }
+            DataSet ds = _searchService.BuildSearchQuery(extendedSearch, Request, whereConditionalOperator, security);
 
-                string values = Request[column_name];
-
-                if (values != null)
-                {
-
-                    values = values.Replace("'", "''");
-
-                    string custom_clause = "";
-
-                    string datatype = (string)drcc["datatype"];
-
-                    if ((datatype == "varchar" || datatype == "nvarchar" || datatype == "char" || datatype == "nchar")
-                    && (string)drcc["dropdown type"] == "")
-                    {
-                        if (values != "")
-                        {
-                            custom_clause = " [" + column_name + "] like '%" + values + "%'\n";
-                            where = build_where(where, custom_clause);
-                        }
-                    }
-                    else if (datatype == "datetime")
-                    {
-                        if (values != "")
-                        {
-                            custom_clause = " [" + column_name + "] >= '" + format_from_date(values) + "'\n";
-                            where = build_where(where, custom_clause);
-
-                            // reset, and do the to date
-                            custom_clause = "";
-                            values = Request["to__" + column_name];
-                            if (values != "")
-                            {
-                                custom_clause = " [" + column_name + "] <= '" + format_to_date(values) + "'\n";
-                                where = build_where(where, custom_clause);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (values == "" && (datatype == "int" || datatype == "decimal"))
-                        {
-                            // skip
-                        }
-                        else
-                        {
-                            string in_not_in = format_in_not_in(values);
-                            custom_clause = " [" + column_name + "] in " + in_not_in + "\n";
-                            where = build_where(where, custom_clause);
-                        }
-                    }
-                }
-            }
-
-            //Checks to see if there is a default select statement in the webconfig. By default this is commented out
-            //and only used if you want to customize the columns that are displayed on the "search" page
-            string search_sql = Util.get_setting("SearchSQL", "");
-
-            //If nothing is is found in the web config, build out the standard select statement.
-            if (search_sql == "")
-            {
-
-                string select = "select isnull(pr_background_color,'#ffffff') [color], bg_id [id],\nbg_short_desc [desc]";
-
-                // reported
-                if (use_full_names)
-                {
-                    select += "\n,isnull(rpt.us_lastname + ', ' + rpt.us_firstname,'') [reported by]";
-                }
-                else
-                {
-                    select += "\n,isnull(rpt.us_username,'') [reported by]";
-                }
-                select += "\n,bg_reported_date [reported on]";
-
-                // last updated
-                if (use_full_names)
-                {
-                    select += "\n,isnull(lu.us_lastname + ', ' + lu.us_firstname,'') [last updated by]";
-                }
-                else
-                {
-                    select += "\n,isnull(lu.us_username,'') [last updated by]";
-                }
-                select += "\n,bg_last_updated_date [last updated on]";
-
-
-                if (security.user.tags_field_permission_level != Security.PERMISSION_NONE)
-                {
-                    select += ",\nisnull(bg_tags,'') [tags]";
-                }
-
-                if (security.user.project_field_permission_level != Security.PERMISSION_NONE)
-                {
-                    select += ",\nisnull(pj_name,'') [project]";
-                }
-
-                if (security.user.org_field_permission_level != Security.PERMISSION_NONE)
-                {
-                    select += ",\nisnull(og_name,'') [organization]";
-                }
-
-                if (security.user.category_field_permission_level != Security.PERMISSION_NONE)
-                {
-                    select += ",\nisnull(ct_name,'') [category]";
-                }
-
-                if (security.user.priority_field_permission_level != Security.PERMISSION_NONE)
-                {
-                    select += ",\nisnull(pr_name,'') [priority]";
-                }
-
-                if (security.user.assigned_to_field_permission_level != Security.PERMISSION_NONE)
-                {
-                    if (use_full_names)
-                    {
-                        select += ",\nisnull(asg.us_lastname + ', ' + asg.us_firstname,'') [assigned to]";
-                    }
-                    else
-                    {
-                        select += ",\nisnull(asg.us_username,'') [assigned to]";
-                    }
-                }
-
-                if (security.user.status_field_permission_level != Security.PERMISSION_NONE)
-                {
-                    select += ",\nisnull(st_name,'') [status]";
-                }
-
-                if (security.user.udf_field_permission_level != Security.PERMISSION_NONE)
-                {
-                    if (show_udf)
-                    {
-                        string udf_name = Util.get_setting("UserDefinedBugAttributeName", "YOUR ATTRIBUTE");
-                        select += ",\nisnull(udf_name,'') [" + udf_name + "]";
-                    }
-                }
-
-                // let results include custom columns
-                string custom_cols_sql = "";
-                int user_type_cnt = 1;
-                foreach (DataRow drcc in ds_custom_cols.Tables[0].Rows)
-                {
-                    string column_name = (string)drcc["name"];
-                    if (security.user.dict_custom_field_permission_level[column_name] == Security.PERMISSION_NONE)
-                    {
-                        continue;
-                    }
-
-                    if (Convert.ToString(drcc["dropdown type"]) == "users")
-                    {
-                        custom_cols_sql += ",\nisnull(users"
-                            + Convert.ToString(user_type_cnt++)
-                            + ".us_username,'') "
-                            + "["
-                            + column_name + "]";
-                    }
-                    else
-                    {
-                        if (Convert.ToString(drcc["datatype"]) == "decimal")
-                        {
-                            custom_cols_sql += ",\nisnull(["
-                                + column_name
-                                + "],0)["
-                                + column_name + "]";
-                        }
-                        else
-                        {
-                            custom_cols_sql += ",\nisnull(["
-                                + column_name
-                                + "],'')["
-                                + column_name + "]";
-                        }
-                    }
-                }
-
-                select += custom_cols_sql;
-
-                // Handle project custom dropdowns
-                List<ListItem> selected_projects = get_selected_projects();
-
-                string project_dropdown_select_cols_server_side = "";
-
-                string alias1 = null;
-                string alias2 = null;
-                string alias3 = null;
-
-                foreach (ListItem selected_project in selected_projects)
-                {
-                    if (selected_project.Value == "0")
-                        continue;
-
-                    int pj_id = Convert.ToInt32(selected_project.Value);
-
-                    if (map_projects.ContainsKey(pj_id))
-                    {
-
-                        BtnetProject btnet_project = map_projects[pj_id];
-
-                        if (btnet_project.map_dropdowns[1].enabled)
-                        {
-                            if (alias1 == null)
-                            {
-                                alias1 = btnet_project.map_dropdowns[1].label;
-                            }
-                            else
-                            {
-                                alias1 = "dropdown1";
-                            }
-                        }
-
-                        if (btnet_project.map_dropdowns[2].enabled)
-                        {
-                            if (alias2 == null)
-                            {
-                                alias2 = btnet_project.map_dropdowns[2].label;
-                            }
-                            else
-                            {
-                                alias2 = "dropdown2";
-                            }
-                        }
-
-                        if (btnet_project.map_dropdowns[3].enabled)
-                        {
-                            if (alias3 == null)
-                            {
-                                alias3 = btnet_project.map_dropdowns[3].label;
-                            }
-                            else
-                            {
-                                alias3 = "dropdown3";
-                            }
-                        }
-
-
-                    }
-                }
-
-                if (alias1 != null)
-                {
-                    project_dropdown_select_cols_server_side
-                        += ",\nisnull(bg_project_custom_dropdown_value1,'') [" + alias1 + "]";
-                }
-                if (alias2 != null)
-                {
-                    project_dropdown_select_cols_server_side
-                        += ",\nisnull(bg_project_custom_dropdown_value2,'') [" + alias2 + "]";
-                }
-                if (alias3 != null)
-                {
-                    project_dropdown_select_cols_server_side
-                        += ",\nisnull(bg_project_custom_dropdown_value3,'') [" + alias3 + "]";
-                }
-
-                select += project_dropdown_select_cols_server_side;
-
-                select += @" from bugs
-			left outer join users rpt on rpt.us_id = bg_reported_user
-			left outer join users lu on lu.us_id = bg_last_updated_user
-			left outer join users asg on asg.us_id = bg_assigned_to_user
-			left outer join projects on pj_id = bg_project
-			left outer join orgs on og_id = bg_org
-			left outer join categories on ct_id = bg_category
-			left outer join priorities on pr_id = bg_priority
-			left outer join statuses on st_id = bg_status
-			";
-
-                user_type_cnt = 1;
-                foreach (DataRow drcc in ds_custom_cols.Tables[0].Rows)
-                {
-
-                    string column_name = (string)drcc["name"];
-                    if (security.user.dict_custom_field_permission_level[column_name] == Security.PERMISSION_NONE)
-                    {
-                        continue;
-                    }
-
-                    if (Convert.ToString(drcc["dropdown type"]) == "users")
-                    {
-                        select += "left outer join users users"
-                            + Convert.ToString(user_type_cnt)
-                            + " on users"
-                            + Convert.ToString(user_type_cnt)
-                            + ".us_id = bugs."
-                            + "[" + column_name + "]\n";
-
-                        user_type_cnt++;
-
-                    }
-                }
-
-
-                if (show_udf)
-                {
-                    select += "left outer join user_defined_attribute on udf_id = bg_user_defined_attribute";
-                }
-
-                //Adds the where clause to the select statement to complete the sql statement
-                sql = select + where + " order by bg_id desc";
-
-            }
-            else
-            {
-                search_sql = search_sql.Replace("[br]", "\n");
-                sql = search_sql.Replace("$WHERE$", where);
-            }
-
-            sql = Util.alter_sql_per_project_permissions(sql, security);
-
-            DataSet ds = btnet.DbUtil.get_dataset(sql);
             dv = new DataView(ds.Tables[0]);
             Session["bugs"] = dv;
             Session["bugs_unfiltered"] = ds.Tables[0];
-        }
-
-        /// <summary>
-        /// Changes the date from a page element into a database date format
-        /// </summary>
-        /// <param name="dt">Date that you want to format</param>
-        /// <returns>Database formatted date</returns>
-        public string format_from_date(string dt)
-        {
-            return Util.format_local_date_into_db_format(dt).Replace(" 12:00:00", "").Replace(" 00:00:00", "");
-        }
-
-        /// <summary>
-        /// Changes the date from a page element into a database date format
-        /// </summary>
-        /// <param name="dt">Date that you want to format</param>
-        /// <returns>Database formatted date</returns>
-        public string format_to_date(string dt)
-        {
-            return Util.format_local_date_into_db_format(dt).Replace(" 12:00:00", " 23:59:59").Replace(" 00:00:00", " 23:59:59");
         }
 
         /// <summary>
@@ -881,6 +385,7 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
 
             //Chose to show or hide the dropdown list. This is based off of the label which is set in the above loop.
             //If we deselect a project we need to be able to hide the listbbox for any custom dropdowns that no longer exist 
+            //The SQL here is to update a variable on the page side used to populate the info needed to Save the Query.
             if (project_custom_dropdown1_label.InnerText == "")
             {
                 project_custom_dropdown1.Items.Clear();
@@ -949,84 +454,61 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
             reported_by.DataValueField = "us_id";
             reported_by.DataBind();
 
-
-            // only show projects where user has permissions
-            if (security.user.is_admin)
-            {
-                sql = "/* drop downs */ select pj_id, pj_name from projects order by pj_name;";
-            }
-            else
-            {
-                sql = @"/* drop downs */ select pj_id, pj_name
-			        from projects
-			        left outer join project_user_xref on pj_id = pu_project
-			        and pu_user = $us
-			        where isnull(pu_permission_level,$dpl) <> 0
-			        order by pj_name;";
-
-                sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-                sql = sql.Replace("$dpl", Util.get_setting("DefaultPermissionLevel", "2"));
-            }
-
-
-            if (security.user.other_orgs_permission_level != 0)
-            {
-                sql += " select og_id, og_name from orgs order by og_name;";
-            }
-            else
-            {
-                sql += " select og_id, og_name from orgs where og_id = " + Convert.ToInt32(security.user.org) + " order by og_name;";
-                org.Visible = false;
-                org_label.Visible = false;
-            }
-
-            sql += @"
-	            select ct_id, ct_name from categories order by ct_sort_seq, ct_name;
-	            select pr_id, pr_name from priorities order by pr_sort_seq, pr_name;
-	            select st_id, st_name from statuses order by st_sort_seq, st_name;
-	            select udf_id, udf_name from user_defined_attribute order by udf_sort_seq, udf_name";
-
-            DataSet ds_dropdowns = btnet.DbUtil.get_dataset(sql);
-
-            project.DataSource = ds_dropdowns.Tables[0];
-            project.DataTextField = "pj_name";
-            project.DataValueField = "pj_id";
-            project.DataBind();
-            project.Items.Insert(0, new ListItem("[no project]", "0"));
-
-            org.DataSource = ds_dropdowns.Tables[1];
-            org.DataTextField = "og_name";
-            org.DataValueField = "og_id";
-            org.DataBind();
-            org.Items.Insert(0, new ListItem("[no organization]", "0"));
-
-            category.DataSource = ds_dropdowns.Tables[2];
-            category.DataTextField = "ct_name";
-            category.DataValueField = "ct_id";
-            category.DataBind();
-            category.Items.Insert(0, new ListItem("[no category]", "0"));
-
-            priority.DataSource = ds_dropdowns.Tables[3];
-            priority.DataTextField = "pr_name";
-            priority.DataValueField = "pr_id";
-            priority.DataBind();
-            priority.Items.Insert(0, new ListItem("[no priority]", "0"));
-
-            status.DataSource = ds_dropdowns.Tables[4];
-            status.DataTextField = "st_name";
-            status.DataValueField = "st_id";
-            status.DataBind();
-            status.Items.Insert(0, new ListItem("[no status]", "0"));
-
-            assigned_to.DataSource = reported_by.DataSource;
+            assigned_to.DataSource = dt_users;
             assigned_to.DataTextField = "us_username";
             assigned_to.DataValueField = "us_id";
             assigned_to.DataBind();
             assigned_to.Items.Insert(0, new ListItem("[not assigned]", "0"));
 
+
+            //Only show projects where user has permissions
+            DataView projectDVList = _projectService.GetProjectListByPermission(security.user.is_admin, security.user.usid);
+            
+            DataView orgDVList = _organizationService.GetOrganizationListByPermission(security.user.other_orgs_permission_level, security.user.org);
+            DataView categoryDVList = _categoryService.GetCategoryListForSearch();
+            DataView priorityDVList = _priorityService.GetPriorityListForSearch();
+            DataView statusDVList = _statusService.GetStatusListForSearch();
+            DataView udfDVList = _userDefinedFieldService.GetFieldListForSearch();
+
+            if (security.user.other_orgs_permission_level == 0)
+            {
+                org.Visible = false;
+                org_label.Visible = false;
+            }
+
+            project.DataSource = projectDVList; 
+            project.DataTextField = "pj_name";
+            project.DataValueField = "pj_id";
+            project.DataBind();
+            project.Items.Insert(0, new ListItem("[no project]", "0"));
+
+            org.DataSource = orgDVList; 
+            org.DataTextField = "og_name";
+            org.DataValueField = "og_id";
+            org.DataBind();
+            org.Items.Insert(0, new ListItem("[no organization]", "0"));
+
+            category.DataSource = categoryDVList; 
+            category.DataTextField = "ct_name";
+            category.DataValueField = "ct_id";
+            category.DataBind();
+            category.Items.Insert(0, new ListItem("[no category]", "0"));
+
+            priority.DataSource = priorityDVList; 
+            priority.DataTextField = "pr_name";
+            priority.DataValueField = "pr_id";
+            priority.DataBind();
+            priority.Items.Insert(0, new ListItem("[no priority]", "0"));
+
+            status.DataSource = statusDVList; 
+            status.DataTextField = "st_name";
+            status.DataValueField = "st_id";
+            status.DataBind();
+            status.Items.Insert(0, new ListItem("[no status]", "0"));
+
             if (show_udf)
             {
-                udf.DataSource = ds_dropdowns.Tables[5];
+                udf.DataSource = udfDVList; 
                 udf.DataTextField = "udf_name";
                 udf.DataValueField = "udf_id";
                 udf.DataBind();
@@ -1102,6 +584,10 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
             Response.Write("')\">&nbsp;[select]</a>");
         }
 
+        /// <summary>
+        /// Called from the aspx page to add date controls to page.
+        /// </summary>
+        /// <param name="name"></param>
         public void write_custom_date_controls(string name)
         {
             Response.Write("from:&nbsp;&nbsp;");
@@ -1110,6 +596,10 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
             write_custom_date_control("to__" + name); // magic
         }
 
+        /// <summary>
+        /// Called by the aspx page to display search results of query
+        /// </summary>
+        /// <param name="show_checkboxes"></param>
         public void display_bugs(bool show_checkboxes)
 		{
 			btnet.BugList.display_bugs(
@@ -1123,6 +613,9 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
 				filter.Value);
 		}
 
+        /// <summary>
+        /// Sorts and filters the bug query results table
+        /// </summary>
 		public void call_sort_and_filter_buglist_dataview()
 		{
 			string filter_val = filter.Value;
@@ -1146,18 +639,5 @@ or isnull(pj_enable_custom_dropdown3,0) = 1";
 		}
 
 	}
-
-	public class ProjectDropdown
-	{
-		public bool enabled = false;
-		public string label = "";
-		public string values = "";
-	};
-
-	public class BtnetProject
-	{
-		public Dictionary<int, ProjectDropdown> map_dropdowns = new Dictionary<int, ProjectDropdown>();
-	};
-
 	
 }
