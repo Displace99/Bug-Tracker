@@ -13,6 +13,7 @@ There are two ways to manage user permissions for projects. The first is at the 
 Permission Levels
 ****************
 There are four different Permission Levels for Users:
+
 1. **none** - The user will not see or be able to interact with the Project in any way.
 2. **view only** - The user will be able to see bugs in the project, but not be able to create, edit, or comment on any bug.
 3. **report** - The user will be able to add new bugs, and add comments to existing bugs, but not able to edit any bugs, even if they are the creator. 
@@ -53,10 +54,12 @@ Project Admin
 You can create what is referred to in the system as a "Project Admin". This is a person that is allowed to add or delete other users from Projects. There are two settings that control this. 
 
 First you must enable a seeting in the Organization that the user is in.
+
 - From the Manage Organization screen, click **edit** for the specific Organization you want to update.
 - In the middle of the settings check the box marked "Non-admin with permission to add users can add users to this org".
 
 Then go to the User Management screen.
+
 - Click **edit** for the specific user you would like to update.
 - Click the **permissions** tab.
 - In the multi-select box at the bottom of the page, select the project you would like them to be able to add users to.
