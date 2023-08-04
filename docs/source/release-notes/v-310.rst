@@ -1,0 +1,29 @@
+==============
+Version 3.10.0
+==============
+Release Date: August 4, 2023
+
+This release continued to focus on restructuring the code in the application to make it easier to develop. We continued to move code into the code behind files, as well as moved the SQL logic into separate services. 
+
+**New**
+
+* Created the following services:
+ * Attachment Service
+ * Comment Service 
+ * Custom Field Service
+ * Dashboard service
+ * Notification Service
+ * Search Service
+ * Status Service
+ * User Defined Fields Service
+
+**Updated**
+
+* Moved the SQL queries from numerous pages into the new services above.
+* Code efficiencies.
+* Removed translate.aspx
+ * This page was a sample page that used a third party web service to translate the language of a page. The web service is no longer available and since it was a sample page not used by the main application, we have deleted the page from the solution
+ * Project list and detail pages
+* CustomPostLink settings in Web.config being deprecated.
+ * The reasoning behind this is two fold: First, it only allows a single custom link to be added, so the functionality is very limited. If you want to add additional links it requires a code change. Second, any links you create will require coding. If you are adding a new page to the solution (as in the example translate page), it requires a developer to make code changes to the solution. If it is a page outside of the solution, it would still require code changes, either in the other system, or updating how the link is generated as parts of the link (like the query string “postid”) are hardcoded in the system. Any code changes like this could break with future updates to the application.
+* Updated the Database DBUp project from .NET Core 3.1 to .NET 6 due to .NET Core 3.1 being at end of life.
