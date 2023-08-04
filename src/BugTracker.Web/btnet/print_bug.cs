@@ -754,24 +754,6 @@ namespace btnet
 						Response.Write (">delete</a>");
 					}
 				}
-
-
-				// custom bug link
-				//TODO: To be removed in 3.11 release
-				if (btnet.Util.get_setting("CustomPostLinkLabel","") != "")
-				{
-
-					string custom_post_link = "&nbsp;&nbsp;&nbsp;<a class=warn style='font-size: 8pt;' href="
-						+ btnet.Util.get_setting("CustomPostLinkUrl","")
-						+ "?postid="
-						+ string_post_id
-						+ ">"
-						+ btnet.Util.get_setting("CustomPostLinkLabel","")
-						+ "</a>";
-
-					Response.Write (custom_post_link);
-
-				}
 			}
 
 			Response.Write ("\n</table>\n<table border=0>\n<tr><td>");
