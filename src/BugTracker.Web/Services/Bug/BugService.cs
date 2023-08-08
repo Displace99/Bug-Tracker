@@ -262,5 +262,30 @@ namespace BugTracker.Web.Services.Bug
 
             DbUtil.execute_nonquery(cmd);
         }
+
+        public void MarkBugSeen(DataView bugList, int bugId, int seen, int userId)
+        {
+            for (int i = 0; i < bugList.Count; i++)
+            {
+                if ((int)bugList[i][1] == bugId)
+                {
+                    
+                    bugList[i]["$SEEN"] = seen;
+                    string sql = @"
+                        if not exists (select bu_bug from bug_user where bu_bug = @bugId and bu_user = @userId)
+	                        insert into bug_user (bu_bug, bu_user, bu_flag, bu_seen, bu_vote) values(@bugId, @userId, 0, 1, 0) 
+                        update bug_user set bu_seen = @seen, bu_seen_datetime = getdate() where bu_bug = @bugId and bu_user = @userId and bu_seen <> @seen";
+
+                    SqlCommand cmd = new SqlCommand(sql);
+                    cmd.Parameters.AddWithValue("@seen", seen);
+                    cmd.Parameters.AddWithValue("@bugId", bugId);
+                    cmd.Parameters.AddWithValue("@userId", userId);
+
+                    DbUtil.execute_nonquery(cmd);
+
+                    break;
+                }
+            }
+        }
     }
 }
