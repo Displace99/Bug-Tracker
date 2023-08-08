@@ -112,7 +112,7 @@ namespace BugTracker.Web.Services.Bug
         public void FlagBug(int bugId, int userId, int flagged)
         {
             StringBuilder sql = new StringBuilder();
-            sql.Append("if not exists (select bu_bug from bug_user where bu_bug = $bg and bu_user = @userId) ");
+            sql.Append("if not exists (select bu_bug from bug_user where bu_bug = @bugId and bu_user = @userId) ");
             sql.AppendLine("insert into bug_user (bu_bug, bu_user, bu_flag, bu_seen, bu_vote) values(@bugId, @userId, 1, 0, 0) ");
             sql.AppendLine("update bug_user set bu_flag = @flagged, bu_flag_datetime = getdate() where bu_bug = @bugId and bu_user = @userId and bu_flag <> @flagged");
 
