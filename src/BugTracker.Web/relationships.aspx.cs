@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Bug;
 using System;
 using System.Data;
 using System.Web;
@@ -14,6 +15,8 @@ namespace BugTracker.Web
 		public Security security;
 		public int permission_level;
 		public string ses;
+
+		private BugService _bugService = new BugService();
 
 		protected void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -81,16 +84,7 @@ namespace BugTracker.Web
 
 					bugid2 = Convert.ToInt32(Util.sanitize_integer(Request["bugid2"]));
 
-					sql = @"
-						delete from bug_relationships where re_bug2 = $bg2 and re_bug1 = $bg;
-						delete from bug_relationships where re_bug1 = $bg2 and re_bug2 = $bg;
-						insert into bug_posts
-								(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-								values($bg, $us, getdate(), N'deleted relationship to $bg2', 'update')";
-					sql = sql.Replace("$bg2", Convert.ToString(bugid2));
-					sql = sql.Replace("$bg", Convert.ToString(bugid));
-					sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-					btnet.DbUtil.execute_nonquery(sql);
+					_bugService.DeleteRelationship(bugid, bugid2, security.user.usid);
 				}
 				else
 				{
@@ -111,26 +105,17 @@ namespace BugTracker.Web
 							}
 							else
 							{
-								int rows = 0;
+								bool bugFound = _bugService.DoesBugExist(bugid2);
 
-								// check if bug exists
-								sql = @"select count(1) from bugs where bg_id = $bg2";
-								sql = sql.Replace("$bg2", Convert.ToString(bugid2));
-								rows = (int)btnet.DbUtil.execute_scalar(sql);
-
-								if (rows == 0)
+								if (!bugFound)
 								{
 									add_err.InnerText = "Not found.";
 								}
 								else
 								{
-									// check if relationship exists
-									sql = @"select count(1) from bug_relationships where re_bug1 = $bg and re_bug2 = $bg2";
-									sql = sql.Replace("$bg2", Convert.ToString(bugid2));
-									sql = sql.Replace("$bg", Convert.ToString(bugid));
-									rows = (int)btnet.DbUtil.execute_scalar(sql);
+									bool hasRelationship = _bugService.DoesRelationshipExist(bugid, bugid2);
 
-									if (rows > 0)
+									if (hasRelationship)
 									{
 										add_err.InnerText = "Relationship already exists.";
 									}

@@ -109,6 +109,40 @@ namespace BugTracker.Web.Services.Bug
             return DbUtil.get_datarow(cmd);
         }
 
+        /// <summary>
+        /// Checks if bug is in the database
+        /// </summary>
+        /// <param name="bugId">Bug ID to check</param>
+        /// <returns>True if found, otherwise false.</returns>
+        public bool DoesBugExist(int bugId)
+        {
+            string sql = "select count(1) from bugs where bg_id = @bugId";
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+
+            int rows = (int)DbUtil.execute_scalar(sql);
+
+            return rows > 0;
+        }
+
+        /// <summary>
+        /// Checks to see if a bug already has a relationship to another bug
+        /// </summary>
+        /// <param name="bugId1">Id of the bug you are in</param>
+        /// <param name="bugId2">Id of the bug you are wanting to link</param>
+        /// <returns>True if relationship found, otherwise false.</returns>
+        public bool DoesRelationshipExist(int bugId1, int bugId2)
+        {
+            string sql = "select count(1) from bug_relationships where re_bug1 = @bugId1 and re_bug2 = @bugId2";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId1", bugId1);
+            cmd.Parameters.AddWithValue("@bugId2", bugId2);
+            int rows = (int)DbUtil.execute_scalar(sql);
+
+            return rows > 0;
+        }
+
         public void FlagBug(int bugId, int userId, int flagged)
         {
             StringBuilder sql = new StringBuilder();
@@ -287,5 +321,26 @@ namespace BugTracker.Web.Services.Bug
                 }
             }
         }
+
+        #region Bug Relationship
+        
+        public void DeleteRelationship(int bugId, int bug2Id, int userId)
+        {
+            string sql = @"
+						delete from bug_relationships where re_bug2 = @bug2Id and re_bug1 = @bugId;
+						delete from bug_relationships where re_bug1 = @bug2Id and re_bug2 = @bugId;
+						insert into bug_posts
+								(bp_bug, bp_user, bp_date, bp_comment, bp_type)
+								values(@bugId, @userId, getdate(), N'deleted relationship to @bug2Id', 'update')";
+            
+            SqlCommand cmd = new SqlCommand(sql); 
+            cmd.Parameters.AddWithValue("@bug2Id", bug2Id);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+            cmd.Parameters.AddWithValue("@userId", userId);
+            
+            DbUtil.execute_nonquery(sql);
+        }
+
+        #endregion
     }
 }
