@@ -60,6 +60,7 @@ namespace BugTracker.Web
 			ses = (string)Session["session_cookie"];
 			string action = Request["actn"];
 
+			//We are either adding or removing a relationship for a bug
 			if (!string.IsNullOrEmpty(action))
 			{
 				if (Request["ses"] != ses)
@@ -131,36 +132,10 @@ namespace BugTracker.Web
 										{
 
 											// insert the relationship both ways
-											sql = @"
-												insert into bug_relationships (re_bug1, re_bug2, re_type, re_direction) values($bg, $bg2, N'$ty', $dir1);
-												insert into bug_relationships (re_bug2, re_bug1, re_type, re_direction) values($bg, $bg2, N'$ty', $dir2);
-												insert into bug_posts
-													(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-													values($bg, $us, getdate(), N'added relationship to $bg2', 'update');";
+											string type = Request["type"].Replace("'", "''");
 
-											sql = sql.Replace("$bg2", Convert.ToString(bugid2));
-											sql = sql.Replace("$bg", Convert.ToString(bugid));
-											sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-											sql = sql.Replace("$ty", Request["type"].Replace("'", "''"));
+											_bugService.AddRelationship(bugid, bugid2, security.user.usid, type, siblings.Checked, child_to_parent.Checked);
 
-
-											if (siblings.Checked)
-											{
-												sql = sql.Replace("$dir2", "0");
-												sql = sql.Replace("$dir1", "0");
-											}
-											else if (child_to_parent.Checked)
-											{
-												sql = sql.Replace("$dir2", "1");
-												sql = sql.Replace("$dir1", "2");
-											}
-											else
-											{
-												sql = sql.Replace("$dir2", "2");
-												sql = sql.Replace("$dir1", "1");
-											}
-
-											btnet.DbUtil.execute_nonquery(sql);
 											add_err.InnerText = "Relationship was added.";
 										}
 									}

@@ -125,24 +125,6 @@ namespace BugTracker.Web.Services.Bug
             return rows > 0;
         }
 
-        /// <summary>
-        /// Checks to see if a bug already has a relationship to another bug
-        /// </summary>
-        /// <param name="bugId1">Id of the bug you are in</param>
-        /// <param name="bugId2">Id of the bug you are wanting to link</param>
-        /// <returns>True if relationship found, otherwise false.</returns>
-        public bool DoesRelationshipExist(int bugId1, int bugId2)
-        {
-            string sql = "select count(1) from bug_relationships where re_bug1 = @bugId1 and re_bug2 = @bugId2";
-
-            SqlCommand cmd = new SqlCommand(sql);
-            cmd.Parameters.AddWithValue("@bugId1", bugId1);
-            cmd.Parameters.AddWithValue("@bugId2", bugId2);
-            int rows = (int)DbUtil.execute_scalar(sql);
-
-            return rows > 0;
-        }
-
         public void FlagBug(int bugId, int userId, int flagged)
         {
             StringBuilder sql = new StringBuilder();
@@ -324,6 +306,12 @@ namespace BugTracker.Web.Services.Bug
 
         #region Bug Relationship
         
+        /// <summary>
+        /// Delete the relationship between the bugs
+        /// </summary>
+        /// <param name="bugId">Id of the first bug</param>
+        /// <param name="bug2Id">Id of the second bug</param>
+        /// <param name="userId">Id of the user requesting the delete</param>
         public void DeleteRelationship(int bugId, int bug2Id, int userId)
         {
             string sql = @"
@@ -339,6 +327,64 @@ namespace BugTracker.Web.Services.Bug
             cmd.Parameters.AddWithValue("@userId", userId);
             
             DbUtil.execute_nonquery(sql);
+        }
+
+        /// <summary>
+        /// Checks to see if a bug already has a relationship to another bug
+        /// </summary>
+        /// <param name="bugId1">Id of the bug you are in</param>
+        /// <param name="bugId2">Id of the bug you are wanting to link</param>
+        /// <returns>True if relationship found, otherwise false.</returns>
+        public bool DoesRelationshipExist(int bugId1, int bugId2)
+        {
+            string sql = "select count(1) from bug_relationships where re_bug1 = @bugId1 and re_bug2 = @bugId2";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId1", bugId1);
+            cmd.Parameters.AddWithValue("@bugId2", bugId2);
+            int rows = (int)DbUtil.execute_scalar(sql);
+
+            return rows > 0;
+        }
+
+        public void AddRelationship(int bugId1, int bugId2, int userId, string type, bool isSibling, bool isChildToParent)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append("insert into bug_relationships (re_bug1, re_bug2, re_type, re_direction) values(@bugId1, @bugId2, @type, @dir1);");
+            sql.AppendLine("insert into bug_relationships (re_bug2, re_bug1, re_type, re_direction) values(@bugId1, @bugId2, @type, @dir2);");
+            sql.AppendLine("insert into bug_posts (bp_bug, bp_user, bp_date, bp_comment, bp_type) values(@bugId1, @userId, getdate(), N'added relationship to @bug2Id, 'update');");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@bugId1", bugId1);
+            cmd.Parameters.AddWithValue("@bugId2", bugId2);
+            cmd.Parameters.AddWithValue("@userId", userId);
+            cmd.Parameters.AddWithValue("@type", type);
+
+            //default values
+            int direction1 = 1;
+            int direction2 = 2;
+
+            if (isSibling)
+            {
+                direction1 = 0;
+                direction2 = 0;
+            }
+            else if (isChildToParent)
+            {
+                direction1 = 2;
+                direction2 = 1;
+            }
+            else
+            {
+                direction1 = 1;
+                direction2 = 2;
+            }
+
+            cmd.Parameters.AddWithValue("@dir1", direction1);
+            cmd.Parameters.AddWithValue("@dir2", direction2);
+
+            DbUtil.execute_nonquery(cmd);
         }
 
         #endregion
