@@ -130,7 +130,6 @@ namespace BugTracker.Web
 										}
 										else
 										{
-
 											// insert the relationship both ways
 											string type = Request["type"].Replace("'", "''");
 
@@ -144,40 +143,9 @@ namespace BugTracker.Web
 						}
 					}
 				}
-
 			}
 
-			sql = @"
-				select bg_id [id],
-					bg_short_desc [desc],
-					re_type [comment],
-					st_name [status],
-					case
-						when re_direction = 0 then ''
-						when re_direction = 2 then 'child of $bg'
-						else                       'parent of $bg' 
-					end as [parent or child],
-					'<a target=_blank href=edit_bug.aspx?id=' + convert(varchar,bg_id) + '>view</a>' [view]";
-
-			if (!security.user.is_guest && permission_level == Security.PERMISSION_ALL)
-			{
-
-				sql += @"
-					,'<a href=''javascript:remove(' + convert(varchar,re_bug2) + ')''>detach</a>' [detach]";
-			}
-
-			sql += @"
-				from bugs
-				inner join bug_relationships on bg_id = re_bug2
-				left outer join statuses on st_id = bg_status
-				where re_bug1 = $bg
-				order by bg_id desc";
-
-
-			sql = sql.Replace("$bg", Convert.ToString(bugid));
-			sql = Util.alter_sql_per_project_permissions(sql, security);
-
-			ds = btnet.DbUtil.get_dataset(sql);
+			ds = _bugService.GetBugRelationships(bugid, security.user.is_guest, permission_level, security);
 
 			bgid.Value = Convert.ToString(bugid);
 

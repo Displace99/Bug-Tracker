@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.EnterpriseServices;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Web;
 
@@ -120,7 +121,7 @@ namespace BugTracker.Web.Services.Bug
             SqlCommand cmd = new SqlCommand(sql);
             cmd.Parameters.AddWithValue("@bugId", bugId);
 
-            int rows = (int)DbUtil.execute_scalar(sql);
+            int rows = (int)DbUtil.execute_scalar(cmd);
 
             return rows > 0;
         }
@@ -326,7 +327,7 @@ namespace BugTracker.Web.Services.Bug
             cmd.Parameters.AddWithValue("@bugId", bugId);
             cmd.Parameters.AddWithValue("@userId", userId);
             
-            DbUtil.execute_nonquery(sql);
+            DbUtil.execute_nonquery(cmd);
         }
 
         /// <summary>
@@ -342,7 +343,7 @@ namespace BugTracker.Web.Services.Bug
             SqlCommand cmd = new SqlCommand(sql);
             cmd.Parameters.AddWithValue("@bugId1", bugId1);
             cmd.Parameters.AddWithValue("@bugId2", bugId2);
-            int rows = (int)DbUtil.execute_scalar(sql);
+            int rows = (int)DbUtil.execute_scalar(cmd);
 
             return rows > 0;
         }
@@ -352,7 +353,7 @@ namespace BugTracker.Web.Services.Bug
             StringBuilder sql = new StringBuilder();
             sql.Append("insert into bug_relationships (re_bug1, re_bug2, re_type, re_direction) values(@bugId1, @bugId2, @type, @dir1);");
             sql.AppendLine("insert into bug_relationships (re_bug2, re_bug1, re_type, re_direction) values(@bugId1, @bugId2, @type, @dir2);");
-            sql.AppendLine("insert into bug_posts (bp_bug, bp_user, bp_date, bp_comment, bp_type) values(@bugId1, @userId, getdate(), N'added relationship to @bug2Id, 'update');");
+            sql.AppendLine("insert into bug_posts (bp_bug, bp_user, bp_date, bp_comment, bp_type) values(@bugId1, @userId, getdate(), N'added relationship to @bug2Id', 'update');");
 
             SqlCommand cmd = new SqlCommand(sql.ToString());
 
@@ -385,6 +386,42 @@ namespace BugTracker.Web.Services.Bug
             cmd.Parameters.AddWithValue("@dir2", direction2);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        public DataSet GetBugRelationships(int bugId, bool isGuest, int permissionLevel, Security security)
+        {
+            string sql = @"
+				select bg_id [id],
+					bg_short_desc [desc],
+					re_type [comment],
+					st_name [status],
+					case
+						when re_direction = 0 then ''
+						when re_direction = 2 then 'child of @bugId'
+						else                       'parent of @bugId' 
+					end as [parent or child],
+					'<a target=_blank href=edit_bug.aspx?id=' + convert(varchar,bg_id) + '>view</a>' [view]";
+
+            if (!isGuest && permissionLevel == Security.PERMISSION_ALL)
+            {
+
+                sql += @"
+					,'<a href=''javascript:remove(' + convert(varchar,re_bug2) + ')''>detach</a>' [detach]";
+            }
+
+            sql += @"
+				from bugs
+				inner join bug_relationships on bg_id = re_bug2
+				left outer join statuses on st_id = bg_status
+				where re_bug1 = @bugId
+				order by bg_id desc";
+
+            sql = Util.alter_sql_per_project_permissions(sql, security);
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+            
+            return DbUtil.get_dataset(cmd);
         }
 
         #endregion
