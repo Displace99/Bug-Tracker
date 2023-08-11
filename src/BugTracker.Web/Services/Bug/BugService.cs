@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.EnterpriseServices;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Web;
 
@@ -107,6 +108,22 @@ namespace BugTracker.Web.Services.Bug
             cmd.Parameters.AddWithValue("@bugId", bugId);
 
             return DbUtil.get_datarow(cmd);
+        }
+
+        /// <summary>
+        /// Checks if bug is in the database
+        /// </summary>
+        /// <param name="bugId">Bug ID to check</param>
+        /// <returns>True if found, otherwise false.</returns>
+        public bool DoesBugExist(int bugId)
+        {
+            string sql = "select count(1) from bugs where bg_id = @bugId";
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+
+            int rows = (int)DbUtil.execute_scalar(cmd);
+
+            return rows > 0;
         }
 
         public void FlagBug(int bugId, int userId, int flagged)
@@ -287,5 +304,126 @@ namespace BugTracker.Web.Services.Bug
                 }
             }
         }
+
+        #region Bug Relationship
+        
+        /// <summary>
+        /// Delete the relationship between the bugs
+        /// </summary>
+        /// <param name="bugId">Id of the first bug</param>
+        /// <param name="bug2Id">Id of the second bug</param>
+        /// <param name="userId">Id of the user requesting the delete</param>
+        public void DeleteRelationship(int bugId, int bug2Id, int userId)
+        {
+            string sql = @"
+						delete from bug_relationships where re_bug2 = @bug2Id and re_bug1 = @bugId;
+						delete from bug_relationships where re_bug1 = @bug2Id and re_bug2 = @bugId;
+						insert into bug_posts
+								(bp_bug, bp_user, bp_date, bp_comment, bp_type)
+								values(@bugId, @userId, getdate(), N'deleted relationship to @bug2Id', 'update')";
+            
+            SqlCommand cmd = new SqlCommand(sql); 
+            cmd.Parameters.AddWithValue("@bug2Id", bug2Id);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+            cmd.Parameters.AddWithValue("@userId", userId);
+            
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        /// <summary>
+        /// Checks to see if a bug already has a relationship to another bug
+        /// </summary>
+        /// <param name="bugId1">Id of the bug you are in</param>
+        /// <param name="bugId2">Id of the bug you are wanting to link</param>
+        /// <returns>True if relationship found, otherwise false.</returns>
+        public bool DoesRelationshipExist(int bugId1, int bugId2)
+        {
+            string sql = "select count(1) from bug_relationships where re_bug1 = @bugId1 and re_bug2 = @bugId2";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId1", bugId1);
+            cmd.Parameters.AddWithValue("@bugId2", bugId2);
+            int rows = (int)DbUtil.execute_scalar(cmd);
+
+            return rows > 0;
+        }
+
+        public void AddRelationship(int bugId1, int bugId2, int userId, string type, bool isSibling, bool isChildToParent)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append("insert into bug_relationships (re_bug1, re_bug2, re_type, re_direction) values(@bugId1, @bugId2, @type, @dir1);");
+            sql.AppendLine("insert into bug_relationships (re_bug2, re_bug1, re_type, re_direction) values(@bugId1, @bugId2, @type, @dir2);");
+            sql.AppendLine("insert into bug_posts (bp_bug, bp_user, bp_date, bp_comment, bp_type) values(@bugId1, @userId, getdate(), N'added relationship to @bug2Id', 'update');");
+
+            SqlCommand cmd = new SqlCommand(sql.ToString());
+
+            cmd.Parameters.AddWithValue("@bugId1", bugId1);
+            cmd.Parameters.AddWithValue("@bugId2", bugId2);
+            cmd.Parameters.AddWithValue("@userId", userId);
+            cmd.Parameters.AddWithValue("@type", type);
+
+            //default values
+            int direction1 = 1;
+            int direction2 = 2;
+
+            if (isSibling)
+            {
+                direction1 = 0;
+                direction2 = 0;
+            }
+            else if (isChildToParent)
+            {
+                direction1 = 2;
+                direction2 = 1;
+            }
+            else
+            {
+                direction1 = 1;
+                direction2 = 2;
+            }
+
+            cmd.Parameters.AddWithValue("@dir1", direction1);
+            cmd.Parameters.AddWithValue("@dir2", direction2);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
+        public DataSet GetBugRelationships(int bugId, bool isGuest, int permissionLevel, Security security)
+        {
+            string sql = @"
+				select bg_id [id],
+					bg_short_desc [desc],
+					re_type [comment],
+					st_name [status],
+					case
+						when re_direction = 0 then ''
+						when re_direction = 2 then 'child of @bugId'
+						else                       'parent of @bugId' 
+					end as [parent or child],
+					'<a target=_blank href=edit_bug.aspx?id=' + convert(varchar,bg_id) + '>view</a>' [view]";
+
+            if (!isGuest && permissionLevel == Security.PERMISSION_ALL)
+            {
+
+                sql += @"
+					,'<a href=''javascript:remove(' + convert(varchar,re_bug2) + ')''>detach</a>' [detach]";
+            }
+
+            sql += @"
+				from bugs
+				inner join bug_relationships on bg_id = re_bug2
+				left outer join statuses on st_id = bg_status
+				where re_bug1 = @bugId
+				order by bg_id desc";
+
+            sql = Util.alter_sql_per_project_permissions(sql, security);
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+            
+            return DbUtil.get_dataset(cmd);
+        }
+
+        #endregion
     }
 }

@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Bug;
 using System;
 using System.Data;
 using System.Web;
@@ -14,6 +15,8 @@ namespace BugTracker.Web
 		public Security security;
 		public int permission_level;
 		public string ses;
+
+		private BugService _bugService = new BugService();
 
 		protected void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -57,6 +60,7 @@ namespace BugTracker.Web
 			ses = (string)Session["session_cookie"];
 			string action = Request["actn"];
 
+			//We are either adding or removing a relationship for a bug
 			if (!string.IsNullOrEmpty(action))
 			{
 				if (Request["ses"] != ses)
@@ -81,16 +85,7 @@ namespace BugTracker.Web
 
 					bugid2 = Convert.ToInt32(Util.sanitize_integer(Request["bugid2"]));
 
-					sql = @"
-						delete from bug_relationships where re_bug2 = $bg2 and re_bug1 = $bg;
-						delete from bug_relationships where re_bug1 = $bg2 and re_bug2 = $bg;
-						insert into bug_posts
-								(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-								values($bg, $us, getdate(), N'deleted relationship to $bg2', 'update')";
-					sql = sql.Replace("$bg2", Convert.ToString(bugid2));
-					sql = sql.Replace("$bg", Convert.ToString(bugid));
-					sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-					btnet.DbUtil.execute_nonquery(sql);
+					_bugService.DeleteRelationship(bugid, bugid2, security.user.usid);
 				}
 				else
 				{
@@ -111,26 +106,17 @@ namespace BugTracker.Web
 							}
 							else
 							{
-								int rows = 0;
+								bool bugFound = _bugService.DoesBugExist(bugid2);
 
-								// check if bug exists
-								sql = @"select count(1) from bugs where bg_id = $bg2";
-								sql = sql.Replace("$bg2", Convert.ToString(bugid2));
-								rows = (int)btnet.DbUtil.execute_scalar(sql);
-
-								if (rows == 0)
+								if (!bugFound)
 								{
 									add_err.InnerText = "Not found.";
 								}
 								else
 								{
-									// check if relationship exists
-									sql = @"select count(1) from bug_relationships where re_bug1 = $bg and re_bug2 = $bg2";
-									sql = sql.Replace("$bg2", Convert.ToString(bugid2));
-									sql = sql.Replace("$bg", Convert.ToString(bugid));
-									rows = (int)btnet.DbUtil.execute_scalar(sql);
+									bool hasRelationship = _bugService.DoesRelationshipExist(bugid, bugid2);
 
-									if (rows > 0)
+									if (hasRelationship)
 									{
 										add_err.InnerText = "Relationship already exists.";
 									}
@@ -144,38 +130,11 @@ namespace BugTracker.Web
 										}
 										else
 										{
-
 											// insert the relationship both ways
-											sql = @"
-												insert into bug_relationships (re_bug1, re_bug2, re_type, re_direction) values($bg, $bg2, N'$ty', $dir1);
-												insert into bug_relationships (re_bug2, re_bug1, re_type, re_direction) values($bg, $bg2, N'$ty', $dir2);
-												insert into bug_posts
-													(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-													values($bg, $us, getdate(), N'added relationship to $bg2', 'update');";
+											string type = Request["type"].Replace("'", "''");
 
-											sql = sql.Replace("$bg2", Convert.ToString(bugid2));
-											sql = sql.Replace("$bg", Convert.ToString(bugid));
-											sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-											sql = sql.Replace("$ty", Request["type"].Replace("'", "''"));
+											_bugService.AddRelationship(bugid, bugid2, security.user.usid, type, siblings.Checked, child_to_parent.Checked);
 
-
-											if (siblings.Checked)
-											{
-												sql = sql.Replace("$dir2", "0");
-												sql = sql.Replace("$dir1", "0");
-											}
-											else if (child_to_parent.Checked)
-											{
-												sql = sql.Replace("$dir2", "1");
-												sql = sql.Replace("$dir1", "2");
-											}
-											else
-											{
-												sql = sql.Replace("$dir2", "2");
-												sql = sql.Replace("$dir1", "1");
-											}
-
-											btnet.DbUtil.execute_nonquery(sql);
 											add_err.InnerText = "Relationship was added.";
 										}
 									}
@@ -184,40 +143,9 @@ namespace BugTracker.Web
 						}
 					}
 				}
-
 			}
 
-			sql = @"
-				select bg_id [id],
-					bg_short_desc [desc],
-					re_type [comment],
-					st_name [status],
-					case
-						when re_direction = 0 then ''
-						when re_direction = 2 then 'child of $bg'
-						else                       'parent of $bg' 
-					end as [parent or child],
-					'<a target=_blank href=edit_bug.aspx?id=' + convert(varchar,bg_id) + '>view</a>' [view]";
-
-			if (!security.user.is_guest && permission_level == Security.PERMISSION_ALL)
-			{
-
-				sql += @"
-					,'<a href=''javascript:remove(' + convert(varchar,re_bug2) + ')''>detach</a>' [detach]";
-			}
-
-			sql += @"
-				from bugs
-				inner join bug_relationships on bg_id = re_bug2
-				left outer join statuses on st_id = bg_status
-				where re_bug1 = $bg
-				order by bg_id desc";
-
-
-			sql = sql.Replace("$bg", Convert.ToString(bugid));
-			sql = Util.alter_sql_per_project_permissions(sql, security);
-
-			ds = btnet.DbUtil.get_dataset(sql);
+			ds = _bugService.GetBugRelationships(bugid, security.user.is_guest, permission_level, security);
 
 			bgid.Value = Convert.ToString(bugid);
 
