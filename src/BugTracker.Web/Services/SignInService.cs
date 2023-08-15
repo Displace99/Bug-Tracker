@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 
+
 namespace BugTracker.Web.Services
 {
     public class SignInService
@@ -50,7 +51,7 @@ namespace BugTracker.Web.Services
             //At this point everything is valid
             string registrationCode = _userService.AddRegisteredUser(model);
 
-            Email.send_email(
+            btnet.Email.send_email(
                 model.Email,
                 Util.get_setting("NotificationEmailFrom", ""),
                 "", // cc
@@ -177,7 +178,7 @@ namespace BugTracker.Web.Services
 
             DataRow dr = AddPasswordResetLink(userId, guid);
 
-            string emailResult = Email.send_email(
+            string emailResult = btnet.Email.send_email(
                 (string)dr["us_email"],
                 Util.get_setting("NotificationEmailFrom", ""),
                 "", // cc

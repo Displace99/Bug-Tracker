@@ -1198,6 +1198,7 @@
       <DependentUpon>mlogin.aspx</DependentUpon>
     </Compile>
     <Compile Include="Models\Category\CategoryVM.cs" />
+    <Compile Include="Models\Comment\AddEmailComment.cs" />
     <Compile Include="Models\CustomFields\CustomField.cs" />
     <Compile Include="Models\CustomFields\NewCustomFieldVM.cs" />
     <Compile Include="Models\Organization\CustomFieldPermissions.cs" />
@@ -1364,6 +1365,7 @@
     <Compile Include="Services\Comment\CommentService.cs" />
     <Compile Include="Services\CustomFields\CustomFieldService.cs" />
     <Compile Include="Services\Dashboard\DashboardService.cs" />
+    <Compile Include="Services\Email\EmailService.cs" />
     <Compile Include="Services\EncryptionService.cs" />
     <Compile Include="Services\Notification\NotificationService.cs" />
     <Compile Include="Services\Organization\OrganizationService.cs" />
@@ -1374,6 +1376,7 @@
     <Compile Include="Services\Search\SearchService.cs" />
     <Compile Include="Services\SignInService.cs" />
     <Compile Include="Services\Status\StatusService.cs" />
+    <Compile Include="Services\Subscription\SubscriptionService.cs" />
     <Compile Include="Services\UserDefinedFields\UserDefinedFieldService.cs" />
     <Compile Include="Services\UserRegistrationResult.cs" />
     <Compile Include="Services\UserService.cs" />
