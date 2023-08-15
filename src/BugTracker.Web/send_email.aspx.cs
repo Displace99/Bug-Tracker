@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Email;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,6 +19,8 @@ namespace BugTracker.Web
         protected Security security;
         protected int project = -1;
         protected bool enable_internal_posts = false;
+
+        private EmailService _emailService = new EmailService();
 
         void Page_Load(Object sender, EventArgs e)
         {
@@ -49,40 +52,18 @@ namespace BugTracker.Web
 
                 DataRow dr = null;
 
+                //This is true if you are forwarding a specific comment on a bug.
+                //When would we forward a specific comment instead of just the entire bug?
+                //This will be removed in a future update.
                 if (string_bp_id != null)
                 {
-                    string_bp_id = btnet.Util.sanitize_integer(string_bp_id);
+                    string_bp_id = Util.sanitize_integer(string_bp_id);
+                    
+                    int commentId = 0;
+                    int.TryParse(string_bg_id, out commentId);
 
-                    sql = @"select
-				bp_parent,
-                bp_file,
-                bp_id,
-				bg_id,
-				bg_short_desc,
-				bp_email_from,
-				bp_comment,
-				bp_email_from,
-				bp_date,
-				bp_type,
-                bp_content_type,
-				bg_project,
-                bp_hidden_from_external_users,
-				isnull(us_signature,'') [us_signature],
-				isnull(pj_pop3_email_from,'') [pj_pop3_email_from],
-				isnull(us_email,'') [us_email],
-				isnull(us_firstname,'') [us_firstname],
-				isnull(us_lastname,'') [us_lastname]				
-				from bug_posts
-				inner join bugs on bp_bug = bg_id
-				inner join users on us_id = $us
-				left outer join projects on bg_project = pj_id
-				where bp_id = $id
-				or (bp_parent = $id and bp_type='file')";
+                    DataView dv = _emailService.GetBugInfoByCommentId(commentId, security.user.usid);
 
-                    sql = sql.Replace("$id", string_bp_id);
-                    sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-
-                    DataView dv = DbUtil.get_dataview(sql);
                     dr = null;
                     if (dv.Count > 0)
                     {
@@ -261,10 +242,12 @@ namespace BugTracker.Web
                     }
 
                 }
-                else if (string_bg_id != null)
+                else if (string_bg_id != null) //This is true when we are sending an email for a bug
                 {
 
                     string_bg_id = Util.sanitize_integer(string_bg_id);
+                    int bugId = 0;
+                    int.TryParse(string_bg_id, out bugId);
 
                     int permission_level = Bug.get_bug_permission_level(Convert.ToInt32(string_bg_id), security);
                     if (permission_level == Security.PERMISSION_NONE
@@ -274,23 +257,7 @@ namespace BugTracker.Web
                         Response.End();
                     }
 
-                    sql = @"select
-				bg_short_desc,
-				bg_project,
-				isnull(us_signature,'') [us_signature],
-				isnull(us_email,'') [us_email],
-				isnull(us_firstname,'') [us_firstname],
-				isnull(us_lastname,'') [us_lastname],
-				isnull(pj_pop3_email_from,'') [pj_pop3_email_from]
-				from bugs
-				inner join users on us_id = $us
-				left outer join projects on bg_project = pj_id
-				where bg_id = $bg";
-
-                    sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-                    sql = sql.Replace("$bg", string_bg_id);
-
-                    dr = btnet.DbUtil.get_datarow(sql);
+                    dr = _emailService.GetBugInfoByBugId(bugId, security.user.usid);
 
                     load_from_dropdown(dr, false); // list the user's email first, then the project
 
@@ -614,7 +581,8 @@ update bugs set
         }
 
 
-
+        //This adds attachments to the email.
+        //For security and efficency we should remove this.
         int[] handle_attachments(int comment_id)
         {
             ArrayList attachments = new ArrayList();
