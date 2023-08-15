@@ -375,9 +375,7 @@ namespace BugTracker.Web
 
         bool validate()
         {
-
-            Boolean good = true;
-
+            bool good = true;
 
             if (to.Value == "")
             {
@@ -397,7 +395,6 @@ namespace BugTracker.Web
                     good = false;
                     to_err.InnerText = "\"To\" is not in a valid format. Separate multiple addresses with commas.";
                 }
-
             }
 
             if (cc.Value != "")
@@ -438,14 +435,12 @@ namespace BugTracker.Web
             msg.InnerText = "Email was not sent.";
 
             return good;
-
         }
 
 
         string get_bug_text(int bugid)
         {
             // Get bug html
-
             DataRow bug_dr = Bug.get_bug_datarow(bugid, security);
 
             // Create a fake response and let the code
