@@ -1,9 +1,12 @@
 ﻿using btnet;
+using BugTracker.Web.Models.Comment;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.EnterpriseServices;
 using System.Linq;
 using System.Web;
+using System.Xml.Linq;
 
 namespace BugTracker.Web.Services.Comment
 {
@@ -50,6 +53,31 @@ namespace BugTracker.Web.Services.Comment
             cmd.Parameters.AddWithValue("@commentId", commentId);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        public int AddEmailSentComment(AddEmailComment emailComment)
+        {
+            string sql = @"
+                insert into bug_posts
+	                (bp_bug, bp_user, bp_date, bp_comment, bp_comment_search, bp_email_from, bp_email_to, bp_type, bp_content_type, bp_email_cc)
+	                values(@bugId, @userId, getdate(), @comment, @commentSearch, @emailFrom,  @emailTo, 'sent', @contentType, @emailCC);
+                select scope_identity()
+                update bugs set
+	                bg_last_updated_user = @userId,
+	                bg_last_updated_date = getdate()
+	                where bg_id = @bugId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId", emailComment.BugId);
+            cmd.Parameters.AddWithValue("@userId", emailComment.UserId);
+            cmd.Parameters.AddWithValue("@comment", emailComment.Comment);
+            cmd.Parameters.AddWithValue("@commentSearch", emailComment.CommentSearch);
+            cmd.Parameters.AddWithValue("@emailFrom", emailComment.EmailFrom);
+            cmd.Parameters.AddWithValue("@emailTo", emailComment.EmailTo);
+            cmd.Parameters.AddWithValue("@contentType", emailComment.ContentType);
+            cmd.Parameters.AddWithValue("@emailCC", emailComment.EmailCC);
+
+            return Convert.ToInt32(DbUtil.execute_scalar(cmd));
         }
     }
 }

@@ -1,4 +1,6 @@
 using btnet;
+using BugTracker.Web.Models.Comment;
+using BugTracker.Web.Services.Comment;
 using BugTracker.Web.Services.Email;
 using System;
 using System.Collections;
@@ -21,6 +23,7 @@ namespace BugTracker.Web
         protected bool enable_internal_posts = false;
 
         private EmailService _emailService = new EmailService();
+        private CommentService _commentService = new CommentService();
 
         void Page_Load(Object sender, EventArgs e)
         {
@@ -466,26 +469,17 @@ namespace BugTracker.Web
 
             if (!validate()) return;
 
-            sql = @"
-insert into bug_posts
-	(bp_bug, bp_user, bp_date, bp_comment, bp_comment_search, bp_email_from, bp_email_to, bp_type, bp_content_type, bp_email_cc)
-	values($id, $us, getdate(), N'$cm', N'$cs', N'$fr',  N'$to', 'sent', N'$ct', N'$cc');
-select scope_identity()
-update bugs set
-	bg_last_updated_user = $us,
-	bg_last_updated_date = getdate()
-	where bg_id = $id";
-
-            sql = sql.Replace("$id", bg_id.Value);
-            sql = sql.Replace("$us", Convert.ToString(security.user.usid));
+            AddEmailComment emailComment = new AddEmailComment();
+            emailComment.BugId = int.Parse(bg_id.Value);
+            emailComment.UserId = security.user.usid;
             if (security.user.use_fckeditor)
             {
                 string adjusted_body = "Subject: " + subject.Value + "<br><br>";
                 adjusted_body += Util.strip_dangerous_tags(body.Value);
 
-                sql = sql.Replace("$cm", adjusted_body.Replace("'", "&#39;"));
-                sql = sql.Replace("$cs", adjusted_body.Replace("'", "''"));
-                sql = sql.Replace("$ct", "text/html");
+                emailComment.Comment = adjusted_body.Replace("'", "&#39;");
+                emailComment.CommentSearch = adjusted_body.Replace("'", "''");
+                emailComment.ContentType = "text/html";
             }
             else
             {
@@ -493,15 +487,16 @@ update bugs set
                 adjusted_body += HttpUtility.HtmlDecode(body.Value);
                 adjusted_body = adjusted_body.Replace("'", "''");
 
-                sql = sql.Replace("$cm", adjusted_body);
-                sql = sql.Replace("$cs", adjusted_body);
-                sql = sql.Replace("$ct", "text/plain");
+                emailComment.Comment = adjusted_body;
+                emailComment.CommentSearch = adjusted_body;
+                emailComment.ContentType = "text/plain";
             }
-            sql = sql.Replace("$fr", from.SelectedItem.Value.Replace("'", "''"));
-            sql = sql.Replace("$to", to.Value.Replace("'", "''"));
-            sql = sql.Replace("$cc", cc.Value.Replace("'", "''"));
 
-            int comment_id = Convert.ToInt32(DbUtil.execute_scalar(sql));
+            emailComment.EmailFrom = from.SelectedItem.Value.Replace("'", "''");
+            emailComment.EmailTo = to.Value.Replace("'", "''");
+            emailComment.EmailCC = cc.Value.Replace("'", "''");
+
+            int comment_id = _commentService.AddEmailSentComment(emailComment);
 
             int[] attachments = handle_attachments(comment_id);
 
