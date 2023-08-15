@@ -19,18 +19,14 @@ namespace BugTracker.Web
         protected int project = -1;
         protected bool enable_internal_posts = false;
 
-        ///////////////////////////////////////////////////////////////////////
         void Page_Load(Object sender, EventArgs e)
         {
-
-            btnet.Util.do_not_cache(Response);
+            Util.do_not_cache(Response);
 
             security = new Security();
             security.check_security(HttpContext.Current, Security.ANY_USER_OK_EXCEPT_GUEST);
 
-
-            titl.InnerText = btnet.Util.get_setting("AppTitle", "BugTracker.NET") + " - "
-                + "send email";
+            titl.InnerText = string.Format("{0} - Send Email", Util.get_setting("AppTitle", "BugTracker.NET"));
 
             msg.InnerText = "";
 
@@ -49,14 +45,12 @@ namespace BugTracker.Web
 
             if (!IsPostBack)
             {
-
                 Session["email_addresses"] = null;
 
                 DataRow dr = null;
 
                 if (string_bp_id != null)
                 {
-
                     string_bp_id = btnet.Util.sanitize_integer(string_bp_id);
 
                     sql = @"select
@@ -88,7 +82,7 @@ namespace BugTracker.Web
                     sql = sql.Replace("$id", string_bp_id);
                     sql = sql.Replace("$us", Convert.ToString(security.user.usid));
 
-                    DataView dv = btnet.DbUtil.get_dataview(sql);
+                    DataView dv = DbUtil.get_dataview(sql);
                     dr = null;
                     if (dv.Count > 0)
                     {
@@ -100,7 +94,7 @@ namespace BugTracker.Web
                     }
 
                     int int_bg_id = (int)dr["bg_id"];
-                    int permission_level = btnet.Bug.get_bug_permission_level(int_bg_id, security);
+                    int permission_level = Bug.get_bug_permission_level(int_bg_id, security);
                     if (permission_level == Security.PERMISSION_NONE)
                     {
                         Response.Write("You are not allowed to view this item");
@@ -126,7 +120,7 @@ namespace BugTracker.Web
 
                     // Work around for a mysterious bug:
                     // http://sourceforge.net/tracker/?func=detail&aid=2815733&group_id=66812&atid=515837
-                    if (btnet.Util.get_setting("StripDisplayNameFromEmailAddress", "0") == "1")
+                    if (Util.get_setting("StripDisplayNameFromEmailAddress", "0") == "1")
                     {
                         to.Value = Email.simplify_email_address(to.Value);
                     }
@@ -257,8 +251,6 @@ namespace BugTracker.Web
                     if (reply == "forward")
                     {
                         to.Value = "";
-                        //original attachments
-                        //dv.RowFilter = "bp_parent = " + string_bp_id;
                         dv.RowFilter = "bp_type = 'file'";
                         foreach (DataRowView drv in dv)
                         {
@@ -272,9 +264,9 @@ namespace BugTracker.Web
                 else if (string_bg_id != null)
                 {
 
-                    string_bg_id = btnet.Util.sanitize_integer(string_bg_id);
+                    string_bg_id = Util.sanitize_integer(string_bg_id);
 
-                    int permission_level = btnet.Bug.get_bug_permission_level(Convert.ToInt32(string_bg_id), security);
+                    int permission_level = Bug.get_bug_permission_level(Convert.ToInt32(string_bg_id), security);
                     if (permission_level == Security.PERMISSION_NONE
                     || permission_level == Security.PERMISSION_READONLY)
                     {
@@ -312,7 +304,7 @@ namespace BugTracker.Web
 
                     // Work around for a mysterious bug:
                     // http://sourceforge.net/tracker/?func=detail&aid=2815733&group_id=66812&atid=515837
-                    if (btnet.Util.get_setting("StripDisplayNameFromEmailAddress", "0") == "1")
+                    if (Util.get_setting("StripDisplayNameFromEmailAddress", "0") == "1")
                     {
                         to.Value = Email.simplify_email_address(to.Value);
                     }
@@ -340,7 +332,7 @@ namespace BugTracker.Web
                 {
 
                     subject.Value = (string)dr["bg_short_desc"]
-                        + "  (" + btnet.Util.get_setting("TrackingIdString", "DO NOT EDIT THIS:")
+                        + "  (" + Util.get_setting("TrackingIdString", "DO NOT EDIT THIS:")
                         + bg_id.Value
                         + ")";
 
@@ -355,7 +347,6 @@ namespace BugTracker.Web
             }
         }
 
-        ///////////////////////////////////////////////////////////////////////
         void load_from_dropdown(DataRow dr, bool project_first)
         {
             // format from dropdown
@@ -412,7 +403,6 @@ namespace BugTracker.Web
 
         }
 
-        ///////////////////////////////////////////////////////////////////////
         bool validate()
         {
 
@@ -481,12 +471,12 @@ namespace BugTracker.Web
 
         }
 
-        ///////////////////////////////////////////////////////////////////////
+
         string get_bug_text(int bugid)
         {
             // Get bug html
 
-            DataRow bug_dr = btnet.Bug.get_bug_datarow(bugid, security);
+            DataRow bug_dr = Bug.get_bug_datarow(bugid, security);
 
             // Create a fake response and let the code
             // write the html to that response
@@ -503,7 +493,7 @@ namespace BugTracker.Web
             return writer.ToString();
         }
 
-        ///////////////////////////////////////////////////////////////////////
+
         void on_update()
         {
 
@@ -524,7 +514,7 @@ update bugs set
             if (security.user.use_fckeditor)
             {
                 string adjusted_body = "Subject: " + subject.Value + "<br><br>";
-                adjusted_body += btnet.Util.strip_dangerous_tags(body.Value);
+                adjusted_body += Util.strip_dangerous_tags(body.Value);
 
                 sql = sql.Replace("$cm", adjusted_body.Replace("'", "&#39;"));
                 sql = sql.Replace("$cs", adjusted_body.Replace("'", "''"));
@@ -544,7 +534,7 @@ update bugs set
             sql = sql.Replace("$to", to.Value.Replace("'", "''"));
             sql = sql.Replace("$cc", cc.Value.Replace("'", "''"));
 
-            int comment_id = Convert.ToInt32(btnet.DbUtil.execute_scalar(sql));
+            int comment_id = Convert.ToInt32(DbUtil.execute_scalar(sql));
 
             int[] attachments = handle_attachments(comment_id);
 
@@ -594,12 +584,11 @@ update bugs set
                 else
                 {
                     body_text = HttpUtility.HtmlDecode(body.Value);
-                    //body_text = body_text.Replace("\n","\r\n");
                     format = BtnetMailFormat.Text;
                 }
             }
 
-            string result = btnet.Email.send_email( // 9 args
+            string result = Email.send_email( // 9 args
                 to.Value,
                 from.SelectedItem.Value,
                 cc.Value,
@@ -610,8 +599,8 @@ update bugs set
                 attachments,
                 return_receipt.Checked);
 
-            btnet.Bug.send_notifications(btnet.Bug.UPDATE, Convert.ToInt32(bg_id.Value), security);
-            btnet.WhatsNew.add_news(Convert.ToInt32(bg_id.Value), short_desc.Value, "email sent", security);
+            Bug.send_notifications(btnet.Bug.UPDATE, Convert.ToInt32(bg_id.Value), security);
+            WhatsNew.add_news(Convert.ToInt32(bg_id.Value), short_desc.Value, "email sent", security);
 
             if (result == "")
             {
@@ -625,7 +614,7 @@ update bugs set
         }
 
 
-        ///////////////////////////////////////////////////////////////////////
+
         int[] handle_attachments(int comment_id)
         {
             ArrayList attachments = new ArrayList();
@@ -634,7 +623,7 @@ update bugs set
             if (filename != "")
             {
                 //add attachment
-                int max_upload_size = Convert.ToInt32(btnet.Util.get_setting("MaxUploadSize", "100000"));
+                int max_upload_size = Convert.ToInt32(Util.get_setting("MaxUploadSize", "100000"));
                 int content_length = attached_file.PostedFile.ContentLength;
                 if (content_length > max_upload_size)
                 {
