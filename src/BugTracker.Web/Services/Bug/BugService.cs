@@ -14,6 +14,11 @@ namespace BugTracker.Web.Services.Bug
 {
     public class BugService
     {
+        /// <summary>
+        /// Gets a list of bugs by project
+        /// </summary>
+        /// <param name="projectID">Project Id to check</param>
+        /// <returns>a list of bugs</returns>
         public List<ProjectBugVM> GetBugsByProject(int projectID)
         {
             List<ProjectBugVM> BugList = new List<ProjectBugVM>();
@@ -72,6 +77,11 @@ namespace BugTracker.Web.Services.Bug
             return BugList;
         }
 
+        /// <summary>
+        /// Get a count of bugs that are reported or assigned to a specific user
+        /// </summary>
+        /// <param name="userId">User Id to check</param>
+        /// <returns>A count of bugs</returns>
         public int GetBugCountByUserId(int userId)
         {
             StringBuilder sql = new StringBuilder();
@@ -126,6 +136,12 @@ namespace BugTracker.Web.Services.Bug
             return rows > 0;
         }
 
+        /// <summary>
+        /// Flags a bug with a specific color (white, red, or green)
+        /// </summary>
+        /// <param name="bugId">Bug Id to flag</param>
+        /// <param name="userId">User who is flagging bug</param>
+        /// <param name="flagged">0, 1, or 2, to represent specific color</param>
         public void FlagBug(int bugId, int userId, int flagged)
         {
             StringBuilder sql = new StringBuilder();
@@ -348,6 +364,15 @@ namespace BugTracker.Web.Services.Bug
             return rows > 0;
         }
 
+        /// <summary>
+        /// Adds a relationship from one bug to another.
+        /// </summary>
+        /// <param name="bugId1">1st bug to link</param>
+        /// <param name="bugId2">2nd bug to link</param>
+        /// <param name="userId">User who is permforming link</param>
+        /// <param name="type"></param>
+        /// <param name="isSibling">Is the link a sibling relationship</param>
+        /// <param name="isChildToParent">Is the link a child/parent relationship</param>
         public void AddRelationship(int bugId1, int bugId2, int userId, string type, bool isSibling, bool isChildToParent)
         {
             StringBuilder sql = new StringBuilder();
@@ -388,6 +413,14 @@ namespace BugTracker.Web.Services.Bug
             DbUtil.execute_nonquery(cmd);
         }
 
+        /// <summary>
+        /// Returns a DataSet of all relationships to current bug
+        /// </summary>
+        /// <param name="bugId">Id of bug to view relationship</param>
+        /// <param name="isGuest">is the user a guest</param>
+        /// <param name="permissionLevel">current permission level</param>
+        /// <param name="security">Security object</param>
+        /// <returns></returns>
         public DataSet GetBugRelationships(int bugId, bool isGuest, int permissionLevel, Security security)
         {
             string sql = @"
