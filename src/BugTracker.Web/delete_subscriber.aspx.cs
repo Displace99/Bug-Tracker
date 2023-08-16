@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Subscription;
 using System;
 using System.Data.SqlClient;
 using System.Web;
@@ -8,6 +9,7 @@ namespace BugTracker.Web
     public partial class delete_subscriber : Page
     {
 		Security security;
+		private SubscriptionService _subscriptionService = new SubscriptionService();
 
 		///////////////////////////////////////////////////////////////////////
 		void Page_Load(Object sender, EventArgs e)
@@ -38,13 +40,7 @@ namespace BugTracker.Web
 				Response.End();
 			}
 
-			string sql = "delete from bug_subscriptions where bs_bug = @bg_id and bs_user = @us_id";
-
-			SqlCommand cmd = new SqlCommand(sql);
-			cmd.Parameters.AddWithValue("@bg_id", bugId);
-			cmd.Parameters.AddWithValue("@us_id", userId);
-			
-			btnet.DbUtil.execute_nonquery(cmd);
+			_subscriptionService.DeleteSubscription(bugId, userId);
 
 			Response.Redirect("view_subscribers.aspx?id=" + bugId);
 
