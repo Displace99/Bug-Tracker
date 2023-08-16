@@ -77,6 +77,10 @@ namespace BugTracker.Web.Services.Category
             DbUtil.execute_nonquery(cmd);
         }
 
+        /// <summary>
+        /// Deletes a Category from the database
+        /// </summary>
+        /// <param name="Id">Id of the category to delete</param>
         public void DeleteCategory(int Id)
         {
             string sql = "delete categories where ct_id = @Id";
@@ -88,6 +92,12 @@ namespace BugTracker.Web.Services.Category
             DbUtil.execute_nonquery(cmd);
         }
 
+        /// <summary>
+        /// Gets a count of bugs tied to a specific category.
+        /// Used when attempting to delete a category
+        /// </summary>
+        /// <param name="categoryId">Category Id to get count for</param>
+        /// <returns>Count of bugs tied to category</returns>
         public int GetBugCountByCategory(int categoryId)
         {
             StringBuilder sql = new StringBuilder();

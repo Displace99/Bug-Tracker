@@ -13,6 +13,12 @@ namespace BugTracker.Web.Services.Dashboard
 {
     public class DashboardService
     {
+        /// <summary>
+        /// Gets specific items for a users dashboard. 
+        /// Each user can only have one dashboard
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public DataSet GetDashboardItems(int userId)
         {
             StringBuilder sql = new StringBuilder();

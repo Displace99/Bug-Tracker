@@ -55,6 +55,11 @@ namespace BugTracker.Web.Services.Comment
             DbUtil.execute_nonquery(cmd);
         }
 
+        /// <summary>
+        /// Adds a comment that the user sent an email.
+        /// </summary>
+        /// <param name="emailComment"></param>
+        /// <returns></returns>
         public int AddEmailSentComment(AddEmailComment emailComment)
         {
             string sql = @"
