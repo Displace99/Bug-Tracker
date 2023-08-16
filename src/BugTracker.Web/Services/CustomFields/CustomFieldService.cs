@@ -122,6 +122,11 @@ namespace BugTracker.Web.Services.CustomFields
             DeleteRow(Id);
         }
 
+        /// <summary>
+        /// Gets a column name from the column Id
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns>Name of the column</returns>
         public string GetColumnName(int Id)
         {
             string sql = @"select sc.name
@@ -190,6 +195,11 @@ namespace BugTracker.Web.Services.CustomFields
             _context.Application["custom_columns_dataset"] = null;
         }
 
+        /// <summary>
+        /// Adds a custom field to the database.
+        /// </summary>
+        /// <param name="customField"></param>
+        /// <returns></returns>
         public bool AddCustomField(NewCustomFieldVM customField)
         {
             //Because this is altering tables and columns we are unable to parameterize this and will need to 

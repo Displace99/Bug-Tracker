@@ -34,6 +34,11 @@ namespace BugTracker.Web.Services.Organization
 			return dr["og_name"].ToString();
         }
 
+		/// <summary>
+		/// Gets details for a specific org
+		/// </summary>
+		/// <param name="orgId"></param>
+		/// <returns></returns>
 		public DataRow GetOrgDetailsById(int orgId)
 		{
             string sql = @"select *,isnull(og_domain,'') og_domain2 from orgs where og_id = @orgId";
@@ -44,6 +49,10 @@ namespace BugTracker.Web.Services.Organization
             return DbUtil.get_datarow(cmd);
         }
 
+		/// <summary>
+		/// Gets an list of organizations for non admins
+		/// </summary>
+		/// <returns></returns>
         public DataSet GetOrgListForNonAdmins()
         {
             StringBuilder sql = new StringBuilder();
@@ -94,6 +103,12 @@ namespace BugTracker.Web.Services.Organization
 			return DbUtil.get_dataset(sql);
         }
 
+		/// <summary>
+		/// Gets an org list based on users permission level
+		/// </summary>
+		/// <param name="orgPermissionLevel"></param>
+		/// <param name="userOrgId"></param>
+		/// <returns></returns>
 		public DataView GetOrganizationListByPermission(int orgPermissionLevel, int userOrgId)
 		{
 			string sql = string.Empty;
@@ -213,6 +228,10 @@ namespace BugTracker.Web.Services.Organization
 			UpdateCustomFields(org);
         }
 
+		/// <summary>
+		/// Updates an existing Org
+		/// </summary>
+		/// <param name="org"></param>
 		public void UpdateOrganizaton(Org org)
 		{
             string sql = @"
@@ -317,6 +336,12 @@ namespace BugTracker.Web.Services.Organization
             DbUtil.execute_nonquery(cmd);
         }
 
+		/// <summary>
+		/// Checks to see if the specific Org has any bugs or queries attached to it.
+		/// Used when attempting to delete an org
+		/// </summary>
+		/// <param name="orgId"></param>
+		/// <returns></returns>
 		public bool DoesOrgHaveRelatedEntities(int orgId)
 		{
             string sql = @"declare @cnt int

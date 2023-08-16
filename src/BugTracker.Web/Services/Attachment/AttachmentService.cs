@@ -34,6 +34,15 @@ namespace BugTracker.Web.Services.Attachment
             return DbUtil.get_datarow(cmd);
         }
 
+        /// <summary>
+        /// Gets the attachment for the bug or comment and writes it directly to the HttpResponse
+        /// </summary>
+        /// <param name="Response">HTTP Response to write back to</param>
+        /// <param name="bugPostId">Comment Id</param>
+        /// <param name="bugId">Bug Id</param>
+        /// <param name="filename">The filename of the attachment</param>
+        /// <param name="contentType">Content Type of attachment</param>
+        /// <param name="download"></param>
         public void GetAttachment(HttpResponse Response, int bugPostId,int bugId, string filename, string contentType, bool download)
         {
             // First, try to find it in the bug_post_attachments table.
@@ -266,6 +275,10 @@ namespace BugTracker.Web.Services.Attachment
             }
         }
 
+        /// <summary>
+        /// Deletes all attachments for a list of bug Ids
+        /// </summary>
+        /// <param name="bugIds">A list of bug Ids</param>
         public void MassDeleteAttachments(List<int> bugIds)
         {
             string paramNames = string.Join(",", bugIds.Select(n => "@prm" + n).ToArray());
@@ -286,6 +299,11 @@ namespace BugTracker.Web.Services.Attachment
             }
         }
 
+        /// <summary>
+        /// Moves an attachment from one bug to another. This is used when merging bugs
+        /// </summary>
+        /// <param name="fromBugId">Bug Id the attachment is currently on</param>
+        /// <param name="intoBugId">Bug Id that you want the attachment moved to</param>
         public void MoveAttachmentToOtherBug(int fromBugId, int intoBugId)
         {
             string upload_folder = Util.get_upload_folder();
