@@ -1,4 +1,5 @@
 using btnet;
+using BugTracker.Web.Services.Bug;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,9 +10,9 @@ namespace BugTracker.Web
 {
     public partial class vote : Page
     {
-        String sql;
 
         Security security;
+        private BugService _bugService = new BugService();
 
         void Page_Load(Object sender, EventArgs e)
         {
@@ -64,16 +65,8 @@ namespace BugTracker.Web
                         vote = 0;
 
                     dv[i]["$VOTE"] = vote;
-                    sql = @"
-if not exists (select bu_bug from bug_user where bu_bug = $bg and bu_user = $us)
-	insert into bug_user (bu_bug, bu_user, bu_flag, bu_seen, bu_vote) values($bg, $us, 0, 0, 1) 
-update bug_user set bu_vote = $vote, bu_vote_datetime = getdate() where bu_bug = $bg and bu_user = $us and bu_vote <> $vote";
-
-                    sql = sql.Replace("$vote", Convert.ToString(vote));
-                    sql = sql.Replace("$bg", Convert.ToString(bugid));
-                    sql = sql.Replace("$us", Convert.ToString(security.user.usid));
-
-                    btnet.DbUtil.execute_nonquery(sql);
+                    
+                    _bugService.UpdateBugVote(bugid, vote, security.user.usid);
 
                     break;
                 }
