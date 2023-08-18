@@ -1361,6 +1361,7 @@
     <Compile Include="Services\Attachment\AttachmentService.cs" />
     <Compile Include="Services\Bug\BugService.cs" />
     <Compile Include="Services\Bug\BugSubscriptionService.cs" />
+    <Compile Include="Services\Bug\TaskService.cs" />
     <Compile Include="Services\Category\CategoryService.cs" />
     <Compile Include="Services\Comment\CommentService.cs" />
     <Compile Include="Services\CustomFields\CustomFieldService.cs" />
