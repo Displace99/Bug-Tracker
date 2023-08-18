@@ -1322,7 +1322,7 @@ order by sc.id, isnull(ccm_sort_seq,sc.colorder)");
 		}
 
 		
-		///////////////////////////////////////////////////////////////////////
+		[Obsolete("Use GetAllTasks in TaskService")]
 		public static DataSet get_all_tasks(Security security, int bugid)
 		{
             string sql = "select ";
