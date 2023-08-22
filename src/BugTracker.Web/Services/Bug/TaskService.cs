@@ -275,5 +275,51 @@ namespace BugTracker.Web.Services.Bug
 
             DbUtil.execute_nonquery(cmd);
         }
+
+        public void UpdateTask(EditTask taskModel)
+        {
+            string sql = @"
+						update bug_tasks set
+						tsk_last_updated_user = @lastUpdatedUserId,
+						tsk_last_updated_date = getdate(),
+						tsk_assigned_to_user = @assignedToUserId,
+						tsk_planned_start_date = @plannedStartDate,
+						tsk_actual_start_date = @actualStartDate,
+						tsk_planned_end_date = @plannedEndDate,
+						tsk_actual_end_date = @actualEndDate,
+						tsk_planned_duration = @plannedDuration,
+						tsk_actual_duration = @actualDuration,
+						tsk_duration_units = @durationUnits,
+						tsk_percent_complete = @percentComplete,
+						tsk_status = @status,
+						tsk_sort_sequence = @sortSeq,
+						tsk_description = @description
+						where tsk_id = @taskId
+                
+						insert into bug_posts
+						(bp_bug, bp_user, bp_date, bp_comment, bp_type)
+						values(@bugId, @lastUpdatedUserId, getdate(), N'updated task @taskId', 'update')";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@taskId", taskModel.TaskId);
+            cmd.Parameters.AddWithValue("@bugId", taskModel.BugId);
+            cmd.Parameters.AddWithValue("@lastUpdatedUserId", taskModel.LastUpdatedBy);
+            cmd.Parameters.AddWithValue("@assignedToUserId", taskModel.AssignedTo.HasValue ? (object)taskModel.AssignedTo.Value : DBNull.Value);
+
+            cmd.Parameters.AddWithValue("@plannedStartDate", taskModel.PlannedStartDate.HasValue ? (object)taskModel.PlannedStartDate.Value : (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@actualStartDate", taskModel.ActualStartDate.HasValue ? (object)taskModel.ActualStartDate.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@plannedEndDate", taskModel.PlannedEndDate.HasValue ? (object)taskModel.PlannedEndDate.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@actualEndDate", taskModel.ActualEndDate.HasValue ? (object)taskModel.ActualEndDate.Value : DBNull.Value);
+
+            cmd.Parameters.AddWithValue("@plannedDuration", taskModel.PlannedDuration.HasValue ? (object)taskModel.PlannedDuration.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@actualDuration", taskModel.ActualDuration.HasValue ? (object)taskModel.ActualDuration.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@percentComplete", taskModel.PercentComplete.HasValue ? (object)taskModel.PercentComplete.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@status", taskModel.Status);
+            cmd.Parameters.AddWithValue("@sortSeq", taskModel.SortSequence.HasValue ? (object)taskModel.SortSequence.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@description", taskModel.Description);
+            cmd.Parameters.AddWithValue("@durationUnits", taskModel.DurationUnits);
+
+            DbUtil.execute_nonquery(cmd);
+        }
     }
 }

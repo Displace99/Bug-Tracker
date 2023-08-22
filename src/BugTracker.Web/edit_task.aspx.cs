@@ -15,8 +15,6 @@ namespace BugTracker.Web
     {
 		int tsk_id;
 		public int bugid;
-		String sql;
-
 
 		public Security security;
 		private TaskService _taskService = new TaskService();
@@ -307,7 +305,7 @@ namespace BugTracker.Web
 
 			if (planned_duration.Value != "")
 			{
-				string err = btnet.Util.is_valid_decimal("Planned Duration", planned_duration.Value, 4, 2);
+				string err = Util.is_valid_decimal("Planned Duration", planned_duration.Value, 4, 2);
 
 				if (err != "")
 				{
@@ -326,7 +324,7 @@ namespace BugTracker.Web
 
 			if (actual_duration.Value != "")
 			{
-				string err = btnet.Util.is_valid_decimal("Actual Duration", actual_duration.Value, 4, 2);
+				string err = Util.is_valid_decimal("Actual Duration", actual_duration.Value, 4, 2);
 
 				if (err != "")
 				{
@@ -346,25 +344,6 @@ namespace BugTracker.Web
 			return good;
 		}
 
-
-		// This might not be right.   
-		string format_date_hour_min(string date, string hour, string min)
-		{
-			if (!string.IsNullOrEmpty(date))
-			{
-				return btnet.Util.format_local_date_into_db_format(
-					date
-					+ " "
-					+ hour
-					+ ":"
-					+ min
-					+ ":00");
-			}
-			else
-			{
-				return "";
-			}
-		}
 
 		private DateTime? ConvertStringToDate(string date, string hour, string min)
 		{
@@ -407,26 +386,6 @@ namespace BugTracker.Web
             else
                 return null;
         }
-
-
-        string format_decimal_for_db(string s)
-		{
-			if (s == "")
-				return "null";
-			else
-				return btnet.Util.format_local_decimal_into_db_format(s);
-		}
-
-
-		
-		string format_number_for_db(string s)
-		{
-			if (s == "")
-				return "null";
-			else
-				return s;
-		}
-
 		
 		void on_update()
 		{
@@ -454,122 +413,12 @@ namespace BugTracker.Web
 
                 if (tsk_id == 0)  // insert new
 				{
-					//sql = @"
-					//	insert into bug_tasks (
-					//	tsk_bug,
-					//	tsk_created_user,
-					//	tsk_created_date,
-					//	tsk_last_updated_user,
-					//	tsk_last_updated_date,
-					//	tsk_assigned_to_user,
-					//	tsk_planned_start_date,
-					//	tsk_actual_start_date,
-					//	tsk_planned_end_date,
-					//	tsk_actual_end_date,
-					//	tsk_planned_duration,
-					//	tsk_actual_duration,
-					//	tsk_duration_units,
-					//	tsk_percent_complete,
-					//	tsk_status,
-					//	tsk_sort_sequence,
-					//	tsk_description
-					//	)
-					//	values (
-					//	$tsk_bug,
-					//	$tsk_created_user,
-					//	getdate(),
-					//	$tsk_last_updated_user,
-					//	getdate(),
-					//	$tsk_assigned_to_user,
-					//	'$tsk_planned_start_date',
-					//	'$tsk_actual_start_date',
-					//	'$tsk_planned_end_date',
-					//	'$tsk_actual_end_date',
-					//	$tsk_planned_duration,
-					//	$tsk_actual_duration,
-					//	N'$tsk_duration_units',
-					//	$tsk_percent_complete,
-					//	$tsk_status,
-					//	$tsk_sort_sequence,
-					//	N'$tsk_description'
-					//	)
-
-					//	declare @tsk_id int
-					//	select @tsk_id = scope_identity()
-
-					//	insert into bug_posts
-					//	(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-					//	values($tsk_bug, $tsk_last_updated_user, getdate(), N'added task ' + convert(varchar, @tsk_id), 'update')";
-
-
-					//sql = sql.Replace("$tsk_created_user", Convert.ToString(security.user.usid));
-
 					_taskService.InsertTask(taskModel);
-
-
 				}
 				else // edit existing
 				{
-
-					sql = @"
-						update bug_tasks set
-						tsk_last_updated_user = $tsk_last_updated_user,
-						tsk_last_updated_date = getdate(),
-						tsk_assigned_to_user = $tsk_assigned_to_user,
-						tsk_planned_start_date = '$tsk_planned_start_date',
-						tsk_actual_start_date = '$tsk_actual_start_date',
-						tsk_planned_end_date = '$tsk_planned_end_date',
-						tsk_actual_end_date = '$tsk_actual_end_date',
-						tsk_planned_duration = $tsk_planned_duration,
-						tsk_actual_duration = $tsk_actual_duration,
-						tsk_duration_units = N'$tsk_duration_units',
-						tsk_percent_complete = $tsk_percent_complete,
-						tsk_status = $tsk_status,
-						tsk_sort_sequence = $tsk_sort_sequence,
-						tsk_description = N'$tsk_description'
-						where tsk_id = $tsk_id
-                
-						insert into bug_posts
-						(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-						values($tsk_bug, $tsk_last_updated_user, getdate(), N'updated task $tsk_id', 'update')";
-
-					sql = sql.Replace("$tsk_id", Convert.ToString(tsk_id));
-
+                    _taskService.UpdateTask(taskModel);
 				}
-
-				sql = sql.Replace("$tsk_bug", Convert.ToString(bugid));
-				sql = sql.Replace("$tsk_last_updated_user", Convert.ToString(security.user.usid));
-
-				sql = sql.Replace("$tsk_planned_start_date", format_date_hour_min(
-					planned_start_date.Value,
-					planned_start_hour.SelectedItem.Value,
-					planned_start_min.SelectedItem.Value));
-
-				sql = sql.Replace("$tsk_actual_start_date", format_date_hour_min(
-					actual_start_date.Value,
-					actual_start_hour.SelectedItem.Value,
-					actual_start_min.SelectedItem.Value));
-
-				sql = sql.Replace("$tsk_planned_end_date", format_date_hour_min(
-					planned_end_date.Value,
-					planned_end_hour.SelectedItem.Value,
-					planned_end_min.SelectedItem.Value));
-
-				sql = sql.Replace("$tsk_actual_end_date", format_date_hour_min(
-					actual_end_date.Value,
-					actual_end_hour.SelectedItem.Value,
-					actual_end_min.SelectedItem.Value));
-
-				sql = sql.Replace("$tsk_planned_duration", format_decimal_for_db(planned_duration.Value));
-				sql = sql.Replace("$tsk_actual_duration", format_decimal_for_db(actual_duration.Value));
-				sql = sql.Replace("$tsk_percent_complete", format_number_for_db(percent_complete.Value));
-				sql = sql.Replace("$tsk_status", status.SelectedItem.Value);
-				sql = sql.Replace("$tsk_sort_sequence", format_number_for_db(sort_sequence.Value));
-				sql = sql.Replace("$tsk_assigned_to_user", assigned_to.SelectedItem.Value);
-				sql = sql.Replace("$tsk_description", desc.Value.Replace("'", "''"));
-				sql = sql.Replace("$tsk_duration_units", duration_units.SelectedItem.Value.Replace("'", "''"));
-
-				DbUtil.execute_nonquery(sql);
 
                 Bug.send_notifications(Bug.UPDATE, bugid, security);
 
