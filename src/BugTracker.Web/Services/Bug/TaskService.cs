@@ -21,7 +21,7 @@ namespace BugTracker.Web.Services.Bug
             {
                 sql += @"
 					'<a href=edit_task.aspx?bugid=$bugId&id=' + convert(varchar,tsk_id) + '>edit</a>'   [$no_sort_edit],
-					'<a href=delete_task.aspx?ses=$ses&bugid=@bugId&id=' + convert(varchar,tsk_id) + '>delete</a>' [$no_sort_delete],";
+					'<a href=delete_task.aspx?ses=$ses&bugid=$bugId&id=' + convert(varchar,tsk_id) + '>delete</a>' [$no_sort_delete],";
             }
 
             sql += "tsk_description [description]";
@@ -203,6 +203,17 @@ namespace BugTracker.Web.Services.Bug
             cmd.Parameters.AddWithValue("@bugId", bugId);
             
             return DbUtil.get_datarow(cmd);
+        }
+
+        public void DeleteTask(int taskId, int bugId)
+        {
+            string sql = @"delete bug_tasks where tsk_id = @taskId and tsk_bug = @bugId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@taskId", taskId);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+            
+            DbUtil.execute_nonquery(cmd);
         }
 
         public void InsertTask(EditTask taskModel)
