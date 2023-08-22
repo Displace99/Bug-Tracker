@@ -1215,6 +1215,7 @@
     <Compile Include="Models\Search\ExtendedSearch.cs" />
     <Compile Include="Models\Search\ProjectDropdown.cs" />
     <Compile Include="Models\Status\StatusVM.cs" />
+    <Compile Include="Models\Task\EditTask.cs" />
     <Compile Include="Models\UDF\UserDefinedField.cs" />
     <Compile Include="Models\User\NewUser.cs" />
     <Compile Include="Models\User\PasswordResetUser.cs" />
