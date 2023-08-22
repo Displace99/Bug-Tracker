@@ -5,6 +5,7 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using btnet;
+using BugTracker.Web.Models.Task;
 using BugTracker.Web.Services;
 using BugTracker.Web.Services.Bug;
 
@@ -245,7 +246,7 @@ namespace BugTracker.Web
 			// or should it be assigned to the logged in user?
 			if (tsk_id == 0)
 			{
-				int default_assigned_to_user = (int)btnet.DbUtil.get_dataset(sql).Tables[2].Rows[0][0];
+				int default_assigned_to_user = (int)userInfo.Tables[2].Rows[0][0];
 				ListItem li = assigned_to.Items.FindByValue(Convert.ToString(default_assigned_to_user));
 				if (li != null)
 				{
@@ -255,9 +256,9 @@ namespace BugTracker.Web
 		}
 
 		
-		Boolean validate()
+		bool ValidateForm()
 		{
-			Boolean good = true;
+			bool good = true;
 
 			if (sort_sequence.Value != "")
 			{
@@ -303,7 +304,6 @@ namespace BugTracker.Web
 			{
 				percent_complete_err.InnerText = "";
 			}
-
 
 			if (planned_duration.Value != "")
 			{
@@ -366,8 +366,50 @@ namespace BugTracker.Web
 			}
 		}
 
-		
-		string format_decimal_for_db(string s)
+		private DateTime? ConvertStringToDate(string date, string hour, string min)
+		{
+			DateTime convertedDate = new DateTime();
+			bool isDateGood = false;
+
+			if (!string.IsNullOrEmpty(date))
+			{
+				string dateString = String.Format("{0} {1}:{2}:00", date, hour, min);
+
+				isDateGood = DateTime.TryParse(dateString, out convertedDate);
+			}
+
+			if (isDateGood)
+				return convertedDate;
+			else
+				return null;
+        }
+
+		private decimal? ConvertStringToDecimal(string value)
+		{
+			decimal convertedDecimal;
+
+			bool isValueGood = decimal.TryParse(value, out convertedDecimal);
+
+			if (isValueGood)
+				return convertedDecimal;
+			else 
+				return null;
+        }
+
+        private int? ConvertStringToInt(string value)
+        {
+            int convertedInt;
+
+            bool isValueGood = int.TryParse(value, out convertedInt);
+
+            if (isValueGood)
+                return convertedInt;
+            else
+                return null;
+        }
+
+
+        string format_decimal_for_db(string s)
 		{
 			if (s == "")
 				return "null";
@@ -388,62 +430,81 @@ namespace BugTracker.Web
 		
 		void on_update()
 		{
-
-			Boolean good = validate();
+			bool good = ValidateForm();
 
 			if (good)
 			{
-				if (tsk_id == 0)  // insert new
+                EditTask taskModel = new EditTask();
+                taskModel.TaskId = tsk_id; //Only for edits
+                taskModel.BugId = bugid;
+                taskModel.CreatedBy = security.user.usid; //Only for new tasks
+                taskModel.LastUpdatedBy = security.user.usid;
+				taskModel.AssignedTo = ConvertStringToInt(assigned_to.SelectedItem.Value);
+                taskModel.PlannedStartDate = ConvertStringToDate(planned_start_date.Value, planned_start_hour.SelectedItem.Value, planned_start_min.SelectedItem.Value);
+                taskModel.ActualStartDate = ConvertStringToDate(actual_start_date.Value, actual_start_hour.SelectedItem.Value, actual_start_min.SelectedItem.Value);
+                taskModel.PlannedEndDate = ConvertStringToDate(planned_end_date.Value, planned_end_hour.SelectedItem.Value, planned_end_min.SelectedItem.Value);
+                taskModel.ActualEndDate = ConvertStringToDate(actual_end_date.Value, actual_end_hour.SelectedItem.Value, actual_end_min.SelectedItem.Value);
+                taskModel.PlannedDuration = ConvertStringToDecimal(planned_duration.Value);
+                taskModel.ActualDuration = ConvertStringToDecimal(actual_duration.Value);
+                taskModel.PercentComplete = ConvertStringToInt(percent_complete.Value);
+                taskModel.Status = int.Parse(status.SelectedItem.Value);
+                taskModel.SortSequence = ConvertStringToInt(sort_sequence.Value);
+                taskModel.Description = desc.Value;
+                taskModel.DurationUnits = duration_units.SelectedItem.Value;
+
+                if (tsk_id == 0)  // insert new
 				{
-					sql = @"
-						insert into bug_tasks (
-						tsk_bug,
-						tsk_created_user,
-						tsk_created_date,
-						tsk_last_updated_user,
-						tsk_last_updated_date,
-						tsk_assigned_to_user,
-						tsk_planned_start_date,
-						tsk_actual_start_date,
-						tsk_planned_end_date,
-						tsk_actual_end_date,
-						tsk_planned_duration,
-						tsk_actual_duration,
-						tsk_duration_units,
-						tsk_percent_complete,
-						tsk_status,
-						tsk_sort_sequence,
-						tsk_description
-						)
-						values (
-						$tsk_bug,
-						$tsk_created_user,
-						getdate(),
-						$tsk_last_updated_user,
-						getdate(),
-						$tsk_assigned_to_user,
-						'$tsk_planned_start_date',
-						'$tsk_actual_start_date',
-						'$tsk_planned_end_date',
-						'$tsk_actual_end_date',
-						$tsk_planned_duration,
-						$tsk_actual_duration,
-						N'$tsk_duration_units',
-						$tsk_percent_complete,
-						$tsk_status,
-						$tsk_sort_sequence,
-						N'$tsk_description'
-						)
+					//sql = @"
+					//	insert into bug_tasks (
+					//	tsk_bug,
+					//	tsk_created_user,
+					//	tsk_created_date,
+					//	tsk_last_updated_user,
+					//	tsk_last_updated_date,
+					//	tsk_assigned_to_user,
+					//	tsk_planned_start_date,
+					//	tsk_actual_start_date,
+					//	tsk_planned_end_date,
+					//	tsk_actual_end_date,
+					//	tsk_planned_duration,
+					//	tsk_actual_duration,
+					//	tsk_duration_units,
+					//	tsk_percent_complete,
+					//	tsk_status,
+					//	tsk_sort_sequence,
+					//	tsk_description
+					//	)
+					//	values (
+					//	$tsk_bug,
+					//	$tsk_created_user,
+					//	getdate(),
+					//	$tsk_last_updated_user,
+					//	getdate(),
+					//	$tsk_assigned_to_user,
+					//	'$tsk_planned_start_date',
+					//	'$tsk_actual_start_date',
+					//	'$tsk_planned_end_date',
+					//	'$tsk_actual_end_date',
+					//	$tsk_planned_duration,
+					//	$tsk_actual_duration,
+					//	N'$tsk_duration_units',
+					//	$tsk_percent_complete,
+					//	$tsk_status,
+					//	$tsk_sort_sequence,
+					//	N'$tsk_description'
+					//	)
 
-						declare @tsk_id int
-						select @tsk_id = scope_identity()
+					//	declare @tsk_id int
+					//	select @tsk_id = scope_identity()
 
-						insert into bug_posts
-						(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-						values($tsk_bug, $tsk_last_updated_user, getdate(), N'added task ' + convert(varchar, @tsk_id), 'update')";
+					//	insert into bug_posts
+					//	(bp_bug, bp_user, bp_date, bp_comment, bp_type)
+					//	values($tsk_bug, $tsk_last_updated_user, getdate(), N'added task ' + convert(varchar, @tsk_id), 'update')";
 
 
-					sql = sql.Replace("$tsk_created_user", Convert.ToString(security.user.usid));
+					//sql = sql.Replace("$tsk_created_user", Convert.ToString(security.user.usid));
+
+					_taskService.InsertTask(taskModel);
 
 
 				}
@@ -510,11 +571,9 @@ namespace BugTracker.Web
 
 				DbUtil.execute_nonquery(sql);
 
-				Bug.send_notifications(Bug.UPDATE, bugid, security);
-
+                Bug.send_notifications(Bug.UPDATE, bugid, security);
 
 				Response.Redirect("tasks.aspx?bugid=" + Convert.ToString(bugid));
-
 			}
 			else
 			{

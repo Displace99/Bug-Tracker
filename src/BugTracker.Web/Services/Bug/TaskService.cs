@@ -1,11 +1,14 @@
 ﻿using btnet;
+using BugTracker.Web.Models.Task;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.EnterpriseServices;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Web;
+using static Lucene.Net.Index.CheckIndex;
 
 namespace BugTracker.Web.Services.Bug
 {
@@ -17,7 +20,7 @@ namespace BugTracker.Web.Services.Bug
             if (permissionLevel == Security.PERMISSION_ALL && !user.is_guest && (user.is_admin || user.can_edit_tasks))
             {
                 sql += @"
-					'<a   href=edit_task.aspx?bugid=@bugId&id=' + convert(varchar,tsk_id) + '>edit</a>'   [$no_sort_edit],
+					'<a href=edit_task.aspx?bugid=$bugId&id=' + convert(varchar,tsk_id) + '>edit</a>'   [$no_sort_edit],
 					'<a href=delete_task.aspx?ses=$ses&bugid=@bugId&id=' + convert(varchar,tsk_id) + '>delete</a>' [$no_sort_delete],";
             }
 
@@ -83,6 +86,7 @@ namespace BugTracker.Web.Services.Bug
 				order by tsk_sort_sequence, tsk_id";
 
             sql = sql.Replace("$ses", session);
+            sql = sql.Replace("$bugId", bugId.ToString());
 
             SqlCommand cmd = new SqlCommand(sql);
             cmd.Parameters.AddWithValue("@bugId", bugId);
@@ -199,6 +203,77 @@ namespace BugTracker.Web.Services.Bug
             cmd.Parameters.AddWithValue("@bugId", bugId);
             
             return DbUtil.get_datarow(cmd);
+        }
+
+        public void InsertTask(EditTask taskModel)
+        {
+            string sql = @"
+						insert into bug_tasks (
+						tsk_bug,
+						tsk_created_user,
+						tsk_created_date,
+						tsk_last_updated_user,
+						tsk_last_updated_date,
+						tsk_assigned_to_user,
+						tsk_planned_start_date,
+						tsk_actual_start_date,
+						tsk_planned_end_date,
+						tsk_actual_end_date,
+						tsk_planned_duration,
+						tsk_actual_duration,
+						tsk_duration_units,
+						tsk_percent_complete,
+						tsk_status,
+						tsk_sort_sequence,
+						tsk_description
+						)
+						values (
+						@bugId,
+						@createdUserId,
+						getdate(),
+						@lastUpdatedUserId,
+						getdate(),
+						@assignedToUserId,
+						@plannedStartDate,
+						@actualStartDate,
+						@plannedEndDate,
+						@actualEndDate,
+						@plannedDuration,
+						@actualDuration,
+						@durationUnits,
+						@percentComplete,
+						@status,
+						@sortSeq,
+						@description
+						)
+
+						declare @tsk_id int
+						select @tsk_id = scope_identity()
+
+						insert into bug_posts
+						(bp_bug, bp_user, bp_date, bp_comment, bp_type)
+						values(@bugId, @lastUpdatedUserId, getdate(), N'added task ' + convert(varchar, @tsk_id), 'update')";
+
+            SqlCommand cmd = new SqlCommand(sql); 
+            cmd.Parameters.AddWithValue("@bugId", taskModel.BugId);
+            cmd.Parameters.AddWithValue("@createdUserId", taskModel.CreatedBy);
+            cmd.Parameters.AddWithValue("@lastUpdatedUserId", taskModel.LastUpdatedBy);
+            cmd.Parameters.AddWithValue("@assignedToUserId", taskModel.AssignedTo.HasValue ? (object)taskModel.AssignedTo.Value : DBNull.Value);
+
+            cmd.Parameters.AddWithValue("@plannedStartDate", taskModel.PlannedStartDate.HasValue ? (object)taskModel.PlannedStartDate.Value : (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@actualStartDate", taskModel.ActualStartDate.HasValue ? (object)taskModel.ActualStartDate.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@plannedEndDate", taskModel.PlannedEndDate.HasValue ? (object)taskModel.PlannedEndDate.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@actualEndDate", taskModel.ActualEndDate.HasValue ? (object)taskModel.ActualEndDate.Value : DBNull.Value);
+
+            cmd.Parameters.AddWithValue("@plannedDuration", taskModel.PlannedDuration.HasValue ? (object)taskModel.PlannedDuration.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@actualDuration", taskModel.ActualDuration.HasValue ? (object)taskModel.ActualDuration.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@percentComplete", taskModel.PercentComplete.HasValue ? (object)taskModel.PercentComplete.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@status", taskModel.Status);
+            cmd.Parameters.AddWithValue("@sortSeq", taskModel.SortSequence.HasValue ? (object)taskModel.SortSequence.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@description", taskModel.Description);
+            cmd.Parameters.AddWithValue("@durationUnits", taskModel.DurationUnits);
+
+            DbUtil.execute_nonquery(cmd);
         }
     }
 }
