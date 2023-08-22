@@ -5,6 +5,8 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using btnet;
+using BugTracker.Web.Services;
+using BugTracker.Web.Services.Bug;
 
 namespace BugTracker.Web
 {
@@ -16,6 +18,8 @@ namespace BugTracker.Web
 
 
 		public Security security;
+		private TaskService _taskService = new TaskService();
+		private UserService _userService = new UserService();
 
 		public void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -143,11 +147,7 @@ namespace BugTracker.Web
 				{
 
 					// Get this entry's data from the db and fill in the form
-
-					sql = @"select * from bug_tasks where tsk_id = $tsk_id and tsk_bug = $bugid";
-					sql = sql.Replace("$tsk_id", Convert.ToString(tsk_id));
-					sql = sql.Replace("$bugid", Convert.ToString(bugid));
-					DataRow dr = btnet.DbUtil.get_datarow(sql);
+					DataRow dr = _taskService.GetTaskById(tsk_id, bugid);
 
 					assigned_to.Items.FindByValue(Convert.ToString(dr["tsk_assigned_to_user"])).Selected = true;
 
@@ -227,72 +227,15 @@ namespace BugTracker.Web
 				current_value = assigned_to.SelectedItem.Value;
 			}
 
-			sql = @"
-				declare @project int
-				declare @assigned_to int
-				select @project = bg_project, @assigned_to = bg_assigned_to_user from bugs where bg_id = $bg_id";
+			DataSet userInfo = _userService.GetUserListForTasks(bugid, security.user.org, security.user.other_orgs_permission_level);
 
-			// Load the user dropdown, which changes per project
-			// Only users explicitly allowed will be listed
-			if (btnet.Util.get_setting("DefaultPermissionLevel", "2") == "0")
-			{
-				sql += @"
-
-					/* users this project */ select us_id, case when $fullnames then us_lastname + ', ' + us_firstname else us_username end us_username
-					from users
-					inner join orgs on us_org = og_id
-					where us_active = 1
-					and og_can_be_assigned_to = 1
-					and ($og_other_orgs_permission_level <> 0 or $og_id = og_id or og_external_user = 0)
-					and us_id in
-						(select pu_user from project_user_xref
-							where pu_project = @project
-							and pu_permission_level <> 0)
-					order by us_username; ";
-			}
-			// Only users explictly DISallowed will be omitted
-			else
-			{
-				sql += @"
-					/* users this project */ select us_id, case when $fullnames then us_lastname + ', ' + us_firstname else us_username end us_username
-					from users
-					inner join orgs on us_org = og_id
-					where us_active = 1
-					and og_can_be_assigned_to = 1
-					and ($og_other_orgs_permission_level <> 0 or $og_id = og_id or og_external_user = 0)
-					and us_id not in
-						(select pu_user from project_user_xref
-							where pu_project = @project
-							and pu_permission_level = 0)
-					order by us_username; ";
-			}
-
-			sql += "\nselect st_id, st_name from statuses order by st_sort_seq, st_name";
-
-			sql += "\nselect isnull(@assigned_to,0) ";
-
-			sql = sql.Replace("$og_id", Convert.ToString(security.user.org));
-			sql = sql.Replace("$og_other_orgs_permission_level", Convert.ToString(security.user.other_orgs_permission_level));
-			sql = sql.Replace("$bg_id", Convert.ToString(bugid));
-
-			if (Util.get_setting("UseFullNames", "0") == "0")
-			{
-				// false condition
-				sql = sql.Replace("$fullnames", "0 = 1");
-			}
-			else
-			{
-				// true condition
-				sql = sql.Replace("$fullnames", "1 = 1");
-			}
-
-			assigned_to.DataSource = new DataView((DataTable)btnet.DbUtil.get_dataset(sql).Tables[0]);
+			assigned_to.DataSource = new DataView(userInfo.Tables[0]);
 			assigned_to.DataTextField = "us_username";
 			assigned_to.DataValueField = "us_id";
 			assigned_to.DataBind();
 			assigned_to.Items.Insert(0, new ListItem("[not assigned]", "0"));
 
-			status.DataSource = new DataView((DataTable)btnet.DbUtil.get_dataset(sql).Tables[1]);
+			status.DataSource = new DataView(userInfo.Tables[1]);
 			status.DataTextField = "st_name";
 			status.DataValueField = "st_id";
 			status.DataBind();

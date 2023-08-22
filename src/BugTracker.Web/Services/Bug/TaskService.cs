@@ -183,5 +183,22 @@ namespace BugTracker.Web.Services.Bug
 
             return DbUtil.get_dataset(sql);
         }
+
+        /// <summary>
+        /// Returns details of a specific task
+        /// </summary>
+        /// <param name="taskId">Task Id to search by</param>
+        /// <param name="bugId">Bug Id to search by</param>
+        /// <returns>DataRow of Task details</returns>
+        public DataRow GetTaskById(int taskId, int bugId)
+        {
+            string sql = @"select * from bug_tasks where tsk_id = @taskId and tsk_bug = @bugId";
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@taskId", taskId); 
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+            
+            return DbUtil.get_datarow(cmd);
+        }
     }
 }
