@@ -61,13 +61,11 @@ namespace BugTracker.Web
                     + "delete comment";
 
                 string id = Util.sanitize_integer(Request["id"]);
+                int commentId = int.Parse(id);
 
                 back_href.HRef = "edit_bug.aspx?id=" + bug_id;
 
-                sql = @"select bp_comment from bug_posts where bp_id = $1";
-                sql = sql.Replace("$1", id);
-
-                DataRow dr = btnet.DbUtil.get_datarow(sql);
+                DataRow dr = _commentService.GetCommentById(commentId);
 
                 // show the first few chars of the comment
                 string s = Convert.ToString(dr["bp_comment"]);

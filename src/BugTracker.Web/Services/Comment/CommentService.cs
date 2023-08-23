@@ -2,6 +2,7 @@
 using BugTracker.Web.Models.Comment;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.EnterpriseServices;
 using System.Linq;
@@ -44,6 +45,16 @@ namespace BugTracker.Web.Services.Comment
             cmd.Parameters.AddWithValue("@commentId", commentId);
 
             DbUtil.execute_nonquery(cmd);
+        }
+
+        public DataRow GetCommentById(int commentId)
+        {
+            string sql = "select bp_comment from bug_posts where bp_id = @commentId";
+            
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@commentId", commentId);
+
+            return DbUtil.get_datarow(cmd);
         }
 
         /// <summary>
