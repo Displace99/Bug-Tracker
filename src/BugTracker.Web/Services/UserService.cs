@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.EnterpriseServices;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -159,6 +160,75 @@ namespace BugTracker.Web.Services
             }
 
             cmd.Parameters.AddWithValue("@Id", userId);
+
+            return DbUtil.get_dataset(cmd);
+        }
+
+        /// <summary>
+        /// This is used specifically for the user drop down box for Tasks
+        /// </summary>
+        /// <returns></returns>
+        public DataSet GetUserListForTasks(int bugId, int orgId, int orgPermissionLevel)
+        {
+            string sql = @"
+				declare @project int
+				declare @assigned_to int
+				select @project = bg_project, @assigned_to = bg_assigned_to_user from bugs where bg_id = @bugId";
+
+            // Load the user dropdown, which changes per project
+            // Only users explicitly allowed will be listed
+            if (btnet.Util.get_setting("DefaultPermissionLevel", "2") == "0")
+            {
+                sql += @"
+
+					/* users this project */ select us_id, case when $fullnames then us_lastname + ', ' + us_firstname else us_username end us_username
+					from users
+					inner join orgs on us_org = og_id
+					where us_active = 1
+					and og_can_be_assigned_to = 1
+					and (@orgPermissionLevel <> 0 or @orgId = og_id or og_external_user = 0)
+					and us_id in
+						(select pu_user from project_user_xref
+							where pu_project = @project
+							and pu_permission_level <> 0)
+					order by us_username; ";
+            }
+            // Only users explictly DISallowed will be omitted
+            else
+            {
+                sql += @"
+					/* users this project */ select us_id, case when $fullnames then us_lastname + ', ' + us_firstname else us_username end us_username
+					from users
+					inner join orgs on us_org = og_id
+					where us_active = 1
+					and og_can_be_assigned_to = 1
+					and (@orgPermissionLevel <> 0 or @orgId = og_id or og_external_user = 0)
+					and us_id not in
+						(select pu_user from project_user_xref
+							where pu_project = @project
+							and pu_permission_level = 0)
+					order by us_username; ";
+            }
+
+            sql += "\nselect st_id, st_name from statuses order by st_sort_seq, st_name";
+
+            sql += "\nselect isnull(@assigned_to,0) ";
+
+            if (Util.get_setting("UseFullNames", "0") == "0")
+            {
+                // false condition
+                sql = sql.Replace("$fullnames", "0 = 1");
+            }
+            else
+            {
+                // true condition
+                sql = sql.Replace("$fullnames", "1 = 1");
+            }
+
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@bugId", bugId);
+            cmd.Parameters.AddWithValue("@orgId", orgId);
+            cmd.Parameters.AddWithValue("@orgPermissionLevel", orgPermissionLevel);
 
             return DbUtil.get_dataset(cmd);
         }

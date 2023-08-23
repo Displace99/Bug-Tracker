@@ -5,6 +5,9 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using btnet;
+using BugTracker.Web.Models.Task;
+using BugTracker.Web.Services;
+using BugTracker.Web.Services.Bug;
 
 namespace BugTracker.Web
 {
@@ -12,10 +15,10 @@ namespace BugTracker.Web
     {
 		int tsk_id;
 		public int bugid;
-		String sql;
-
 
 		public Security security;
+		private TaskService _taskService = new TaskService();
+		private UserService _userService = new UserService();
 
 		public void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -143,11 +146,7 @@ namespace BugTracker.Web
 				{
 
 					// Get this entry's data from the db and fill in the form
-
-					sql = @"select * from bug_tasks where tsk_id = $tsk_id and tsk_bug = $bugid";
-					sql = sql.Replace("$tsk_id", Convert.ToString(tsk_id));
-					sql = sql.Replace("$bugid", Convert.ToString(bugid));
-					DataRow dr = btnet.DbUtil.get_datarow(sql);
+					DataRow dr = _taskService.GetTaskById(tsk_id, bugid);
 
 					assigned_to.Items.FindByValue(Convert.ToString(dr["tsk_assigned_to_user"])).Selected = true;
 
@@ -227,72 +226,15 @@ namespace BugTracker.Web
 				current_value = assigned_to.SelectedItem.Value;
 			}
 
-			sql = @"
-				declare @project int
-				declare @assigned_to int
-				select @project = bg_project, @assigned_to = bg_assigned_to_user from bugs where bg_id = $bg_id";
+			DataSet userInfo = _userService.GetUserListForTasks(bugid, security.user.org, security.user.other_orgs_permission_level);
 
-			// Load the user dropdown, which changes per project
-			// Only users explicitly allowed will be listed
-			if (btnet.Util.get_setting("DefaultPermissionLevel", "2") == "0")
-			{
-				sql += @"
-
-					/* users this project */ select us_id, case when $fullnames then us_lastname + ', ' + us_firstname else us_username end us_username
-					from users
-					inner join orgs on us_org = og_id
-					where us_active = 1
-					and og_can_be_assigned_to = 1
-					and ($og_other_orgs_permission_level <> 0 or $og_id = og_id or og_external_user = 0)
-					and us_id in
-						(select pu_user from project_user_xref
-							where pu_project = @project
-							and pu_permission_level <> 0)
-					order by us_username; ";
-			}
-			// Only users explictly DISallowed will be omitted
-			else
-			{
-				sql += @"
-					/* users this project */ select us_id, case when $fullnames then us_lastname + ', ' + us_firstname else us_username end us_username
-					from users
-					inner join orgs on us_org = og_id
-					where us_active = 1
-					and og_can_be_assigned_to = 1
-					and ($og_other_orgs_permission_level <> 0 or $og_id = og_id or og_external_user = 0)
-					and us_id not in
-						(select pu_user from project_user_xref
-							where pu_project = @project
-							and pu_permission_level = 0)
-					order by us_username; ";
-			}
-
-			sql += "\nselect st_id, st_name from statuses order by st_sort_seq, st_name";
-
-			sql += "\nselect isnull(@assigned_to,0) ";
-
-			sql = sql.Replace("$og_id", Convert.ToString(security.user.org));
-			sql = sql.Replace("$og_other_orgs_permission_level", Convert.ToString(security.user.other_orgs_permission_level));
-			sql = sql.Replace("$bg_id", Convert.ToString(bugid));
-
-			if (Util.get_setting("UseFullNames", "0") == "0")
-			{
-				// false condition
-				sql = sql.Replace("$fullnames", "0 = 1");
-			}
-			else
-			{
-				// true condition
-				sql = sql.Replace("$fullnames", "1 = 1");
-			}
-
-			assigned_to.DataSource = new DataView((DataTable)btnet.DbUtil.get_dataset(sql).Tables[0]);
+			assigned_to.DataSource = new DataView(userInfo.Tables[0]);
 			assigned_to.DataTextField = "us_username";
 			assigned_to.DataValueField = "us_id";
 			assigned_to.DataBind();
 			assigned_to.Items.Insert(0, new ListItem("[not assigned]", "0"));
 
-			status.DataSource = new DataView((DataTable)btnet.DbUtil.get_dataset(sql).Tables[1]);
+			status.DataSource = new DataView(userInfo.Tables[1]);
 			status.DataTextField = "st_name";
 			status.DataValueField = "st_id";
 			status.DataBind();
@@ -302,7 +244,7 @@ namespace BugTracker.Web
 			// or should it be assigned to the logged in user?
 			if (tsk_id == 0)
 			{
-				int default_assigned_to_user = (int)btnet.DbUtil.get_dataset(sql).Tables[2].Rows[0][0];
+				int default_assigned_to_user = (int)userInfo.Tables[2].Rows[0][0];
 				ListItem li = assigned_to.Items.FindByValue(Convert.ToString(default_assigned_to_user));
 				if (li != null)
 				{
@@ -312,9 +254,9 @@ namespace BugTracker.Web
 		}
 
 		
-		Boolean validate()
+		bool ValidateForm()
 		{
-			Boolean good = true;
+			bool good = true;
 
 			if (sort_sequence.Value != "")
 			{
@@ -361,10 +303,9 @@ namespace BugTracker.Web
 				percent_complete_err.InnerText = "";
 			}
 
-
 			if (planned_duration.Value != "")
 			{
-				string err = btnet.Util.is_valid_decimal("Planned Duration", planned_duration.Value, 4, 2);
+				string err = Util.is_valid_decimal("Planned Duration", planned_duration.Value, 4, 2);
 
 				if (err != "")
 				{
@@ -383,7 +324,7 @@ namespace BugTracker.Web
 
 			if (actual_duration.Value != "")
 			{
-				string err = btnet.Util.is_valid_decimal("Actual Duration", actual_duration.Value, 4, 2);
+				string err = Util.is_valid_decimal("Actual Duration", actual_duration.Value, 4, 2);
 
 				if (err != "")
 				{
@@ -404,174 +345,84 @@ namespace BugTracker.Web
 		}
 
 
-		// This might not be right.   
-		string format_date_hour_min(string date, string hour, string min)
+		private DateTime? ConvertStringToDate(string date, string hour, string min)
 		{
+			DateTime convertedDate = new DateTime();
+			bool isDateGood = false;
+
 			if (!string.IsNullOrEmpty(date))
 			{
-				return btnet.Util.format_local_date_into_db_format(
-					date
-					+ " "
-					+ hour
-					+ ":"
-					+ min
-					+ ":00");
+				string dateString = String.Format("{0} {1}:{2}:00", date, hour, min);
+
+				isDateGood = DateTime.TryParse(dateString, out convertedDate);
 			}
-			else
-			{
-				return "";
-			}
-		}
 
-		
-		string format_decimal_for_db(string s)
+			if (isDateGood)
+				return convertedDate;
+			else
+				return null;
+        }
+
+		private decimal? ConvertStringToDecimal(string value)
 		{
-			if (s == "")
-				return "null";
-			else
-				return btnet.Util.format_local_decimal_into_db_format(s);
-		}
+			decimal convertedDecimal;
 
+			bool isValueGood = decimal.TryParse(value, out convertedDecimal);
 
-		
-		string format_number_for_db(string s)
-		{
-			if (s == "")
-				return "null";
-			else
-				return s;
-		}
+			if (isValueGood)
+				return convertedDecimal;
+			else 
+				return null;
+        }
 
+        private int? ConvertStringToInt(string value)
+        {
+            int convertedInt;
+
+            bool isValueGood = int.TryParse(value, out convertedInt);
+
+            if (isValueGood)
+                return convertedInt;
+            else
+                return null;
+        }
 		
 		void on_update()
 		{
-
-			Boolean good = validate();
+			bool good = ValidateForm();
 
 			if (good)
 			{
-				if (tsk_id == 0)  // insert new
+                EditTask taskModel = new EditTask();
+                taskModel.TaskId = tsk_id; //Only for edits
+                taskModel.BugId = bugid;
+                taskModel.CreatedBy = security.user.usid; //Only for new tasks
+                taskModel.LastUpdatedBy = security.user.usid;
+				taskModel.AssignedTo = ConvertStringToInt(assigned_to.SelectedItem.Value);
+                taskModel.PlannedStartDate = ConvertStringToDate(planned_start_date.Value, planned_start_hour.SelectedItem.Value, planned_start_min.SelectedItem.Value);
+                taskModel.ActualStartDate = ConvertStringToDate(actual_start_date.Value, actual_start_hour.SelectedItem.Value, actual_start_min.SelectedItem.Value);
+                taskModel.PlannedEndDate = ConvertStringToDate(planned_end_date.Value, planned_end_hour.SelectedItem.Value, planned_end_min.SelectedItem.Value);
+                taskModel.ActualEndDate = ConvertStringToDate(actual_end_date.Value, actual_end_hour.SelectedItem.Value, actual_end_min.SelectedItem.Value);
+                taskModel.PlannedDuration = ConvertStringToDecimal(planned_duration.Value);
+                taskModel.ActualDuration = ConvertStringToDecimal(actual_duration.Value);
+                taskModel.PercentComplete = ConvertStringToInt(percent_complete.Value);
+                taskModel.Status = int.Parse(status.SelectedItem.Value);
+                taskModel.SortSequence = ConvertStringToInt(sort_sequence.Value);
+                taskModel.Description = desc.Value;
+                taskModel.DurationUnits = duration_units.SelectedItem.Value;
+
+                if (tsk_id == 0)  // insert new
 				{
-					sql = @"
-						insert into bug_tasks (
-						tsk_bug,
-						tsk_created_user,
-						tsk_created_date,
-						tsk_last_updated_user,
-						tsk_last_updated_date,
-						tsk_assigned_to_user,
-						tsk_planned_start_date,
-						tsk_actual_start_date,
-						tsk_planned_end_date,
-						tsk_actual_end_date,
-						tsk_planned_duration,
-						tsk_actual_duration,
-						tsk_duration_units,
-						tsk_percent_complete,
-						tsk_status,
-						tsk_sort_sequence,
-						tsk_description
-						)
-						values (
-						$tsk_bug,
-						$tsk_created_user,
-						getdate(),
-						$tsk_last_updated_user,
-						getdate(),
-						$tsk_assigned_to_user,
-						'$tsk_planned_start_date',
-						'$tsk_actual_start_date',
-						'$tsk_planned_end_date',
-						'$tsk_actual_end_date',
-						$tsk_planned_duration,
-						$tsk_actual_duration,
-						N'$tsk_duration_units',
-						$tsk_percent_complete,
-						$tsk_status,
-						$tsk_sort_sequence,
-						N'$tsk_description'
-						)
-
-						declare @tsk_id int
-						select @tsk_id = scope_identity()
-
-						insert into bug_posts
-						(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-						values($tsk_bug, $tsk_last_updated_user, getdate(), N'added task ' + convert(varchar, @tsk_id), 'update')";
-
-
-					sql = sql.Replace("$tsk_created_user", Convert.ToString(security.user.usid));
-
-
+					_taskService.InsertTask(taskModel);
 				}
 				else // edit existing
 				{
-
-					sql = @"
-						update bug_tasks set
-						tsk_last_updated_user = $tsk_last_updated_user,
-						tsk_last_updated_date = getdate(),
-						tsk_assigned_to_user = $tsk_assigned_to_user,
-						tsk_planned_start_date = '$tsk_planned_start_date',
-						tsk_actual_start_date = '$tsk_actual_start_date',
-						tsk_planned_end_date = '$tsk_planned_end_date',
-						tsk_actual_end_date = '$tsk_actual_end_date',
-						tsk_planned_duration = $tsk_planned_duration,
-						tsk_actual_duration = $tsk_actual_duration,
-						tsk_duration_units = N'$tsk_duration_units',
-						tsk_percent_complete = $tsk_percent_complete,
-						tsk_status = $tsk_status,
-						tsk_sort_sequence = $tsk_sort_sequence,
-						tsk_description = N'$tsk_description'
-						where tsk_id = $tsk_id
-                
-						insert into bug_posts
-						(bp_bug, bp_user, bp_date, bp_comment, bp_type)
-						values($tsk_bug, $tsk_last_updated_user, getdate(), N'updated task $tsk_id', 'update')";
-
-					sql = sql.Replace("$tsk_id", Convert.ToString(tsk_id));
-
+                    _taskService.UpdateTask(taskModel);
 				}
 
-				sql = sql.Replace("$tsk_bug", Convert.ToString(bugid));
-				sql = sql.Replace("$tsk_last_updated_user", Convert.ToString(security.user.usid));
-
-				sql = sql.Replace("$tsk_planned_start_date", format_date_hour_min(
-					planned_start_date.Value,
-					planned_start_hour.SelectedItem.Value,
-					planned_start_min.SelectedItem.Value));
-
-				sql = sql.Replace("$tsk_actual_start_date", format_date_hour_min(
-					actual_start_date.Value,
-					actual_start_hour.SelectedItem.Value,
-					actual_start_min.SelectedItem.Value));
-
-				sql = sql.Replace("$tsk_planned_end_date", format_date_hour_min(
-					planned_end_date.Value,
-					planned_end_hour.SelectedItem.Value,
-					planned_end_min.SelectedItem.Value));
-
-				sql = sql.Replace("$tsk_actual_end_date", format_date_hour_min(
-					actual_end_date.Value,
-					actual_end_hour.SelectedItem.Value,
-					actual_end_min.SelectedItem.Value));
-
-				sql = sql.Replace("$tsk_planned_duration", format_decimal_for_db(planned_duration.Value));
-				sql = sql.Replace("$tsk_actual_duration", format_decimal_for_db(actual_duration.Value));
-				sql = sql.Replace("$tsk_percent_complete", format_number_for_db(percent_complete.Value));
-				sql = sql.Replace("$tsk_status", status.SelectedItem.Value);
-				sql = sql.Replace("$tsk_sort_sequence", format_number_for_db(sort_sequence.Value));
-				sql = sql.Replace("$tsk_assigned_to_user", assigned_to.SelectedItem.Value);
-				sql = sql.Replace("$tsk_description", desc.Value.Replace("'", "''"));
-				sql = sql.Replace("$tsk_duration_units", duration_units.SelectedItem.Value.Replace("'", "''"));
-
-				DbUtil.execute_nonquery(sql);
-
-				Bug.send_notifications(Bug.UPDATE, bugid, security);
-
+                Bug.send_notifications(Bug.UPDATE, bugid, security);
 
 				Response.Redirect("tasks.aspx?bugid=" + Convert.ToString(bugid));
-
 			}
 			else
 			{

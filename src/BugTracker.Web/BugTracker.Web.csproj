@@ -1215,6 +1215,7 @@
     <Compile Include="Models\Search\ExtendedSearch.cs" />
     <Compile Include="Models\Search\ProjectDropdown.cs" />
     <Compile Include="Models\Status\StatusVM.cs" />
+    <Compile Include="Models\Task\EditTask.cs" />
     <Compile Include="Models\UDF\UserDefinedField.cs" />
     <Compile Include="Models\User\NewUser.cs" />
     <Compile Include="Models\User\PasswordResetUser.cs" />
@@ -1361,6 +1362,7 @@
     <Compile Include="Services\Attachment\AttachmentService.cs" />
     <Compile Include="Services\Bug\BugService.cs" />
     <Compile Include="Services\Bug\BugSubscriptionService.cs" />
+    <Compile Include="Services\Bug\TaskService.cs" />
     <Compile Include="Services\Category\CategoryService.cs" />
     <Compile Include="Services\Comment\CommentService.cs" />
     <Compile Include="Services\CustomFields\CustomFieldService.cs" />

@@ -3,6 +3,7 @@ using System.Data;
 using System.Web;
 using System.Web.UI;
 using btnet;
+using BugTracker.Web.Services.Bug;
 
 namespace BugTracker.Web
 {
@@ -14,6 +15,8 @@ namespace BugTracker.Web
 		public Security security;
 		public int permission_level;
 		string ses;
+
+		private TaskService _taskService = new TaskService();
 
 		public void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -50,82 +53,7 @@ namespace BugTracker.Web
 
 			ses = (string)Session["session_cookie"];
 
-			string sql = "select tsk_id [id],";
-
-			if (permission_level == Security.PERMISSION_ALL && !security.user.is_guest && (security.user.is_admin || security.user.can_edit_tasks))
-			{
-				sql += @"
-					'<a   href=edit_task.aspx?bugid=$bugid&id=' + convert(varchar,tsk_id) + '>edit</a>'   [$no_sort_edit],
-					'<a href=delete_task.aspx?ses=$ses&bugid=$bugid&id=' + convert(varchar,tsk_id) + '>delete</a>' [$no_sort_delete],";
-			}
-
-			sql += "tsk_description [description]";
-
-			if (btnet.Util.get_setting("ShowTaskAssignedTo", "1") == "1")
-			{
-				sql += ",us_username [assigned to]";
-			}
-
-			if (btnet.Util.get_setting("ShowTaskPlannedStartDate", "1") == "1")
-			{
-				sql += ", tsk_planned_start_date [planned start]";
-			}
-			if (btnet.Util.get_setting("ShowTaskActualStartDate", "1") == "1")
-			{
-				sql += ", tsk_actual_start_date [actual start]";
-			}
-
-			if (btnet.Util.get_setting("ShowTaskPlannedEndDate", "1") == "1")
-			{
-				sql += ", tsk_planned_end_date [planned end]";
-			}
-			if (btnet.Util.get_setting("ShowTaskActualEndDate", "1") == "1")
-			{
-				sql += ", tsk_actual_end_date [actual end]";
-			}
-
-			if (btnet.Util.get_setting("ShowTaskPlannedDuration", "1") == "1")
-			{
-				sql += ", tsk_planned_duration [planned<br>duration]";
-			}
-			if (btnet.Util.get_setting("ShowTaskActualDuration", "1") == "1")
-			{
-				sql += ", tsk_actual_duration  [actual<br>duration]";
-			}
-
-
-			if (btnet.Util.get_setting("ShowTaskDurationUnits", "1") == "1")
-			{
-				sql += ", tsk_duration_units [duration<br>units]";
-			}
-
-			if (btnet.Util.get_setting("ShowTaskPercentComplete", "1") == "1")
-			{
-				sql += ", tsk_percent_complete [percent<br>complete]";
-			}
-
-			if (btnet.Util.get_setting("ShowTaskStatus", "1") == "1")
-			{
-				sql += ", st_name  [status]";
-			}
-
-			if (btnet.Util.get_setting("ShowTaskSortSequence", "1") == "1")
-			{
-				sql += ", tsk_sort_sequence  [seq]";
-			}
-
-			sql += @"
-				from bug_tasks 
-				left outer join statuses on tsk_status = st_id
-				left outer join users on tsk_assigned_to_user = us_id
-				where tsk_bug = $bugid 
-				order by tsk_sort_sequence, tsk_id";
-
-			sql = sql.Replace("$bugid", Convert.ToString(bugid));
-			sql = sql.Replace("$ses", ses);
-
-			ds = DbUtil.get_dataset(sql);
-
+			ds = _taskService.GetTasksByBugId(bugid, permission_level, security.user, ses);
 		}
 	}
 }

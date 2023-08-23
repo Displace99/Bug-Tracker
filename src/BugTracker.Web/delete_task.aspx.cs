@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using btnet;
+using BugTracker.Web.Services.Bug;
 
 namespace BugTracker.Web
 {
@@ -13,6 +14,7 @@ namespace BugTracker.Web
 		String sql;
 
 		public Security security;
+		private TaskService _taskService = new TaskService();
 
 		public void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -32,7 +34,7 @@ namespace BugTracker.Web
 				Response.End();
 			}
 
-			string string_bugid = btnet.Util.sanitize_integer(Request["bugid"]);
+			string string_bugid = Util.sanitize_integer(Request["bugid"]);
 			int bugid = Convert.ToInt32(string_bugid);
 
 			int permission_level = Bug.get_bug_permission_level(bugid, security);
@@ -43,38 +45,27 @@ namespace BugTracker.Web
 				Response.End();
 			}
 
-			string string_tsk_id = btnet.Util.sanitize_integer(Request["id"]);
-			int tsk_id = Convert.ToInt32(string_tsk_id);
+			string string_tsk_id = Util.sanitize_integer(Request["id"]);
+			int taskid = Convert.ToInt32(string_tsk_id);
 
 			if (IsPostBack)
 			{
 				// do delete here
+				_taskService.DeleteTask(taskid, bugid);
 
-				sql = @"delete bug_tasks where tsk_id = $tsk_id and tsk_bug = $bugid";
-				sql = sql.Replace("$tsk_id", string_tsk_id);
-				sql = sql.Replace("$bugid", string_bugid);
-				btnet.DbUtil.execute_nonquery(sql);
 				Response.Redirect("tasks.aspx?bugid=" + string_bugid);
 			}
 			else
 			{
-
 				titl.InnerText = Util.get_setting("AppTitle", "BugTracker.NET") + " - "
 					+ "delete task";
 
 				back_href.HRef = "tasks.aspx?bugid=" + string_bugid;
 
-				sql = @"select tsk_description from bug_tasks where tsk_id = $tsk_id and tsk_bug = $bugid";
-				sql = sql.Replace("$tsk_id", string_tsk_id);
-				sql = sql.Replace("$bugid", string_bugid);
-
-				DataRow dr = btnet.DbUtil.get_datarow(sql);
+				DataRow dr = _taskService.GetTaskById(taskid, bugid);
 
 				confirm_href.InnerText = "confirm delete of task: " + Convert.ToString(dr["tsk_description"]);
-
 			}
-
-
 		}
 	}
 }

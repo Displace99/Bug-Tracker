@@ -3,6 +3,7 @@ using System.Data;
 using System.Web;
 using System.Web.UI;
 using btnet;
+using BugTracker.Web.Services.Bug;
 
 namespace BugTracker.Web
 {
@@ -11,6 +12,7 @@ namespace BugTracker.Web
 		public DataSet ds_tasks;
 
 		public Security security;
+		private TaskService _taskService = new TaskService();
 
 		public void Page_Init(object sender, EventArgs e) { ViewStateUserKey = Session.SessionID; }
 
@@ -35,7 +37,7 @@ namespace BugTracker.Web
 				Response.End();
 			}
 
-			ds_tasks = btnet.Util.get_all_tasks(security, 0);
+			ds_tasks = _taskService.GetAllTasks(security, 0);
 		}
 	}
 }
