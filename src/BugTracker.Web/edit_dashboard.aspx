@@ -1,5 +1,4 @@
 <%@ Page language="C#" CodeBehind="edit_dashboard.aspx.cs" Inherits="BugTracker.Web.edit_dashboard" AutoEventWireup="True" %>
-<!-- #include file = "inc.aspx" -->
 
 <html>
 <head>
