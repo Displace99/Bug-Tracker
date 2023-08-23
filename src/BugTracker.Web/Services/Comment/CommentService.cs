@@ -37,6 +37,10 @@ namespace BugTracker.Web.Services.Comment
             return commentId;
         }
 
+        /// <summary>
+        /// Deletes a comment
+        /// </summary>
+        /// <param name="commentId"></param>
         public void DeleteComment(int commentId)
         {
             string sql = "delete bug_posts where bp_id = @commentId";
@@ -47,6 +51,11 @@ namespace BugTracker.Web.Services.Comment
             DbUtil.execute_nonquery(cmd);
         }
 
+        /// <summary>
+        /// Gets a comment by the comment Id
+        /// </summary>
+        /// <param name="commentId"></param>
+        /// <returns></returns>
         public DataRow GetCommentById(int commentId)
         {
             string sql = "select bp_comment from bug_posts where bp_id = @commentId";
