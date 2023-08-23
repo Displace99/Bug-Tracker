@@ -7,5 +7,6 @@ namespace BugTracker.Web
 {
     public partial class view_whatsnew : Page
     {
+
     }
 }

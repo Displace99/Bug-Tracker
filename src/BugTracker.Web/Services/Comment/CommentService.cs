@@ -36,6 +36,16 @@ namespace BugTracker.Web.Services.Comment
             return commentId;
         }
 
+        public void DeleteComment(int commentId)
+        {
+            string sql = "delete bug_posts where bp_id = @commentId";
+            
+            SqlCommand cmd = new SqlCommand(sql);
+            cmd.Parameters.AddWithValue("@commentId", commentId);
+
+            DbUtil.execute_nonquery(cmd);
+        }
+
         /// <summary>
         /// This updates the comments when we merge bugs
         /// </summary>
